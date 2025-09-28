@@ -1,0 +1,12 @@
+<h1>Buscar Jogador no Wolvesville</h1>
+<form action="/search" method="GET">
+    <label for="username">Nome do Jogador:</label>
+    <input type="text" id="username" name="username" required style="padding: 8px; width: 250px; border: 1px solid #ccc; border-radius: 4px;">
+    <button type="submit" style="padding: 8px 15px; background-color: #5a2a82; color: white; border: none; border-radius: 4px; cursor: pointer;">Buscar</button>
+</form>
+
+{{#if error}}
+    <div style="color: red; margin-top: 15px;">
+        <p><strong>Erro:</strong> {{error}}</p>
+    </div>
+{{/if}}

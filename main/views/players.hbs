@@ -1,0 +1,84 @@
+<h2>Resultados para "{{query}}"</h2>
+
+{{#if players}}
+    <div class="player-list">
+        {{#each players}}
+            <div class="player-card" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; background-color: #fafafa;">
+                <div style="display: flex; align-items: flex-start;">
+                    <img 
+                        src="{{this.equippedAvatar.url}}" 
+                        alt="Avatar de {{this.username}}"
+                        style="width: 80px; height: 80px; border-radius: 50%; margin-right: 20px; border: 2px solid #5a2a82;"
+                    >
+                    <div>
+                        <h3 style="margin: 0 0 5px 0;">{{this.username}}</h3>
+                        <p style="margin: 2px 0;"><strong>Level:</strong> {{this.level}} | <strong>Status:</strong> {{this.status}}</p>
+                        {{#if this.clan}}
+                            <p style="margin: 2px 0;"><strong>Clã:</strong> {{this.clan.name}}</p>
+                        {{/if}}
+                        <div class="badges" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center;">
+                            {{#each this.badgeIds}}
+                                <img src="{{getBadgeImage this}}" alt="Badge" title="Badge" style="height: 50px;">
+                            {{/each}}
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                        <h4>Estatísticas de Jogo:</h4>
+                        <p style="margin: 2px 0;"><strong>Vitórias / Derrotas / Empates:</strong> {{this.gameStats.totalWinCount}} / {{this.gameStats.totalLoseCount}} / {{this.gameStats.totalTieCount}}</p>
+                        <p style="margin: 2px 0;"><strong>Vitórias como Vila:</strong> {{this.gameStats.villageWinCount}}</p>
+                        <p style="margin: 2px 0;"><strong>Vitórias como Lobisomem:</strong> {{this.gameStats.werewolfWinCount}}</p>
+                        <p style="margin: 2px 0;"><strong>Tempo de Jogo:</strong> {{this.gameStats.totalPlayTimeInMinutes}} minutos</p>
+                        <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
+                        <p style="margin: 2px 0;"><strong>Rosas:</strong> {{this.receivedRosesCount}} recebidas / {{this.sentRosesCount}} enviadas</p>
+                        {{#if this.personalMessage}}
+                            <p style="margin: 10px 0 2px 0; font-style: italic; color: #555;">"{{stripAndTrim this.personalMessage}}"</p>
+                        {{/if}}
+                    </div>
+                </div>
+
+                <button onclick="toggleAvatarGallery('{{this.id}}')" style="margin-top: 15px; padding: 5px 10px; cursor: pointer;">Ver todos os avatares</button>
+                
+                <!-- Galeria de avatares escondida -->
+                <div id="avatar-gallery-{{this.id}}" style="display: none; margin-top: 15px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {{#each this.avatars}}
+                            <img src="{{this.url}}" alt="Avatar" title="Avatar" style="width: 60px; height: 60px; border-radius: 10px; background-color: #eee;"/>
+                        {{/each}}
+                    </div>
+                </div>
+            </div>
+        {{/each}}
+    </div>
+
+    {{#if pagination.hasPages}}
+        <div class="pagination" style="margin-top: 20px; text-align: center;">
+            {{#if pagination.prevPage}}
+                <a href="/search?username={{query}}&page={{pagination.prevPage}}">Anterior</a>
+            {{/if}}
+
+            <span>Página {{pagination.currentPage}} de {{pagination.totalPages}}</span>
+
+            {{#if pagination.nextPage}}
+                <a href="/search?username={{query}}&page={{pagination.nextPage}}">Próxima</a>
+            {{/if}}
+        </div>
+    {{/if}}
+
+{{else}}
+    <p>Nenhum jogador encontrado com este nome.</p>
+{{/if}}
+
+<br>
+<a href="/">Fazer nova busca</a>
+
+<script>
+    function toggleAvatarGallery(playerId) {
+        const galleryDiv = document.getElementById('avatar-gallery-' + playerId);
+        if (galleryDiv) {
+            if (galleryDiv.style.display === 'none') {
+                galleryDiv.style.display = 'block';
+            } else {
+                galleryDiv.style.display = 'none';
+            }
+        }
+    }
+</script>
