@@ -19,33 +19,33 @@ export const NavigationBar = () => {
             </span>
           </Link>
 
-          {/* Navigation */}
-          <NavigationMenu>
-            <NavigationMenuList className="gap-4">
-              <NavigationMenuItem>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    const formData = new FormData(e.currentTarget);
-                    const username = formData.get("username") as string;
-                    if (username.trim()) {
-                      // Navega para a página de busca com o nome do jogador na URL
-                      window.location.href = `/search?username=${encodeURIComponent(username.trim())}`;
-                    }
-                  }}
-                  className="relative"
-                >
-                  <SearchInput
-                    name="username"
-                    placeholder="Buscar jogador..."
-                    className="h-10 w-64 pr-10"
-                  />
-                  <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </form>
-              </NavigationMenuItem>
-
+          {/* Search and Navigation */}
+          <div className="flex items-center gap-4">
+            {/* Search Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const username = formData.get("username") as string;
+                if (username.trim()) {
+                  window.location.href = `/search?username=${encodeURIComponent(username.trim())}`;
+                }
+              }}
+              className="relative"
+            >
+              <SearchInput
+                name="username"
+                placeholder="Buscar jogador..."
+                className="h-10 w-64 pr-10"
+              />
+              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+            
+            {/* Navigation Menu */}
+            <NavigationMenu>
+              <NavigationMenuList className="gap-2">
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-background/50 hover:bg-accent/80">
                   <Users className="w-4 h-4 mr-2" />
@@ -126,8 +126,9 @@ export const NavigationBar = () => {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
         </div>
       </div>
     </header>
