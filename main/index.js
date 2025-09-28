@@ -229,6 +229,31 @@ app.get('/roleRotations', async (req, res) => {
   }
 });
 
+/**
+ * Rota para buscar as ofertas ativas da loja.
+ */
+app.get('/shop/activeOffers', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/shop/activeOffers`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /shop/activeOffers bem-sucedida ---');
+
+    res.json(response.data);
+
+  } catch (error) {
+    console.error("Erro ao buscar ofertas da loja:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar as ofertas da loja. Tente novamente mais tarde.' });
+  }
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
