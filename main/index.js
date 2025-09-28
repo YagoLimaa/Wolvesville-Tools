@@ -3,7 +3,10 @@ require('dotenv').config();
 
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors'); // Importa o pacote cors
 const { engine } = require('express-handlebars');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 // Usa a porta definida no .env ou 3000 como padrão
@@ -35,6 +38,9 @@ app.set('views', './views');
 // Configura o Express para servir arquivos estáticos (CSS, JS, imagens) da pasta 'public'
 app.use(express.static('public'));
 
+// Habilita o CORS para permitir requisições do frontend
+app.use(cors());
+
 
 // Validação inicial para garantir que a chave da API foi configurada
 if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
@@ -46,7 +52,8 @@ if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
 /**
  * Rota principal: exibe o formulário de busca.
  */
-app.get('/', (req, res) => {
+app.get('/', (req, res) => { 
+  // Esta rota não será mais usada pelo frontend React, mas podemos mantê-la.
   res.render('home');
 });
 
@@ -110,7 +117,12 @@ app.get('/search', async (req, res) => {
     }
 
     if (!allPlayers || allPlayers.length === 0) {
-      return res.render('players', { query: username, players: [] });
+      // Se nenhum jogador for encontrado, retorna uma estrutura JSON vazia
+      // que o frontend consegue entender.
+      return res.json({
+        players: [],
+        pagination: { currentPage: 1, totalPages: 1 }
+      });
     }
 
     // Lógica de Paginação
@@ -119,26 +131,106 @@ app.get('/search', async (req, res) => {
     const endIndex = startIndex + resultsPerPage;
     const paginatedPlayers = allPlayers.slice(startIndex, endIndex);
 
-    res.render('players', {
-      query: username,
+    // Em vez de renderizar uma página HTML, enviamos os dados em formato JSON.
+    // A estrutura do objeto (players, pagination) corresponde ao que o frontend espera.
+    res.json({
       players: paginatedPlayers,
       pagination: {
         currentPage: page,
         totalPages: totalPages,
         hasPages: totalPages > 1,
-        prevPage: page > 1 ? page - 1 : null,
-        nextPage: page < totalPages ? page + 1 : null
+        prevPage: page > 1 ? page - 1 : undefined,
+        nextPage: page < totalPages ? page + 1 : undefined
       }
     });
 
   } catch (error) {
     console.error("Erro ao buscar dados da API Wolvesville:", error.message);
-    res.render('home', { error: 'Não foi possível conectar à API do Wolvesville. Tente novamente mais tarde.' });
+    // Em caso de erro, envia uma resposta de erro em JSON
+    res.status(500).json({ error: 'Não foi possível conectar à API do Wolvesville. Tente novamente mais tarde.' });
+  }
+});
+
+/**
+ * Rota para buscar a rotação de roles ativa.
+ */
+app.get('/roleRotations', async (req, res) => {
+  try {
+    // Usando o endpoint /roleRotations conforme solicitado
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roleRotations`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /roleRotations bem-sucedida ---');
+
+
+    // Processa cada modo de jogo retornado pela API
+    const formattedRotations = response.data.map(rotationData => {
+      const roles = (rotationData.roleRotations && rotationData.roleRotations.length > 0)
+        ? rotationData.roleRotations[0].roleRotation.roles.flat().map(r => {
+            // A API pode retornar um array de strings ou um objeto com a propriedade 'role'
+            const roleName = typeof r === 'string' ? r : r.role;
+            if (!roleName) return null;
+            return {
+              id: roleName,
+              name: roleName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              imageUrl: (() => {
+                // Verifica se a versão .svg da imagem existe na pasta public
+                const svgPath = path.join(__dirname, 'public', 'images', 'roles', `${roleName}.svg`);
+                if (fs.existsSync(svgPath)) {
+                  return `http://localhost:3000/images/roles/${roleName}.svg`;
+                }
+                // Se não existir, assume que a versão é .png
+                return `http://localhost:3000/images/roles/${roleName}.png`;
+              })()
+            };
+          }).filter(Boolean) // Remove quaisquer roles nulas
+        : [];
+
+      return {
+        // Usa gameMode como chave única e confiável
+        gameMode: rotationData.gameMode,
+        // Usa gameModeName se existir, senão formata o gameMode
+        gameModeName: rotationData.gameModeName || rotationData.gameMode.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        roles: roles
+      };
+    });
+
+    // Filtra as rotações para não incluir as ligas ranqueadas Prata e Ouro
+    const filteredRotations = formattedRotations.filter(rotation => 
+      rotation.gameMode !== 'ranked-league-silver' && rotation.gameMode !== 'ranked-league-gold'
+    );
+
+    // Define a ordem desejada para os modos de jogo
+    const desiredOrder = ['quick', 'crazy-fun', 'advanced', 'sandbox'];
+
+    const sortedRotations = filteredRotations.sort((a, b) => {
+      const indexA = desiredOrder.indexOf(a.gameMode);
+      const indexB = desiredOrder.indexOf(b.gameMode);
+
+      // Se um dos modos não estiver na lista de ordem, ele vai para o final
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+
+      return indexA - indexB;
+    });
+
+    res.json(sortedRotations);
+
+  } catch (error) {
+    console.error("Erro ao buscar rotação de roles:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar a rotação de roles. Tente novamente mais tarde.' });
   }
 });
 
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`Acesse http://localhost:${PORT} para começar.`);
+  console.log(`API pronta para receber requisições em http://localhost:${PORT}`);
 });
