@@ -1,10 +1,60 @@
+import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { Trophy, Star, Calendar } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { BattlePassRewards } from "./BattlePassRewards";
+import { BattlePassShop } from "./BattlePassShop";
+import { Trophy, Calendar, AlertTriangle } from "lucide-react";
+
+export interface Reward {
+  type: string;
+  amount: number;
+  free: boolean;
+  // Adicionando outras propriedades como opcionais
+  emojiId?: string;
+  avatarItemIdMale?: string;
+  avatarItemIdFemale?: string;
+  avatarItemId?: string;
+  rosePackageId?: string;
+  profileIconId?: string;
+  bodyPaintId?: string;
+  loadingScreenId?: string;
+  imageUrl: string; // Adicionando a URL da imagem
+}
+
+export interface BattlePassSeasonData {
+  startTime: string;
+  number: number;
+  durationInDays: number;
+  iconUrl: string;
+  rewards: Reward[];
+}
+
+const fetchBattlePassSeason = async (): Promise<BattlePassSeasonData> => {
+  const response = await fetch("http://localhost:3000/battlePass/season");
+  if (!response.ok) {
+    throw new Error("Não foi possível buscar os dados do Battle Pass.");
+  }
+  return response.json();
+};
 
 export const BattlePassSeason = () => {
+  const { data: season, isLoading, isError, error } = useQuery<BattlePassSeasonData, Error>({
+    queryKey: ["battlePassSeason"],
+    queryFn: fetchBattlePassSeason,
+  });
+
+  const getEndDate = () => {
+    if (!season) return null;
+    const startDate = new Date(season.startTime);
+    const endDate = new Date(startDate.setDate(startDate.getDate() + season.durationInDays));
+    const daysLeft = Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    return daysLeft > 0 ? `Termina em ${daysLeft} dias` : "Terminando hoje";
+  };
+
   return (
     <Card className="bg-card/50 backdrop-blur border-accent/20">
       <CardHeader>
@@ -13,51 +63,71 @@ export const BattlePassSeason = () => {
           Battle Pass - Temporada Atual
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Season Info */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Temporada Lunar</h3>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="w-4 h-4" />
-              <span>Termina em 15 dias</span>
+      <CardContent>
+        {isLoading && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-6 w-3/5" />
+              <Skeleton className="h-6 w-1/4" />
             </div>
+            <Skeleton className="h-10 w-full" />
           </div>
-          <Badge variant="secondary" className="bg-primary/20 text-primary">
-            Nível 42
-          </Badge>
-        </div>
+        )}
 
-        {/* Progress */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Progresso da Temporada</span>
-            <span>8,450 / 10,000 XP</span>
-          </div>
-          <Progress value={84.5} className="h-2" />
-        </div>
+        {isError && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Erro</AlertTitle>
+            <AlertDescription>{error.message}</AlertDescription>
+          </Alert>
+        )}
 
-        {/* Rewards Preview */}
-        <div className="space-y-3">
-          <h4 className="font-medium flex items-center gap-2">
-            <Star className="w-4 h-4 text-yellow-500" />
-            Próximas Recompensas
-          </h4>
-          <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="aspect-square bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg border border-primary/30 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-8 h-8 bg-primary/30 rounded-full mx-auto mb-1" />
-                  <div className="text-xs text-muted-foreground">Nível {43 + i}</div>
+        {season && (
+          <div className="space-y-6">
+            {/* Season Info */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Temporada {season.number}</h3>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="w-4 h-4" />
+                  <span>{getEndDate()}</span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <img src={season.iconUrl} alt={`Temporada ${season.number}`} className="w-12 h-12" />
+            </div>
 
-        <GradientButton variant="primary" className="w-full">
-          Ver Battle Pass Completo
-        </GradientButton>
+            <div className="grid grid-cols-2 gap-4">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <GradientButton variant="primary" className="w-full">
+                    Ver Battle Pass Completo
+                  </GradientButton>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>Recompensas da Temporada {season.number}</DialogTitle>
+                  </DialogHeader>
+                  <div className="overflow-y-auto pr-4">
+                    <BattlePassRewards season={season} />
+                  </div>
+                </DialogContent>
+              </Dialog>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <GradientButton variant="outline" className="w-full">Loja do Passe</GradientButton>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>Loja da Temporada {season.number}</DialogTitle>
+                  </DialogHeader>
+                  <div className="overflow-y-auto pr-4">
+                    <BattlePassShop />
+                  </div>
+                </DialogContent>
+              </Dialog>
+                </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

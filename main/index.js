@@ -254,6 +254,58 @@ app.get('/shop/activeOffers', async (req, res) => {
   }
 });
 
+/**
+ * Rota para buscar os dados da temporada atual do Battle Pass.
+ */
+app.get('/battlePass/season', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /battlePass/season bem-sucedida ---');
+
+    // Envia os dados brutos da API, a lógica da imagem será tratada no frontend
+    res.json(response.data);
+
+  } catch (error) {
+    console.error("Erro ao buscar dados da temporada do Battle Pass:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os dados da temporada.' });
+  }
+});
+
+/**
+ * Rota para buscar os dados da loja da temporada do Battle Pass.
+ */
+app.get('/battlePass/shop', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /battlePass/shop bem-sucedida ---');
+
+    // Envia os dados brutos da API, a lógica de exibição será tratada no frontend
+    res.json(response.data);
+
+  } catch (error) {
+    console.error("Erro ao buscar dados da loja do Battle Pass:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os dados da loja do passe.' });
+  }
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
