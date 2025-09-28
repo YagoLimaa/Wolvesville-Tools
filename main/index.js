@@ -306,6 +306,84 @@ app.get('/battlePass/shop', async (req, res) => {
   }
 });
 
+/**
+ * Rota para buscar os desafios ativos do Battle Pass.
+ */
+app.get('/battlePass/challenges', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      },
+      // Passa o locale para a API do Wolvesville, usando 'pt' como padrão.
+      params: {
+        locale: req.query.locale || 'pt'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /battlePass/challenges bem-sucedida ---');
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar desafios do Battle Pass:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os desafios do passe.' });
+  }
+});
+
+/**
+ * Rota para buscar os highscores dos jogadores.
+ */
+app.get('/players/highscores', async (req, res) => {
+  try {
+    // Define 'xp' como o tipo de ranking padrão e busca o limite da query.
+    const type = 'oldRank';
+    // const { limit = 10 } = req.query; // Limite removido conforme solicitado
+
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/highscores`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      },
+      params: { type } // Parâmetro 'limit' removido da requisição
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} com params: ${JSON.stringify(requestConfig.params)} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /players/highscores bem-sucedida ---');
+
+    const highscorePlayers = response.data.allTime || [];
+
+    // Para cada jogador no ranking, busca os detalhes (incluindo avatar)
+    const detailedPlayers = await Promise.all(highscorePlayers.map(async (player) => {
+      try {
+        const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
+        const playerDetailsResponse = await axios.get(playerDetailsUrl, {
+          headers: {
+            'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+            'Accept': 'application/json'
+          }
+        });
+        // Combina os dados do ranking com os detalhes do perfil (avatar)
+        return { ...player, ...playerDetailsResponse.data };
+      } catch (detailsError) {
+        console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
+        return player; // Retorna o jogador sem detalhes em caso de erro
+      }
+    }));
+
+    res.json(detailedPlayers);
+
+  } catch (error) {
+    console.error("Erro ao buscar highscores:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os highscores.' });
+  }
+});
+
 // Inicia o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

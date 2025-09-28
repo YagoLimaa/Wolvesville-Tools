@@ -1,19 +1,44 @@
+import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Award, Crown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Trophy, Medal, Award, Crown, AlertTriangle } from "lucide-react";
 
-const mockHighscores = [
-  { rank: 1, username: "WolfMaster", level: 89, wins: 1247, icon: Crown, color: "text-yellow-500" },
-  { rank: 2, username: "MoonHunter", level: 85, wins: 1189, icon: Trophy, color: "text-gray-400" },
-  { rank: 3, username: "NightStalker", level: 82, wins: 1156, icon: Medal, color: "text-amber-600" },
-  { rank: 4, username: "ShadowWolf", level: 78, wins: 1098, icon: Award, color: "text-blue-500" },
-  { rank: 5, username: "LunarBeast", level: 76, wins: 1067, icon: Award, color: "text-blue-500" },
-  { rank: 6, username: "AlphaWolf", level: 74, wins: 1023, icon: Award, color: "text-blue-500" },
-  { rank: 7, username: "PackLeader", level: 72, wins: 998, icon: Award, color: "text-blue-500" },
-  { rank: 8, username: "WildHowl", level: 70, wins: 967, icon: Award, color: "text-blue-500" },
-];
+interface HighscorePlayer {
+  playerId: string;
+  username: string;
+  xp: number;
+  oldRank: number;
+  // Level pode não estar presente, então o tornamos opcional
+  level?: number;
+  equippedAvatar?: {
+    url: string;
+  };
+}
+
+const fetchHighscores = async (): Promise<HighscorePlayer[]> => {
+  const response = await fetch("http://localhost:3000/players/highscores?limit=10");
+  if (!response.ok) {
+    throw new Error("Não foi possível buscar os melhores jogadores.");
+  }
+  return response.json();
+};
+
+const getRankIcon = (rank: number) => {
+  if (rank === 1) return { Icon: Crown, color: "text-yellow-500" };
+  if (rank === 2) return { Icon: Trophy, color: "text-gray-400" };
+  if (rank === 3) return { Icon: Medal, color: "text-amber-600" };
+  return { Icon: Award, color: "text-blue-500" };
+};
 
 export const PlayersHighscores = () => {
+  const { data: players, isLoading, isError, error } = useQuery<HighscorePlayer[], Error>({
+    queryKey: ["playerHighscores"],
+    queryFn: fetchHighscores,
+  });
+
   return (
     <Card className="bg-card/50 backdrop-blur border-accent/20">
       <CardHeader>
@@ -23,45 +48,69 @@ export const PlayersHighscores = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {mockHighscores.map((player, index) => {
-            const Icon = player.icon;
-            return (
-              <div 
-                key={index}
-                className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-accent/20 ${
-                  player.rank <= 3 ? "bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30" : "bg-background/50 border-border"
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Icon className={`w-5 h-5 ${player.color}`} />
-                    <span className="font-bold text-lg min-w-[20px]">#{player.rank}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {player.username.charAt(0)}
-                      </span>
+        {isLoading && (
+          <div className="space-y-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+        {isError && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Erro</AlertTitle>
+            <AlertDescription>{error.message}</AlertDescription>
+          </Alert>
+        )}
+        {players && (
+          <div className="space-y-3">
+            {players.slice(0, 10).map((player, index) => {
+              const rank = player.oldRank + 1;
+              const { Icon, color } = getRankIcon(rank);
+              return (
+                <Link
+                  key={player.playerId}
+                  to={`/search?username=${encodeURIComponent(player.username)}`}
+                  className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 hover:border-primary hover:shadow-glow-primary hover:scale-[1.02] ${
+                    rank <= 3 ? "bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30" : "bg-background/50 border-border"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Icon className={`w-5 h-5 ${color}`} />
+                      <span className="font-bold text-lg min-w-[20px]">#{rank}</span>
                     </div>
-                    <div>
-                      <div className="font-medium">{player.username}</div>
-                      <div className="text-sm text-muted-foreground">
-                        Level {player.level}
+                    
+                    <div className="flex items-center gap-3">
+                      {player.equippedAvatar ? (
+                        <img src={player.equippedAvatar.url} alt={player.username} className="w-10 h-10 rounded-full border-2 border-primary/50" />
+                      ) : (
+                        <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">
+                            {player.username.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-medium">{player.username}</div>
+                        {player.level && (
+                          <div className="text-sm text-muted-foreground">
+                            Level {player.level}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="text-right">
-                  <div className="font-semibold text-primary">{player.wins}</div>
-                  <div className="text-xs text-muted-foreground">vitórias</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-primary">{player.xp.toLocaleString()}</div>
+                    <div className="text-xs text-muted-foreground">XP</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
