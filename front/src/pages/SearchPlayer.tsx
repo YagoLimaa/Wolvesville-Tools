@@ -31,7 +31,7 @@ const SearchPlayer = () => {
     
     try {
       const response = await fetch(
-        `http://localhost:3000/search?username=${encodeURIComponent(username)}&page=${page}`
+        `${import.meta.env.VITE_API_BASE_URL}/search?username=${encodeURIComponent(username)}&page=${page}`
       );
       if (!response.ok) {
         throw new Error("Falha ao buscar dados. A API do Wolvesville pode estar offline ou o backend não está rodando.");
@@ -41,6 +41,7 @@ const SearchPlayer = () => {
       setSearchResult(result);
       setCurrentQuery(username);
       setSearchParams({ username, page: page.toString() }); // Atualiza a URL com a busca atual
+      window.scrollTo({ top: 0, behavior: 'smooth' }); // Rola para o topo
     } catch (err) {
       setError("Erro ao buscar jogadores. Tente novamente.");
       setSearchResult(null);

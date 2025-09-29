@@ -1,0 +1,540 @@
+import * as React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { NavigationBar } from "@/components/ui/navigation-bar";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Pagination } from "@/components/Pagination";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Package, Search, AlertTriangle, Palette, Shirt, Gem, Filter } from "lucide-react";
+import { PawPrint } from "lucide-react"; // Ícone para ProfileIcons
+interface Item {
+  id: string;
+  // A categoria agora pode ser qualquer uma das chaves retornadas pela API
+  category: string; 
+  imageUrl: string;
+  name?: string;
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary'; // Opcional, pois conjuntos não têm raridade
+  gender?: 'male' | 'female' | 'any';
+  type?: string;
+  parentSetId?: string; // ID do conjunto/coleção ao qual o item pertence
+  avatarItemIds?: string[];
+  rewards?: ContainedItem[];
+  items?: ContainedItem[]; // Para bundles mais simples ou itens genéricos
+
+  // Propriedades específicas para bundles (são arrays de sub-itens)
+  avatarItemSets?: {
+    id: string;
+    avatarItemIds?: string[];
+    promoImageUrl?: string;
+    promoImagePrimaryColor?: string;
+  }[];
+  emojis?: { id: string; }[];
+  loadingScreens?: {
+    id: string;
+    rarity?: string;
+    image?: { url: string; width: number; height: number; };
+    imageWide?: { url: string; width: number; height: number; };
+    imagePrimaryColor?: string;
+  }[];
+  roleIcons?: { id: string; rarity?: string; image?: { url: string; width: number; height: number; }; roleId?: string; }[];
+  bodyPaints?: { id: string; }[];
+  roseSkins?: { id: string; }[];
+  backgrounds?: { id: string; }[];
+}
+
+// Interface específica para os itens dentro de coleções, removendo o 'any'
+interface ContainedItem {
+  type: string;
+  amount: number;
+  avatarItemId?: string;
+  loadingScreenId?: string;
+  emojiId?: string;
+  [key: string]: string | number | undefined; // Permite outras propriedades, mas de forma mais segura
+}
+
+// Tipos para os itens contidos em coleções
+interface ContainedItemIdentifier {
+  id: string | number;
+  type: string;
+}
+
+// Define a estrutura de um item como vem da API (sem a propriedade 'category')
+interface ApiItem {
+  id: string;
+  imageUrl: string;
+  name?: string;
+  rarity?: 'common' | 'rare' | 'epic' | 'legendary'; // Opcional, agora em minúsculas
+  gender?: 'male' | 'female' | 'any';
+  type?: string;
+  avatarItemIds?: string[];
+  // A API pode retornar outras propriedades que não usamos
+  [key: string]: unknown;
+}
+
+// Mapeia os nomes das chaves da API para nomes amigáveis
+const categoryDisplayNames: { [key: string]: string } = {
+  avatarItems: "Itens de Avatar",
+  bodyPaints: "Pinturas Corporais",
+  avatarItemSets: "Conjuntos de Avatar",
+  avatarItemCollections: "Coleções de Avatar",
+  bundles: "Pacotes",
+  calendars: "Calendários",
+  profileIcons: "Ícones de Perfil",
+  profileIconBorders: "Bordas de Ícone",
+  emojis: "Emojis",
+  emojiCollections: "Coleções de Emoji",
+  backgrounds: "Fundos",
+  loadingScreens: "Telas de Loading",
+  roleIcons: "Ícones de Papel",
+  roseSkins: "Skins de Rosa",
+};
+
+const fetchItems = async (): Promise<Item[]> => {
+  // Busca todas as categorias, incluindo 'tags' para a busca reversa
+  const categories = [...Object.keys(categoryDisplayNames), 'tags'];
+
+  const promises = categories.map(async (category) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/items/${category}`);
+      if (!response.ok) {
+        console.warn(`Falha ao buscar a categoria: ${category}`);
+        return { category, items: [] };
+      }
+      const itemsArray = await response.json();
+      return { category, items: itemsArray as ApiItem[] };
+    } catch (error) {
+      console.error(`Erro na requisição para ${category}:`, error);
+      return { category, items: [] };
+    }
+  });
+
+  const results = await Promise.all(promises);
+
+  const allItemsProcessed = results.flatMap(({ category, items }) => {
+    return items.map((apiItem: ApiItem): Item => {
+        // Agora 'apiItem' já tem o tipo correto, não precisa de casting de 'unknown'
+        return { 
+          ...apiItem, 
+          category,
+          gender: (apiItem.gender as string | undefined)?.toLowerCase() as 'male' | 'female' | 'any' | undefined
+        };
+    });
+  });
+
+
+  const allItems = allItemsProcessed.filter(item => item && item.id);
+
+  console.log("--- Lista final de itens combinados (visível no console do navegador): ---", allItems.length, "itens");
+
+  return allItems as Item[];
+};
+
+const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4 };
+const rarityColors = {
+  common: "border-gray-400/50",
+  rare: "border-blue-400/50",
+  epic: "border-purple-500/50",
+  legendary: "border-yellow-500/50",
+};
+
+// Função para extrair e formatar um nome a partir da URL da imagem
+const getNameFromUrl = (url: string): string => {
+  try {
+    const filename = url.split('/').pop()?.split('.')[0] ?? '';
+    // Remove prefixos e sufixos comuns e substitui hífens/sublinhados por espaços
+    const cleanedName = filename
+      .replace(/bp\d+-/, '') // Remove prefixos de passe de batalha, ex: bp44-
+      .replace(/_store|@\dx/g, '') // Remove sufixos como _store, @2x, @3x
+      .replace(/[-_]/g, ' ');
+    return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
+  } catch {
+    return "Item"; // Nome de fallback em caso de erro
+  }
+};
+
+// Componente para renderizar a imagem do item com lógica de fallback
+const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: string) => void; }) => {
+  const [imageSrc, setImageSrc] = React.useState(item.imageUrl);
+  const [hasError, setHasError] = React.useState(false);
+
+  // Reseta a imagem se o item mudar
+  React.useEffect(() => {
+    setImageSrc(item.imageUrl);
+    setHasError(false); // Reseta o estado de erro quando o item muda
+  }, [item.imageUrl]);
+
+  // Caso especial para profileIcons que não têm imagem
+  if (item.category === 'profileIcons') {
+    return <div className="w-full h-full flex items-center justify-center"><PawPrint className="w-1/2 h-1/2 text-muted-foreground" /></div>;
+  }
+
+  const handleError = () => {
+    if (!hasError) {
+      setHasError(true);
+      onImageError(item.id);
+    }
+
+    // Se a URL original falhar, tenta construir uma URL de fallback para o CDN
+    const baseCdn = "https://cdn2.wolvesville.com";
+    let fallbackUrl = '';
+
+    // Constrói a URL de fallback baseada na categoria do item
+    switch (item.category) {
+      case "avatarItems":
+        fallbackUrl = `${baseCdn}/avatarItems/${item.id}.store@2x.png`;
+        break;
+      case "bodyPaints":
+        fallbackUrl = `${baseCdn}/bodyPaints/${item.id}.store@2x.png`;
+        break;
+      // Adicione outras categorias que possam ter URLs quebradas
+      // e para as quais conhecemos o padrão do CDN.
+    }
+
+    // Se um fallback foi construído e é diferente da URL atual, tenta usá-lo.
+    if (fallbackUrl && fallbackUrl !== imageSrc) {
+      setImageSrc(fallbackUrl);
+    } else {
+      // Se não há fallback ou ele também falhou, usa a imagem de fallback final.
+      // Verifica para não entrar em loop se a própria imagem de fallback falhar.
+      const FALLBACK_IMAGE_URL = "https://cdn-avatars2.wolvesville.com/ad3466d4-8798-4b9b-a5e7-2ae7d2343c58@2x.png";
+      if (imageSrc !== FALLBACK_IMAGE_URL) {
+        setImageSrc(FALLBACK_IMAGE_URL);
+      }
+    }
+  };
+
+  // Adiciona um fundo escuro se a imagem for a de fallback
+  const isFallback = imageSrc.includes("ad3466d4-8798-4b9b-a5e7-2ae7d2343c58");
+
+  return (
+    <img src={imageSrc} alt={item.name || item.id} className={`w-full h-full object-contain p-2 ${isFallback ? 'bg-black/20 rounded-md' : ''}`} onError={handleError} />
+  );
+};
+
+const ITEMS_PER_PAGE = 50;
+
+const ItemsSkins = () => {
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [categoryFilter, setCategoryFilter] = React.useState("avatarItems");
+  const [rarityFilter, setRarityFilter] = React.useState("all");
+  const [genderFilter, setGenderFilter] = React.useState("all");
+  const [typeFilter, setTypeFilter] = React.useState("all");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [brokenImageIds, setBrokenImageIds] = React.useState<Set<string>>(new Set());
+  const [selectedCollection, setSelectedCollection] = React.useState<Item | null>(null);
+
+  const { data: allItems, isLoading, isError, error } = useQuery<Item[], Error>({
+    queryKey: ["allItems"],
+    queryFn: fetchItems,
+    staleTime: 1000 * 60 * 60, // Cache por 1 hora
+  });
+
+  const handleImageError = React.useCallback((itemId: string) => {
+    setBrokenImageIds(prev => {
+      const newSet = new Set(prev);
+      newSet.add(itemId);
+      return newSet;
+    });
+  }, []);
+
+  const sortedItems = React.useMemo(() => {
+    if (!allItems) return [];
+    return [...allItems].sort((a, b) => {
+      const aIsBroken = brokenImageIds.has(a.id);
+      const bIsBroken = brokenImageIds.has(b.id);
+      if (aIsBroken !== bIsBroken) return aIsBroken ? 1 : -1; // Itens quebrados vão para o final
+      return (rarityOrder[b.rarity!] || 0) - (rarityOrder[a.rarity!] || 0); // Ordenação por raridade (maior primeiro)
+    });
+  }, [allItems, brokenImageIds]);
+
+  const filteredItems = React.useMemo(() => {
+    return sortedItems.filter(item => {
+      const matchesSearch = (item.name || item.id).toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+      const matchesRarity = rarityFilter === "all" || !item.rarity || item.rarity === rarityFilter;
+
+      // Aplica filtros de gênero e tipo APENAS se a categoria for 'avatarItems'
+      // E o item atual também for dessa categoria.
+      let matchesGender = true;
+      if (categoryFilter === 'avatarItems' && item.category === 'avatarItems') {
+        if (genderFilter === 'all') {
+          matchesGender = true;
+        } else if (genderFilter === 'any') {
+          matchesGender = item.gender === 'any' || !item.gender; // Itens sem gênero são considerados unissex
+        } else {
+          matchesGender = item.gender === genderFilter;
+        }
+      }
+      const matchesType = categoryFilter !== 'avatarItems' || item.category !== 'avatarItems' || typeFilter === "all" || item.type === typeFilter;
+
+      return matchesSearch && matchesCategory && matchesRarity && matchesGender && matchesType;
+    });
+  }, [sortedItems, searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter]);
+
+  // Efeito para resetar a página quando os filtros mudam
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter]);
+
+  // Itens paginados para exibição
+  const paginatedItems = React.useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredItems, currentPage]);
+
+  const totalPages = React.useMemo(() => {
+    return Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  }, [filteredItems]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Extrai os tipos únicos de itens de avatar para o filtro
+  const avatarItemTypes = React.useMemo(() => {
+    if (!allItems) return [];
+    const types = new Set(allItems.filter(i => i.category === 'avatarItems' && i.type).map(i => i.type!));
+    return Array.from(types).sort();
+  }, [allItems]);
+
+  // Categorias que abrem popup
+  const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars'];
+
+  // Encontra as peças de uma coleção selecionada (conjunto, calendário, etc.)
+  const collectionPieces = React.useMemo(() => {
+    if (!selectedCollection || !allItems) return [];
+
+    let pieceIdentifiers: ContainedItemIdentifier[] = [];
+
+    if (selectedCollection.avatarItemIds) { // Para avatarItemSets e avatarItemCollections
+      pieceIdentifiers = selectedCollection.avatarItemIds.map(id => ({ id, type: 'avatarItems' }));
+    } else if (selectedCollection.rewards) { // Para calendars
+      pieceIdentifiers = selectedCollection.rewards.map(reward => ({
+        id: reward.avatarItemId || reward.loadingScreenId || reward.emojiId || '',
+        type: reward.type.toLowerCase().replace(/_/g, '') + 's' // ex: AVATAR_ITEM -> avataritems
+      })).filter(p => p.id !== '');
+    } else if (selectedCollection.category === 'bundles') {
+      const bundle = selectedCollection; // 'selectedCollection' já é do tipo 'Item' com as propriedades de bundle
+      const pieceArrays = [
+        ...(bundle.avatarItemSets?.flatMap(set => set.avatarItemIds?.map(id => ({ id, type: 'avatarItems' }))) || []),
+        ...(bundle.emojis?.map(emoji => ({ id: emoji.id, type: 'emojis' })) || []),
+        ...(bundle.loadingScreens?.map(screen => ({ id: screen.id, type: 'loadingScreens' })) || []),
+        ...(bundle.roleIcons?.map(icon => ({ id: icon.id, type: 'roleIcons' })) || []),
+        ...(bundle.bodyPaints?.map(paint => ({ id: paint.id, type: 'bodyPaints' })) || []),
+        ...(bundle.roseSkins?.map(skin => ({ id: skin.id, type: 'roseSkins' })) || []),
+        ...(bundle.backgrounds?.map(bg => ({ id: bg.id, type: 'backgrounds' })) || []),
+        // Adiciona a propriedade 'items' se existir (para bundles mais genéricos)
+        ...(bundle.items?.map(item => ({ id: item.avatarItemId || item.id, type: item.type.toLowerCase().replace(/_/g, '') + 's' })) || []),
+      ];
+      pieceIdentifiers = pieceArrays.filter(p => p && p.id);
+    }
+
+    return pieceIdentifiers.map(p => allItems.find(item => String(item.id) === String(p.id))).filter((item): item is Item => !!item);
+  }, [selectedCollection, allItems]);
+
+  // Lista de categorias de itens individuais que podem pertencer a uma coleção
+  const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
+
+  // Função para lidar com o clique em um item
+  const handleItemClick = (item: Item) => {
+    // Se for uma coleção, abre o popup com suas peças
+    if (collectionCategories.includes(item.category)) {
+      setSelectedCollection(item);
+    } else if (item.parentSetId && allItems) {
+      // Se o item tem um 'parentSetId' (adicionado pelo backend), encontra e exibe o conjunto pai
+      const parentSet = allItems.find(set => set.id === item.parentSetId);
+      if (parentSet) setSelectedCollection(parentSet);
+    } else if (reverseSearchableCategories.includes(item.category) && allItems) {
+      const parentSet = allItems.find(
+        set => (collectionCategories.includes(set.category)) && (set.avatarItemIds?.includes(item.id) || set.rewards?.some(r => r.avatarItemId === item.id || r.emojiId === item.id) || set.items?.some(i => i.avatarItemId === item.id))
+      );
+      if (parentSet) setSelectedCollection(parentSet);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <NavigationBar />
+
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Coluna de Filtros */}
+          <aside className="lg:col-span-1">
+            <Card className="bg-card/50 backdrop-blur border-accent/20 sticky top-24">
+              <CardContent className="p-4">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Filter className="w-5 h-5 text-primary" />
+                  Filtros
+                </h3>
+                <div className="relative mb-4">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar item..."
+                      className="pl-10 w-full"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <Accordion type="multiple" defaultValue={['type', 'rarity', 'gender', 'subtype']} className="w-full">
+                  <AccordionItem value="type">
+                    <AccordionTrigger>Tipo de Item</AccordionTrigger>
+                    <AccordionContent>
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os Tipos</SelectItem>
+                          {Object.entries(categoryDisplayNames).map(([key, name]) => (
+                            <SelectItem key={key} value={key}>{name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="rarity">
+                    <AccordionTrigger>Raridade</AccordionTrigger>
+                    <AccordionContent>
+                      <Select value={rarityFilter} onValueChange={setRarityFilter}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todas as Raridades</SelectItem>
+                          <SelectItem value="common"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-gray-400" /> Comum</span></SelectItem>
+                          <SelectItem value="rare"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-blue-400" /> Raro</span></SelectItem>
+                          <SelectItem value="epic"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-purple-500" /> Épico</span></SelectItem>
+                          <SelectItem value="legendary"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-yellow-500" /> Lendário</span></SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </AccordionContent>
+                  </AccordionItem>
+                  {/* Filtros que só se aplicam a "Itens de Avatar" */}
+                  <AccordionItem value="gender" disabled={categoryFilter !== 'avatarItems'}>
+                    <AccordionTrigger>Gênero</AccordionTrigger>
+                    <AccordionContent>
+                      <Select value={genderFilter} onValueChange={setGenderFilter} disabled={categoryFilter !== 'avatarItems'}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os Gêneros</SelectItem>
+                          <SelectItem value="male">Masculino</SelectItem>
+                          <SelectItem value="female">Feminino</SelectItem>
+                          <SelectItem value="any">Unissex</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="subtype" disabled={categoryFilter !== 'avatarItems'}>
+                    <AccordionTrigger>Tipo (Avatar)</AccordionTrigger>
+                    <AccordionContent>
+                      <Select value={typeFilter} onValueChange={setTypeFilter} disabled={categoryFilter !== 'avatarItems'}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os Tipos</SelectItem>
+                          {avatarItemTypes.map(type => <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </CardContent>
+            </Card>
+          </aside>
+
+          {/* Coluna de Itens */}
+          <div className="lg:col-span-3">
+            {isLoading && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <Skeleton key={i} className="aspect-square rounded-lg" />
+                ))}
+              </div>
+            )}
+            {isError && (
+              <Card className="bg-card/50 backdrop-blur border-accent/20 flex items-center justify-center h-96">
+                <Alert variant="destructive" className="w-auto">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertTitle>Erro ao Carregar Itens</AlertTitle>
+                  <AlertDescription>{error.message}</AlertDescription>
+                </Alert>
+              </Card>
+            )}
+            {allItems && (
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                {paginatedItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => handleItemClick(item)}
+                    className={`group relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 transition-all hover:scale-105 hover:shadow-glow-primary text-left w-full
+                      ${item.rarity ? rarityColors[item.rarity] : 'border-border'}
+                      ${collectionCategories.includes(item.category) || item.parentSetId || reverseSearchableCategories.includes(item.category) ? 'cursor-pointer' : 'cursor-default'}
+                    `}
+                  >
+                    <ItemImage item={item} onImageError={handleImageError} />
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-md">
+                      <p className="text-xs font-semibold text-white truncate">{item.name || getNameFromUrl(item.imageUrl)}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            {allItems && filteredItems.length === 0 && (
+              <Card className="bg-card/50 backdrop-blur border-accent/20 flex items-center justify-center h-96">
+                <div className="text-center">
+                  <h2 className="text-2xl font-semibold text-muted-foreground">Nenhum item encontrado</h2>
+                  <p className="text-muted-foreground mt-2">Tente ajustar seus filtros de busca.</p>
+                </div>
+              </Card>
+            )}
+
+            {/* Paginação */}
+            {totalPages > 1 && (
+              <div className="mt-8">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  hasPrev={currentPage > 1}
+                  hasNext={currentPage < totalPages}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Modal para exibir as peças do conjunto */}
+      {selectedCollection && (
+        <div 
+          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+          onClick={() => setSelectedCollection(null)}
+        >
+          <Card 
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CardContent className="p-6">
+              <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
+              {collectionPieces.length > 0 ? (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                  {collectionPieces.map(piece => (
+                    <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity!] || 'border-gray-600/50'}`}>
+                      <ItemImage item={piece} onImageError={handleImageError} />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-center">
+                        <p className="text-xs font-semibold text-white truncate">{piece.name || getNameFromUrl(piece.imageUrl)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground">Não foi possível encontrar os detalhes das peças deste conjunto.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ItemsSkins;

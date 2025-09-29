@@ -52,11 +52,6 @@ if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
 /**
  * Rota principal: exibe o formulário de busca.
  */
-app.get('/', (req, res) => { 
-  // Esta rota não será mais usada pelo frontend React, mas podemos mantê-la.
-  res.render('home');
-});
-
 /**
  * Rota de busca: processa o formulário, busca na API e exibe os resultados com paginação.
  */
@@ -359,7 +354,9 @@ app.get('/players/highscores', async (req, res) => {
     const highscorePlayers = response.data.allTime || [];
 
     // Para cada jogador no ranking, busca os detalhes (incluindo avatar)
-    const detailedPlayers = await Promise.all(highscorePlayers.map(async (player) => {
+    // Usamos um loop for...of sequencial para evitar o erro 429 (Too Many Requests)
+    const detailedPlayers = [];
+    for (const player of highscorePlayers) {
       try {
         const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
         const playerDetailsResponse = await axios.get(playerDetailsUrl, {
@@ -368,19 +365,78 @@ app.get('/players/highscores', async (req, res) => {
             'Accept': 'application/json'
           }
         });
-        // Combina os dados do ranking com os detalhes do perfil (avatar)
-        return { ...player, ...playerDetailsResponse.data };
+        // Combina os dados do ranking com os detalhes do perfil e adiciona à lista
+        detailedPlayers.push({ ...player, ...playerDetailsResponse.data });
       } catch (detailsError) {
         console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
-        return player; // Retorna o jogador sem detalhes em caso de erro
+        detailedPlayers.push(player); // Adiciona o jogador sem detalhes em caso de erro
       }
-    }));
+      // Adiciona um pequeno atraso para ser mais gentil com a API
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
 
     res.json(detailedPlayers);
 
   } catch (error) {
     console.error("Erro ao buscar highscores:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar os highscores.' });
+  }
+});
+
+
+app.get('/items/:category', async (req, res) => {
+  const { category } = req.params;
+  // Lista de categorias válidas para segurança
+  const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins'];
+
+  if (!validCategories.includes(category)) {
+    return res.status(400).json({ error: 'Categoria de item inválida.' });
+  }
+
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/${category}`;
+    const requestConfig = { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' } };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+
+    // Normaliza a resposta para garantir que sempre seja um array de itens
+    const itemsArray = Array.isArray(response.data) ? response.data : (response.data.list ? Object.values(response.data.list) : Object.values(response.data));
+
+    // Função para extrair nome da URL se não existir
+    const getNameFromUrl = (url) => {
+      if (!url || typeof url !== 'string') return "Item";
+      try {
+        const filename = url.split('/').pop()?.split('.')[0] ?? '';
+        const cleanedName = filename.replace(/bp\d+-/, '').replace(/_store|@\dx/g, '').replace(/[-_]/g, ' ');
+        return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
+      } catch {
+        return "Item";
+      }
+    };
+
+    // Processa cada item para garantir que tenha imageUrl e name
+    const processedItems = itemsArray.map(item => {
+      const newItem = { ...item };
+      // Garante que imageUrl exista, pegando de fontes alternativas
+      if (!newItem.imageUrl) {
+        newItem.imageUrl = newItem.promoImageUrl || newItem.iconUrl || (newItem.image && newItem.image.url) || newItem.singleImageUrl || newItem.urlPreview || (newItem.imageDay && newItem.imageDay.url) || (newItem.imageSmall && newItem.imageSmall.url);
+      }
+      // Garante que o nome exista, derivando da URL se necessário
+      if (!newItem.name) {
+        newItem.name = newItem.title || getNameFromUrl(newItem.imageUrl);
+      }
+      // Converte raridade para minúsculas
+      if (newItem.rarity) {
+        newItem.rarity = newItem.rarity.toLowerCase();
+      }
+      return newItem;
+    });
+
+    res.json(processedItems);
+  } catch (error) {
+    console.error(`Erro ao buscar itens da categoria ${category}:`, error.message);
+    res.status(500).json({ error: `Não foi possível buscar os itens da categoria ${category}.` });
   }
 });
 
