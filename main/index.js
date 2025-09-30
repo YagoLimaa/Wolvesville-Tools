@@ -386,7 +386,7 @@ app.get('/players/highscores', async (req, res) => {
 app.get('/items/:category', async (req, res) => {
   const { category } = req.params;
   // Lista de categorias válidas para segurança
-  const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins'];
+  const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins', 'advancedRoleCardOffers'];
 
   if (!validCategories.includes(category)) {
     return res.status(400).json({ error: 'Categoria de item inválida.' });
@@ -427,7 +427,7 @@ app.get('/items/:category', async (req, res) => {
       }
       // Converte raridade para minúsculas
       if (newItem.rarity) {
-        newItem.rarity = newItem.rarity.toLowerCase();
+        newItem.rarity = String(newItem.rarity).toLowerCase();
       }
       return newItem;
     });

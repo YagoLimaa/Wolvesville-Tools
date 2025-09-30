@@ -1,6 +1,33 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
+// Mapeia os nomes das chaves da API para nomes amigáveis
+const categoryDisplayNames: { [key: string]: string } = {
+  avatarItems: "Itens de Avatar",
+  bodyPaints: "Pinturas Corporais",
+  avatarItemSets: "Conjuntos de Avatar",
+  avatarItemCollections: "Coleções de Avatar",
+  bundles: "Pacotes",
+  calendars: "Calendários",
+  profileIcons: "Ícones de Perfil",
+  profileIconBorders: "Bordas de Ícone",
+  emojis: "Emojis",
+  emojiCollections: "Coleções de Emoji",
+  backgrounds: "Fundos",
+  loadingScreens: "Telas de Loading",
+  roleIcons: "Ícones de Papel",
+  roseSkins: "Skins de Rosa",
+};
+
+interface ContainedItem {
+  type: string;
+  amount: number;
+  avatarItemId?: string;
+  loadingScreenId?: string;
+  emojiId?: string;
+  [key: string]: string | number | undefined;
+}
+
 export interface Item {
   id: string;
   category: string;
@@ -9,12 +36,33 @@ export interface Item {
   rarity?: 'common' | 'rare' | 'epic' | 'legendary';
   gender?: 'male' | 'female' | 'any';
   type?: string;
-  [key: string]: unknown;
+  parentSetId?: string;
+  avatarItemIds?: string[];
+  rewards?: ContainedItem[];
+  items?: ContainedItem[] | { roleIconId: string }[];
+  avatarItemSetId?: string;
+  avatarItemSets?: (
+    | {
+        id: string;
+        avatarItemIds?: string[];
+        promoImageUrl?: string;
+      }
+    | string
+  )[];
+  emojis?: { id: string; }[];
+  loadingScreens?: { id: string; rarity?: string; image?: { url: string; }; imageWide?: { url: string; }; }[];
+  roleIcons?: { id: string; rarity?: string; image?: { url: string; }; roleId?: string; }[];
+  bodyPaints?: { id: string; }[];
+  roseSkins?: { id: string; }[];
+  backgrounds?: { id: string; }[];
+  [key: string]: unknown; // Permite outras propriedades
 }
 
 // Interface para os itens como eles vêm da API, antes de adicionar a categoria
 interface ApiItem {
   id: string;
+  imageUrl: string;
+  gender?: 'male' | 'female' | 'any' | string;
   [key: string]: unknown;
 }
 
@@ -28,16 +76,24 @@ interface ItemsContextType {
 const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined);
 
 const fetchAllItems = async (): Promise<Item[]> => {
-  // Categorias que contêm itens com imagens que queremos referenciar
-  const categories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'roseSkins'];
+  // Busca todas as categorias, incluindo 'tags' e 'advancedRoleCardOffers'
+  // 'avatarItemSets' é processado por último para ter prioridade no mapa de IDs.
+  const categories = [...Object.keys(categoryDisplayNames), 'tags', 'advancedRoleCardOffers', 'avatarItemSets'];
 
   const promises = categories.map(async (category) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/items/${category}`);
-      if (!response.ok) return [];
-      const items = await response.json();
-      // Adiciona a categoria a cada item para referência futura
-      return items.map((item: ApiItem) => ({ ...item, category }));
+      if (!response.ok) {
+        console.warn(`Falha ao buscar a categoria: ${category}`);
+        return [];
+      }
+      const itemsArray = await response.json() as ApiItem[];
+      // Adiciona a categoria a cada item e normaliza o gênero
+      return itemsArray.map((apiItem: ApiItem): Item => ({
+        ...apiItem,
+        category,
+        gender: (apiItem.gender as string | undefined)?.toLowerCase() as 'male' | 'female' | 'any' | undefined
+      }));
     } catch (error) {
       console.error(`Erro ao buscar a categoria de itens ${category}:`, error);
       return [];
@@ -45,7 +101,9 @@ const fetchAllItems = async (): Promise<Item[]> => {
   });
 
   const results = await Promise.all(promises);
-  return results.flat();
+  const allItems = results.flat().filter(item => item && item.id);
+  console.log("--- [ItemsContext] Lista final de itens combinados: ---", allItems.length, "itens");
+  return allItems;
 };
 
 export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

@@ -4,46 +4,13 @@ import { NavigationBar } from "@/components/ui/navigation-bar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useItems, Item } from "@/components/contexts/ItemsContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Pagination } from "@/components/Pagination";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Package, Search, AlertTriangle, Palette, Shirt, Gem, Filter } from "lucide-react";
+import { Search, AlertTriangle, Gem, Filter } from "lucide-react";
 import { PawPrint } from "lucide-react"; // Ícone para ProfileIcons
-interface Item {
-  id: string;
-  // A categoria agora pode ser qualquer uma das chaves retornadas pela API
-  category: string; 
-  imageUrl: string;
-  name?: string;
-  rarity?: 'common' | 'rare' | 'epic' | 'legendary'; // Opcional, pois conjuntos não têm raridade
-  gender?: 'male' | 'female' | 'any';
-  type?: string;
-  parentSetId?: string; // ID do conjunto/coleção ao qual o item pertence
-  avatarItemIds?: string[];
-  rewards?: ContainedItem[];
-  items?: ContainedItem[]; // Para bundles mais simples ou itens genéricos
-
-  // Propriedades específicas para bundles (são arrays de sub-itens)
-  avatarItemSets?: {
-    id: string;
-    avatarItemIds?: string[];
-    promoImageUrl?: string;
-    promoImagePrimaryColor?: string;
-  }[];
-  emojis?: { id: string; }[];
-  loadingScreens?: {
-    id: string;
-    rarity?: string;
-    image?: { url: string; width: number; height: number; };
-    imageWide?: { url: string; width: number; height: number; };
-    imagePrimaryColor?: string;
-  }[];
-  roleIcons?: { id: string; rarity?: string; image?: { url: string; width: number; height: number; }; roleId?: string; }[];
-  bodyPaints?: { id: string; }[];
-  roseSkins?: { id: string; }[];
-  backgrounds?: { id: string; }[];
-}
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
 interface ContainedItem {
@@ -59,19 +26,6 @@ interface ContainedItem {
 interface ContainedItemIdentifier {
   id: string | number;
   type: string;
-}
-
-// Define a estrutura de um item como vem da API (sem a propriedade 'category')
-interface ApiItem {
-  id: string;
-  imageUrl: string;
-  name?: string;
-  rarity?: 'common' | 'rare' | 'epic' | 'legendary'; // Opcional, agora em minúsculas
-  gender?: 'male' | 'female' | 'any';
-  type?: string;
-  avatarItemIds?: string[];
-  // A API pode retornar outras propriedades que não usamos
-  [key: string]: unknown;
 }
 
 // Mapeia os nomes das chaves da API para nomes amigáveis
@@ -90,46 +44,6 @@ const categoryDisplayNames: { [key: string]: string } = {
   loadingScreens: "Telas de Loading",
   roleIcons: "Ícones de Papel",
   roseSkins: "Skins de Rosa",
-};
-
-const fetchItems = async (): Promise<Item[]> => {
-  // Busca todas as categorias, incluindo 'tags' para a busca reversa
-  const categories = [...Object.keys(categoryDisplayNames), 'tags'];
-
-  const promises = categories.map(async (category) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/items/${category}`);
-      if (!response.ok) {
-        console.warn(`Falha ao buscar a categoria: ${category}`);
-        return { category, items: [] };
-      }
-      const itemsArray = await response.json();
-      return { category, items: itemsArray as ApiItem[] };
-    } catch (error) {
-      console.error(`Erro na requisição para ${category}:`, error);
-      return { category, items: [] };
-    }
-  });
-
-  const results = await Promise.all(promises);
-
-  const allItemsProcessed = results.flatMap(({ category, items }) => {
-    return items.map((apiItem: ApiItem): Item => {
-        // Agora 'apiItem' já tem o tipo correto, não precisa de casting de 'unknown'
-        return { 
-          ...apiItem, 
-          category,
-          gender: (apiItem.gender as string | undefined)?.toLowerCase() as 'male' | 'female' | 'any' | undefined
-        };
-    });
-  });
-
-
-  const allItems = allItemsProcessed.filter(item => item && item.id);
-
-  console.log("--- Lista final de itens combinados (visível no console do navegador): ---", allItems.length, "itens");
-
-  return allItems as Item[];
 };
 
 const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4 };
@@ -226,11 +140,7 @@ const ItemsSkins = () => {
   const [brokenImageIds, setBrokenImageIds] = React.useState<Set<string>>(new Set());
   const [selectedCollection, setSelectedCollection] = React.useState<Item | null>(null);
 
-  const { data: allItems, isLoading, isError, error } = useQuery<Item[], Error>({
-    queryKey: ["allItems"],
-    queryFn: fetchItems,
-    staleTime: 1000 * 60 * 60, // Cache por 1 hora
-  });
+  const { allItems, isLoading, isError } = useItems();
 
   const handleImageError = React.useCallback((itemId: string) => {
     setBrokenImageIds(prev => {
@@ -320,7 +230,15 @@ const ItemsSkins = () => {
     } else if (selectedCollection.category === 'bundles') {
       const bundle = selectedCollection; // 'selectedCollection' já é do tipo 'Item' com as propriedades de bundle
       const pieceArrays = [
-        ...(bundle.avatarItemSets?.flatMap(set => set.avatarItemIds?.map(id => ({ id, type: 'avatarItems' }))) || []),
+        ...(bundle.avatarItemSets?.flatMap(setOrId => {
+          if (typeof setOrId === 'string') {
+            // Se for apenas o ID de um conjunto, precisamos encontrar esse conjunto nos allItems
+            const foundSet = allItems.find(item => item.id === setOrId);
+            return (foundSet?.avatarItemIds as string[] | undefined)?.map(id => ({ id, type: 'avatarItems' })) || [];
+          }
+          // Se for um objeto, podemos acessar os IDs diretamente
+          return (setOrId.avatarItemIds as string[] | undefined)?.map(id => ({ id, type: 'avatarItems' })) || [];
+        }) || []),
         ...(bundle.emojis?.map(emoji => ({ id: emoji.id, type: 'emojis' })) || []),
         ...(bundle.loadingScreens?.map(screen => ({ id: screen.id, type: 'loadingScreens' })) || []),
         ...(bundle.roleIcons?.map(icon => ({ id: icon.id, type: 'roleIcons' })) || []),
@@ -455,7 +373,7 @@ const ItemsSkins = () => {
                 <Alert variant="destructive" className="w-auto">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Erro ao Carregar Itens</AlertTitle>
-                  <AlertDescription>{error.message}</AlertDescription>
+                  <AlertDescription>Não foi possível carregar a lista de itens. Tente recarregar a página.</AlertDescription>
                 </Alert>
               </Card>
             )}

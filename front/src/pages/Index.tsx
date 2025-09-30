@@ -2,7 +2,6 @@ import { NavigationBar } from "@/components/ui/navigation-bar";
 import { RoleRotations } from "@/components/RoleRotations";
 import { BattlePassSeason } from "@/components/BattlePassSeason";
 import { BattlePassChallenges } from "@/components/BattlePassChallenges";
-import { ShopActiveOffers } from "@/components/ShopActiveOffers";
 import { PlayersHighscores } from "@/components/PlayersHighscores";
 
 const Index = () => {
@@ -34,7 +33,6 @@ const Index = () => {
           {/* Right Column */}
           <div className="space-y-8">
             <RoleRotations />
-            <ShopActiveOffers />
           </div>
         </div>
       </main>

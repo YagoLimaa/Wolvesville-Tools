@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ItemsProvider } from "./components/contexts/ItemsContext";
 import Index from "./pages/Index";
 import SearchPlayer from "./pages/SearchPlayer";
+import ItemsShop from "./pages/ItemsShop";
 import ItemsSkins from "./pages/ItemsSkins";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +22,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<SearchPlayer />} />
+          <Route path="/items/shop" element={<ItemsShop />} />
             <Route path="/items/skins" element={<ItemsSkins />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
