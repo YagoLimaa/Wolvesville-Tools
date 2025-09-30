@@ -6,12 +6,14 @@ import { PlayerCard } from "@/components/PlayerCard";
 import { Pagination } from "@/components/Pagination";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useItems } from "../components/contexts/ItemsContext";
 import { SearchResult } from "@/types/Player";
-import { ArrowLeft, AlertTriangle, Info } from "lucide-react";
+import { ArrowLeft, Info } from "lucide-react";
 
 const SearchPlayer = () => {
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { isLoading: isLoadingItems } = useItems();
   const [error, setError] = useState<string | null>(null);
   const [currentQuery, setCurrentQuery] = useState("");
   const [searchParams, setSearchParams] = useSearchParams();
@@ -65,14 +67,30 @@ const SearchPlayer = () => {
       <NavigationBar />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-            {/* Back to Search */}
-            <div className="flex items-center justify-between gap-4">
+        {isLoadingItems && (
+          <div className="text-center text-muted-foreground text-lg">
+            Carregando dados de itens...
+          </div>
+        )}
+        {!isLoadingItems && (
+          <div className="space-y-6">
+            {/* Se não houver resultados, mostra o formulário de busca */}
+            {!searchResult && (
+              <Card className="max-w-md mx-auto bg-card/50 backdrop-blur border-accent/20">
+                <CardContent className="p-6">
+                  <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Se houver resultados, mostra o cabeçalho e o botão de voltar */}
+            {searchResult && (
+              <div className="flex items-center justify-between gap-4">
               <GradientButton variant="outline" onClick={handleGoBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </GradientButton>
-              {searchResult && (
+              
                 <div className="text-right">
                   <h2 className="text-2xl font-bold text-foreground">
                     Resultados para "{currentQuery}"
@@ -81,9 +99,8 @@ const SearchPlayer = () => {
                     Página {searchResult.pagination.currentPage} de {searchResult.pagination.totalPages}
                   </p>
                 </div>
-              )}
             </div>
-
+            )}
             {isLoading && <p className="text-center text-muted-foreground text-lg">Buscando jogadores...</p>}
 
             {searchResult && searchResult.players.length > 0 && (
@@ -115,7 +132,8 @@ const SearchPlayer = () => {
                 hasPrev={!!searchResult.pagination.prevPage}
               />
             )}
-        </div>
+          </div>
+        )}
       </main>
     </div>
   );

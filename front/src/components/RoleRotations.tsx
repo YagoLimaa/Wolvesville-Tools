@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Zap, AlertTriangle, Info, Clock } from "lucide-react";
+import { Zap, AlertTriangle, Clock } from "lucide-react";
 
 // Define a estrutura de uma Role, conforme a API
 interface Role {
@@ -93,7 +93,6 @@ export const RoleRotations = () => {
     queryKey: ["roleRotations"],
     queryFn: fetchRoleRotations,
   });
-
   const timeLeft = useCountdownToNextWednesday();
 
   return (

@@ -185,11 +185,10 @@ app.get('/roleRotations', async (req, res) => {
                 return `http://localhost:3000/images/roles/${roleName}.png`;
               })()
             };
-          }).filter(Boolean) // Remove quaisquer roles nulas
+          }).filter(Boolean) // Remove quaisquer roles nulas ou vazias
         : [];
 
       return {
-        // Usa gameMode como chave única e confiável
         gameMode: rotationData.gameMode,
         // Usa gameModeName se existir, senão formata o gameMode
         gameModeName: rotationData.gameModeName || rotationData.gameMode.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),

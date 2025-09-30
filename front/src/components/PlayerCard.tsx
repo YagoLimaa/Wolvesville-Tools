@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Player } from "@/types/Player";
 import { Users, Trophy, Clock, Heart, Eye, EyeOff, X } from "lucide-react";
+import { useItems } from "./contexts/ItemsContext";
 
 interface PlayerCardProps {
   player: Player;
@@ -12,11 +13,13 @@ interface PlayerCardProps {
 export const PlayerCard = ({ player }: PlayerCardProps) => {
   const [showAvatars, setShowAvatars] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const { itemsById } = useItems();
 
   const getBadgeImage = (badgeId: string) => {
-    // Constrói a URL para buscar a imagem da badge do nosso próprio backend,
-    // que está servindo os arquivos da pasta 'public'.
-    return `http://localhost:3000/images/badges/${badgeId}.png`;
+    const badgeItem = itemsById.get(badgeId);
+    // Se o item da insígnia for encontrado no nosso mapa, usa a imageUrl dele.
+    // Caso contrário, usa uma imagem de placeholder.
+    return badgeItem?.imageUrl || "https://via.placeholder.com/48";
   };
 
   // Verifica se há alguma estatística de jogo pública para exibir o card
