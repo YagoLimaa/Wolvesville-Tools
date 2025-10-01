@@ -102,17 +102,6 @@ export const NavigationBar = () => {
                       </NavigationMenuLink>
                       <NavigationMenuLink asChild>
                         <Link
-                          to="/items/combinations"
-                          className="block p-3 rounded-lg hover:bg-accent/50 transition-colors"
-                        >
-                          <div className="font-medium">Combinações</div>
-                          <div className="text-sm text-muted-foreground">
-                            Combine skins e avatares
-                          </div>
-                        </Link>
-                      </NavigationMenuLink>
-                      <NavigationMenuLink asChild>
-                        <Link
                           to="/items/shop"
                           className="block p-3 rounded-lg hover:bg-accent/50 transition-colors"
                         >

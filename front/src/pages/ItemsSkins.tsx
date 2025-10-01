@@ -282,7 +282,7 @@ const ItemsSkins = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Coluna de Filtros */}
           <aside className="lg:col-span-1">
-            <Card className="bg-card/50 backdrop-blur border-accent/20 sticky top-24">
+            <Card className="bg-card/50 backdrop-blur border-accent/20 sticky top-24 mt-[84px]">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Filter className="w-5 h-5 text-primary" />
@@ -377,6 +377,18 @@ const ItemsSkins = () => {
                 </Alert>
               </Card>
             )}
+            {/* Paginação no Topo */}
+            {totalPages > 1 && (
+              <div className="mb-4 flex justify-end">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                  hasPrev={currentPage > 1}
+                  hasNext={currentPage < totalPages}
+                />
+              </div>
+            )}
             {allItems && (
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                 {paginatedItems.map((item) => (
@@ -405,18 +417,6 @@ const ItemsSkins = () => {
               </Card>
             )}
 
-            {/* Paginação */}
-            {totalPages > 1 && (
-              <div className="mt-8">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  hasPrev={currentPage > 1}
-                  hasNext={currentPage < totalPages}
-                />
-              </div>
-            )}
           </div>
         </div>
       </main>

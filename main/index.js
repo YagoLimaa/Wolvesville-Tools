@@ -334,8 +334,8 @@ app.get('/battlePass/challenges', async (req, res) => {
 app.get('/players/highscores', async (req, res) => {
   try {
     // Define 'xp' como o tipo de ranking padrão e busca o limite da query.
-    const type = 'oldRank';
-    // const { limit = 10 } = req.query; // Limite removido conforme solicitado
+    const type = 'oldRank'; // Mantém o tipo de ranking
+    const { limit = 10 } = req.query; // Reintroduz o limite, com 10 como padrão
 
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/highscores`;
     const requestConfig = {
@@ -343,36 +343,35 @@ app.get('/players/highscores', async (req, res) => {
         'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
         'Accept': 'application/json'
       },
-      params: { type } // Parâmetro 'limit' removido da requisição
+      params: { type, limit } // Adiciona o 'limit' à requisição para a API
     };
 
     console.log(`--- Iniciando requisição para ${requestUrl} com params: ${JSON.stringify(requestConfig.params)} ---`);
     const response = await axios.get(requestUrl, requestConfig);
     console.log('--- Requisição para /players/highscores bem-sucedida ---');
 
-    const highscorePlayers = response.data.allTime || [];
+    // A API não respeita o 'limit' para 'oldRank', então cortamos a lista manualmente.
+    const allPlayersFromApi = response.data.allTime || [];
+    // Garante que vamos processar apenas o número de jogadores solicitado no 'limit'.
+    const highscorePlayers = allPlayersFromApi.slice(0, limit);
 
-    // Para cada jogador no ranking, busca os detalhes (incluindo avatar)
-    // Usamos um loop for...of sequencial para evitar o erro 429 (Too Many Requests)
-    const detailedPlayers = [];
-    for (const player of highscorePlayers) {
-      try {
-        const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
-        const playerDetailsResponse = await axios.get(playerDetailsUrl, {
-          headers: {
-            'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
-            'Accept': 'application/json'
-          }
+    // Busca os detalhes de todos os jogadores em paralelo para otimizar o tempo
+    const playerDetailPromises = highscorePlayers.map(player => {
+      const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
+      return axios.get(playerDetailsUrl, {
+        headers: {
+          'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+          'Accept': 'application/json'
+        }
+      }).then(detailsResponse => ({ ...player, ...detailsResponse.data }))
+        .catch(detailsError => {
+          console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
+          return player; // Retorna o jogador sem detalhes em caso de erro
         });
-        // Combina os dados do ranking com os detalhes do perfil e adiciona à lista
-        detailedPlayers.push({ ...player, ...playerDetailsResponse.data });
-      } catch (detailsError) {
-        console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
-        detailedPlayers.push(player); // Adiciona o jogador sem detalhes em caso de erro
-      }
-      // Adiciona um pequeno atraso para ser mais gentil com a API
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
+    });
+
+    // Aguarda todas as requisições de detalhes terminarem
+    const detailedPlayers = await Promise.all(playerDetailPromises);
 
     res.json(detailedPlayers);
 
