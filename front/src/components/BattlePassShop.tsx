@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { useItems } from "./contexts/ItemsContext";
 
 interface BattlePassShopReward {
   id: string;
@@ -24,43 +25,14 @@ const fetchBattlePassShop = async (): Promise<BattlePassShopData> => {
   return response.json();
 };
 
-// Mapa para traduzir os IDs dos itens de avatar para as URLs de imagem corretas.
-const avatarItemUrlMap: Record<string, string> = {
-  "QBW": "https://cdn2.wolvesville.com/avatarItems/bp44-bpc-gravestone-krasue.store@2x.png",
-  "99e": "https://cdn2.wolvesville.com/avatarItems/bp44-bpc-hair-krasue.store@2x.png",
-  "e9g": "https://cdn2.wolvesville.com/avatarItems/bp44-bpc-eyes-krasue.store@2x.png",
-  "X1J": "https://cdn2.wolvesville.com/avatarItems/bp44-bpc-shirt-krasue.store@2x.png",
-  "M31": "https://cdn2.wolvesville.com/avatarItems/bp44-bpc-back-krasue.store@3x.png",
-};
-
-const getShopRewardImageUrl = (reward: BattlePassShopReward): string => {
-    const baseCdnUrl = "https://cdn2.wolvesville.com";
-  
-    switch (reward.type) {
-      case "AVATAR_ITEM":
-        // Usa o mapa para obter a URL correta. Se não encontrar, usa um placeholder.
-        if (reward.avatarItemId && avatarItemUrlMap[reward.avatarItemId]) {
-          return avatarItemUrlMap[reward.avatarItemId];
-        }
-        // Fallback caso um novo item apareça e não esteja no mapa
-        return "https://via.placeholder.com/100";
-      case "ROLE_CARD_ABILITY_EXCHANGE_VOUCHER":
-        return `https://www.wolvesville.com/static/media/role_card_ability_exchange_voucher.4a1cb8b754a6807e78da.png`;
-      case "GOLD":
-        return `https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png`;
-      default:
-        // Fallback para qualquer outro tipo de recompensa não mapeado
-        return "https://via.placeholder.com/100";
-    }
-};
-
 export const BattlePassShop = () => {
   const { data, isLoading, isError, error } = useQuery<BattlePassShopData, Error>({
     queryKey: ["battlePassShop"],
     queryFn: fetchBattlePassShop,
   });
+  const { itemsById, isLoading: isLoadingItems } = useItems();
 
-  if (isLoading) {
+  if (isLoading || isLoadingItems) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {Array.from({ length: 8 }).map((_, i) => (
@@ -87,7 +59,25 @@ export const BattlePassShop = () => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       {data.rewards.map((reward) => {
-        const imageUrl = getShopRewardImageUrl(reward);
+        let itemInfo = null;
+        let imageUrl = "https://via.placeholder.com/100"; // Placeholder
+        let itemName = "Item";
+
+        if (reward.avatarItemId) {
+          const item = itemsById.get(reward.avatarItemId);
+          if (item) {
+            itemInfo = item;
+            imageUrl = item.imageUrl;
+            itemName = item.name;
+          }
+        } else if (reward.type === "ROLE_CARD_ABILITY_EXCHANGE_VOUCHER") {
+          imageUrl = `https://www.wolvesville.com/static/media/role_card_ability_exchange_voucher.4a1cb8b754a6807e78da.png`;
+          itemName = "Voucher de Troca";
+        } else if (reward.type === "GOLD") {
+          imageUrl = `https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png`;
+          itemName = "Ouro";
+        }
+
         return (
           <div
             key={reward.id}
@@ -104,11 +94,16 @@ export const BattlePassShop = () => {
 
                   {/* Imagem principal */}
                   <img
-                    alt={reward.type}
+                    alt={itemName}
                     draggable="false"
                     src={imageUrl}
                     className="relative z-10 h-full w-full object-contain p-4 transition-transform duration-300 group-hover:scale-110"
                   />
+
+                  {/* Nome do item */}
+                  <div className="absolute top-2 left-2 right-2 z-20 bg-black/60 px-2 py-1 text-center text-xs font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md">
+                    <p className="truncate">{itemName}</p>
+                  </div>
 
                   {/* Custo */}
                   <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-semibold text-white">

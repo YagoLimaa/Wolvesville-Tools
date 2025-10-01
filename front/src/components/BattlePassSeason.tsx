@@ -25,12 +25,21 @@ export interface Reward {
   imageUrl: string; // Adicionando a URL da imagem
 }
 
+export interface BattlePassCoinReward {
+  battlePassCoins: number;
+  free: boolean;
+  amount: number;
+  level: number;
+}
+
+export type BattlePassReward = Reward | BattlePassCoinReward;
+
 export interface BattlePassSeasonData {
   startTime: string;
   number: number;
   durationInDays: number;
   iconUrl: string;
-  rewards: Reward[];
+  rewards: BattlePassReward[];
 }
 
 const fetchBattlePassSeason = async (): Promise<BattlePassSeasonData> => {
