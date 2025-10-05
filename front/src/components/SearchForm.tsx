@@ -6,9 +6,18 @@ import { Search } from "lucide-react";
 interface SearchFormProps {
   onSearch: (username: string) => void;
   isLoading?: boolean;
+  placeholder?: string;
+  label?: string;
+  buttonText?: string;
 }
 
-export const SearchForm = ({ onSearch, isLoading = false }: SearchFormProps) => {
+export const SearchForm = ({ 
+  onSearch, 
+  isLoading = false,
+  placeholder = "Digite o nome...",
+  label = "Nome:",
+  buttonText = "Buscar"
+}: SearchFormProps) => {
   const [username, setUsername] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -22,13 +31,13 @@ export const SearchForm = ({ onSearch, isLoading = false }: SearchFormProps) => 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="username" className="text-lg font-medium text-foreground">
-          Nome do Jogador:
+          {label}
         </label>
         <SearchInput
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          placeholder="Digite o nome do jogador..."
+          placeholder={placeholder}
           required
           disabled={isLoading}
         />
@@ -48,7 +57,7 @@ export const SearchForm = ({ onSearch, isLoading = false }: SearchFormProps) => 
         ) : (
           <>
             <Search className="w-4 h-4 mr-2" />
-            Buscar Jogador
+            {buttonText}
           </>
         )}
       </GradientButton>

@@ -381,6 +381,66 @@ app.get('/players/highscores', async (req, res) => {
   }
 });
 
+/**
+ * Rota para buscar clãs por nome e enriquecer com detalhes e membros.
+ */
+app.get('/clans/search', async (req, res) => {
+  const { name, language } = req.query;
+
+  if (!name) {
+    return res.status(400).json({ error: 'O nome do clã é obrigatório.' });
+  }
+
+  try {
+    // 1. Busca clãs pelo nome e idioma
+    const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
+    const searchConfig = {
+      params: { name, language: language || 'pt-br' }, // Usa 'pt-br' como padrão se nenhum idioma for fornecido
+      headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' }
+    };
+    console.log(`--- Buscando clãs com nome: ${name} ---`);
+    const searchResponse = await axios.get(searchUrl, searchConfig);
+
+    const clansFound = searchResponse.data;
+    if (!clansFound || clansFound.length === 0) {
+      return res.json([]); // Retorna array vazio se nenhum clã for encontrado
+    }
+
+    // 2. Para cada clã, busca informações detalhadas e membros em paralelo
+    const detailedClansPromises = clansFound.map(async (clan) => {
+      try {
+        const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${clan.id}/info`; // Busca informações do clã
+        const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${clan.id}/members/detailed`; // Busca membros com detalhes
+        const headers = { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' };
+
+        // Busca info e membros simultaneamente
+        const [infoResponse, membersResponse] = await Promise.all([
+          axios.get(infoUrl, { headers }),
+          axios.get(membersUrl, { headers })
+        ]);
+
+        // Combina os dados do clã com as informações e membros
+        return {
+          ...clan,
+          ...infoResponse.data,
+          members: membersResponse.data,
+        };
+      } catch (detailsError) {
+        console.error(`Erro ao buscar detalhes para o clã ${clan.id}:`, detailsError.message);
+        return null; // Retorna nulo se houver erro ao buscar detalhes
+      }
+    });
+
+    const detailedClans = (await Promise.all(detailedClansPromises)).filter(Boolean); // Filtra clãs nulos
+
+    res.json(detailedClans);
+
+  } catch (error) {
+    console.error("Erro ao buscar clãs:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os clãs. Tente novamente mais tarde.' });
+  }
+});
+
 
 app.get('/items/:category', async (req, res) => {
   const { category } = req.params;

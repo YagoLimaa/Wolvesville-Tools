@@ -78,7 +78,13 @@ const SearchPlayer = () => {
             {!searchResult && (
               <Card className="max-w-md mx-auto bg-card/50 backdrop-blur border-accent/20">
                 <CardContent className="p-6">
-                  <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+                  <SearchForm 
+                    onSearch={handleSearch} 
+                    isLoading={isLoading}
+                    placeholder="Digite o nome do jogador..."
+                    label="Nome do Jogador:"
+                    buttonText="Buscar Jogador"
+                  />
                 </CardContent>
               </Card>
             )}
