@@ -39,8 +39,20 @@ app.set('views', './views');
 app.use(express.static('public'));
 
 // Habilita o CORS para permitir requisições do frontend
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:8080', // Sua URL de desenvolvimento do frontend
+  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
+].filter(Boolean);
 
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+}));
 
 // Validação inicial para garantir que a chave da API foi configurada
 if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
@@ -179,10 +191,10 @@ app.get('/roleRotations', async (req, res) => {
                 // Verifica se a versão .svg da imagem existe na pasta public
                 const svgPath = path.join(__dirname, 'public', 'images', 'roles', `${roleName}.svg`);
                 if (fs.existsSync(svgPath)) {
-                  return `http://localhost:3000/images/roles/${roleName}.svg`;
+                  return `/images/roles/${roleName}.svg`;
                 }
                 // Se não existir, assume que a versão é .png
-                return `http://localhost:3000/images/roles/${roleName}.png`;
+                return `/images/roles/${roleName}.png`;
               })()
             };
           }).filter(Boolean) // Remove quaisquer roles nulas ou vazias
@@ -498,8 +510,13 @@ app.get('/items/:category', async (req, res) => {
   }
 });
 
-// Inicia o servidor
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-  console.log(`API pronta para receber requisições em http://localhost:${PORT}`);
-});
+// Inicia o servidor para desenvolvimento local
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`API pronta para receber requisições em :${PORT}`);
+  });
+}
+
+// Exporta o app para a Vercel
+module.exports = app;

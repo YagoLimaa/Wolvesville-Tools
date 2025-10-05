@@ -30,7 +30,8 @@ interface Offer {
 }
 
 const fetchShopOffers = async (): Promise<Offer[]> => {
-  const response = await fetch("http://localhost:3000/shop/activeOffers");
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/shop/activeOffers`);
   if (!response.ok) {
     throw new Error("Não foi possível buscar as ofertas da loja.");
   }

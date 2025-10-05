@@ -43,7 +43,8 @@ export interface BattlePassSeasonData {
 }
 
 const fetchBattlePassSeason = async (): Promise<BattlePassSeasonData> => {
-  const response = await fetch("http://localhost:3000/battlePass/season");
+  const apiUrl = import.meta.env.VITE_API_URL;
+  const response = await fetch(`${apiUrl}/battlePass/season`);
   if (!response.ok) {
     throw new Error("Não foi possível buscar os dados do Battle Pass.");
   }
