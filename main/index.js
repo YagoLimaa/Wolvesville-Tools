@@ -21,7 +21,7 @@ app.use(express.static('public'));
 // Habilita o CORS para permitir requisições do frontend
 const allowedOrigins = [
   'http://localhost:8080',
-  'wolvesville-hub-ri8h.vercel.app', // Sua URL de desenvolvimento do frontend
+  'https://wolvesvilletools.vercel.app', // Sua URL de desenvolvimento do frontend
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
 ].filter(Boolean);
 
