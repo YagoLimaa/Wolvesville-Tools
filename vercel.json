@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "main/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "front/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist"
+      }
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/images/(.*)",
+      "destination": "/main/public/images/$1"
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": "/main/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/front/$1"
+    }
+  ]
+}
