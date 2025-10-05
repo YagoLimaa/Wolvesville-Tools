@@ -22,7 +22,7 @@ interface GameModeRotation {
 // Função para buscar os dados no nosso backend
 const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
-  const response = await fetch(`${apiUrl}/roleRotations`);
+  const response = await fetch(`${apiUrl}/api/roleRotations`);
   if (!response.ok) {
     throw new Error("Não foi possível buscar a rotação de roles.");
   }
