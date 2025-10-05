@@ -48,7 +48,7 @@ const ClanSearch = () => {
     navigate(`/clan/search?name=${encodeURIComponent(clanName)}`);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
+      const apiUrl = import.meta.env.VITE_API_BASE_URL;
       const response = await fetch(`${apiUrl}/clans/search?name=${encodeURIComponent(clanName)}&language=${language.toUpperCase()}`);
       if (!response.ok) {
         throw new Error("Falha ao buscar dados. A API pode estar offline.");

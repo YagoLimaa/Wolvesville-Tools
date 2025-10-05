@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
+// Remove custom ImportMetaEnv and ImportMeta interfaces, Vite provides these types globally.
+
 export interface Role {
   id: string;
   name: string;

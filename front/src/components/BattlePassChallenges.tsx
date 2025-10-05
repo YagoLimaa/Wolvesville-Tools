@@ -16,7 +16,7 @@ interface Challenge {
 }
 
 const fetchBattlePassChallenges = async (): Promise<Challenge[]> => {
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const response = await fetch(`${apiUrl}/battlePass/challenges`);
   if (!response.ok) {
     throw new Error("Não foi possível buscar os desafios do Battle Pass.");

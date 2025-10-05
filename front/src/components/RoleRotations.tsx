@@ -21,7 +21,7 @@ interface GameModeRotation {
 
 // Função para buscar os dados no nosso backend
 const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
-  const apiUrl = import.meta.env.VITE_API_URL;
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const response = await fetch(`${apiUrl}/roleRotations`);
   if (!response.ok) {
     throw new Error("Não foi possível buscar a rotação de roles.");
@@ -36,26 +36,26 @@ const useCountdownToNextWednesday = () => {
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date();
-      const target = new Date();
-
-      // Horário de Brasília (UTC-3)
+      const now = new Date(); // Data/hora atual no fuso do cliente
       const targetDayOfWeek = 3; // Quarta-feira (Domingo=0, Segunda=1, ...)
       const targetHour = 21;
 
-      // Ajusta para o fuso horário de Brasília (UTC-3)
-      const nowBrasilia = new Date(now.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
-      
-      let daysUntilTarget = (targetDayOfWeek - nowBrasilia.getDay() + 7) % 7;
-      
-      if (daysUntilTarget === 0 && nowBrasilia.getHours() >= targetHour) {
-        daysUntilTarget = 7; // Já passou da hora, mira na próxima semana
+      // Cria uma data alvo baseada na data atual
+      const target = new Date(now);
+
+      // Calcula quantos dias faltam para a próxima quarta-feira
+      const currentDay = now.getDay();
+      let daysToAdd = (targetDayOfWeek - currentDay + 7) % 7;
+
+      // Se for quarta-feira e já passou das 21h, mira na próxima semana
+      if (daysToAdd === 0 && now.getHours() >= targetHour) {
+        daysToAdd = 7;
       }
 
-      target.setDate(nowBrasilia.getDate() + daysUntilTarget);
+      target.setDate(now.getDate() + daysToAdd);
       target.setHours(targetHour, 0, 0, 0);
 
-      setCountDown(target.getTime() - nowBrasilia.getTime());
+      setCountDown(target.getTime() - now.getTime());
     };
 
     const interval = setInterval(() => {

@@ -1,12 +1,12 @@
 // Carrega as variáveis de ambiente do arquivo .env para process.env
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors'); // Importa o pacote cors
 const { engine } = require('express-handlebars');
 const fs = require('fs');
-const path = require('path');
 
 const app = express();
 // Usa a porta definida no .env ou 3000 como padrão
@@ -41,6 +41,7 @@ app.use(express.static('public'));
 // Habilita o CORS para permitir requisições do frontend
 const allowedOrigins = [
   'http://localhost:8080', // Sua URL de desenvolvimento do frontend
+  'http://localhost:5173', // URL padrão do Vite
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
 ].filter(Boolean);
 
@@ -190,11 +191,12 @@ app.get('/roleRotations', async (req, res) => {
               imageUrl: (() => {
                 // Verifica se a versão .svg da imagem existe na pasta public
                 const svgPath = path.join(__dirname, 'public', 'images', 'roles', `${roleName}.svg`);
+                const baseUrl = process.env.NODE_ENV !== 'production' ? `http://localhost:${PORT}` : '';
                 if (fs.existsSync(svgPath)) {
-                  return `/images/roles/${roleName}.svg`;
+                  return `${baseUrl}/images/roles/${roleName}.svg`;
                 }
                 // Se não existir, assume que a versão é .png
-                return `/images/roles/${roleName}.png`;
+                return `${baseUrl}/images/roles/${roleName}.png`;
               })()
             };
           }).filter(Boolean) // Remove quaisquer roles nulas ou vazias

@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL: string;
-  // adicione outras variáveis de ambiente que você usa aqui
+  readonly VITE_API_URL: string;
+  readonly WOLVESVILLE_API_KEY: string;
+  readonly port?: string;
 }
