@@ -22,7 +22,7 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "/main/index.js"
+      "destination": "/main/index.js?path=$1"
     },
     {
       "source": "/(.*)",
