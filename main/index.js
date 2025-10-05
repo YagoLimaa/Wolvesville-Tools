@@ -1,5 +1,8 @@
 // Carrega as variáveis de ambiente do arquivo .env para process.env
 const path = require('path');
+// Adiciona a configuração do dotenv para carregar as variáveis do arquivo .env
+// Apenas em ambiente de desenvolvimento. Na Vercel, as variáveis são injetadas automaticamente.
+if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ path: path.resolve(__dirname, '.env') }); }
 
 const express = require('express');
 const axios = require('axios');
