@@ -23,7 +23,7 @@ interface RolesContextType {
 const RolesContext = React.createContext<RolesContextType | undefined>(undefined);
 
 const fetchAllRoles = async (): Promise<Role[]> => {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/roles`);
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/roles`);
   if (!response.ok) {
     throw new Error('Não foi possível buscar a lista de roles do backend.');
   }
