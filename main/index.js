@@ -168,9 +168,7 @@ app.get('/roleRotations', async (req, res) => {
             return {
               id: roleName,
               name: roleName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              // Simplificado para usar caminhos relativos. O frontend decidirá qual usar.
-              // O ideal é ter uma convenção (ex: sempre usar .png ou ter um endpoint que retorne a URL correta)
-              imageUrl: `/images/roles/${roleName}.png`
+              imageUrl: `/images/roles/${roleName}.svg`
             };
           }).filter(Boolean) // Remove quaisquer roles nulas ou vazias
         : [];

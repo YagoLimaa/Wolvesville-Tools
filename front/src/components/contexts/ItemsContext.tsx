@@ -82,7 +82,7 @@ const fetchAllItems = async (): Promise<Item[]> => {
 
   const promises = categories.map(async (category) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/items/${category}`);
+      const response = await fetch(`/api/items/${category}`);
       if (!response.ok) {
         console.warn(`Falha ao buscar a categoria: ${category}`);
         return [];

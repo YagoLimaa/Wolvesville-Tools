@@ -32,9 +32,7 @@ const SearchPlayer = () => {
     setError(null);
     
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/search?username=${encodeURIComponent(username)}&page=${page}`
-      );
+      const response = await fetch(`/api/search?username=${encodeURIComponent(username)}&page=${page}`);
       if (!response.ok) {
         throw new Error("Falha ao buscar dados. A API do Wolvesville pode estar offline ou o backend não está rodando.");
       }

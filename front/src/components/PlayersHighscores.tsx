@@ -19,8 +19,7 @@ interface HighscorePlayer {
 }
 
 const fetchHighscores = async (): Promise<HighscorePlayer[]> => {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-  const response = await fetch(`${apiUrl}/players/highscores?limit=10`);
+  const response = await fetch('/api/players/highscores?limit=10');
   if (!response.ok) {
     throw new Error("Não foi possível buscar os melhores jogadores.");
   }
