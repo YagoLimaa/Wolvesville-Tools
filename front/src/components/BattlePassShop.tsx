@@ -18,8 +18,8 @@ interface BattlePassShopData {
 }
 
 const fetchBattlePassShop = async (): Promise<BattlePassShopData> => {
-  const apiUrl = import.meta.env.VITE_API_BASE_URL;
-  const response = await fetch(`${apiUrl}/battlePass/shop`);
+  const apiUrl = import.meta.env.VITE_API_BASE_URL || '';
+  const response = await fetch(`${apiUrl}/api/battlePass/shop`);
   if (!response.ok) {
     throw new Error("Não foi possível buscar os dados da loja do Battle Pass.");
   }
