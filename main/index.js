@@ -1,12 +1,9 @@
 // Carrega as variáveis de ambiente do arquivo .env para process.env
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors'); // Importa o pacote cors
-const { engine } = require('express-handlebars');
-const fs = require('fs');
 
 const app = express();
 // Usa a porta definida no .env ou 3000 como padrão
@@ -14,26 +11,6 @@ const PORT = process.env.PORT || 3000;
 
 const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
 const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
-
-// Configuração do Handlebars
-app.engine('hbs', engine({
-  extname: '.hbs',
-  defaultLayout: 'main',
-  helpers: {
-    // Helper para remover quebras de linha e espaços excessivos
-    stripAndTrim: function (str) {
-      if (typeof str !== 'string') return '';
-      return str.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, ' ').trim();
-    },
-    // Helper para buscar a imagem da badge com base no ID
-    getBadgeImage: function (badgeId) {
-      // Retorna o caminho para sua imagem local na pasta public
-      return `/images/badges/${badgeId}.png`;
-    }
-  }
-}));
-app.set('view engine', 'hbs');
-app.set('views', './views');
 
 // Configura o Express para servir arquivos estáticos (CSS, JS, imagens) da pasta 'public'
 app.use(express.static('public'));
@@ -188,16 +165,9 @@ app.get('/roleRotations', async (req, res) => {
             return {
               id: roleName,
               name: roleName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              imageUrl: (() => {
-                // Verifica se a versão .svg da imagem existe na pasta public
-                const svgPath = path.join(__dirname, 'public', 'images', 'roles', `${roleName}.svg`);
-                const baseUrl = process.env.NODE_ENV !== 'production' ? `http://localhost:${PORT}` : '';
-                if (fs.existsSync(svgPath)) {
-                  return `${baseUrl}/images/roles/${roleName}.svg`;
-                }
-                // Se não existir, assume que a versão é .png
-                return `${baseUrl}/images/roles/${roleName}.png`;
-              })()
+              // Simplificado para usar caminhos relativos. O frontend decidirá qual usar.
+              // O ideal é ter uma convenção (ex: sempre usar .png ou ter um endpoint que retorne a URL correta)
+              imageUrl: `/images/roles/${roleName}.png`
             };
           }).filter(Boolean) // Remove quaisquer roles nulas ou vazias
         : [];
