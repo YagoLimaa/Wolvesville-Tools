@@ -13,6 +13,13 @@
         "buildCommand": "npm run build",
         "outputDirectory": "dist"
       }
+    },
+    {
+      "src": "main/public/**",
+      "use": "@vercel/static",
+      "config": {
+        "includeFiles": "main/public/**"
+      }
     }
   ],
   "rewrites": [
