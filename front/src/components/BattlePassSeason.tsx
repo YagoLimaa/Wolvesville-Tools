@@ -112,11 +112,11 @@ export const BattlePassSeason = () => {
                     Ver Battle Pass Completo
                   </GradientButton>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                <DialogContent className="max-w-4xl h-[80vh] flex flex-col pr-6">
                   <DialogHeader>
                     <DialogTitle>Recompensas da Temporada {season.number}</DialogTitle>
                   </DialogHeader>
-                  <div className="overflow-y-auto">
+                  <div className="overflow-y-auto -mr-6">
                     <BattlePassRewards season={season} />
                   </div>
                 </DialogContent>
@@ -125,11 +125,11 @@ export const BattlePassSeason = () => {
                 <DialogTrigger asChild>
                   <GradientButton variant="outline" className="w-full">Loja do Passe</GradientButton>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+                <DialogContent className="max-w-4xl h-[80vh] flex flex-col pr-6">
                   <DialogHeader>
                     <DialogTitle>Loja da Temporada {season.number}</DialogTitle>
                   </DialogHeader>
-                  <div className="overflow-y-auto">
+                  <div className="overflow-y-auto -mr-6">
                     <BattlePassShop />
                   </div>
                 </DialogContent>
