@@ -120,3 +120,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Correção para o shift de layout do modal do shadcn/ui */
+body[data-scroll-locked] header {
+  padding-right: var(--removed-body-scroll-bar-size);
+}
