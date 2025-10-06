@@ -19,15 +19,15 @@
       "dest": "/main/index.js"
     },
     {
-      "source": "/images/(.*)",
-      "destination": "/main/public/images/$1"
+      "src": "/images/(.*)",
+      "dest": "/main/public/images/$1"
     },
     {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/front/dist/app.tsx"
+      "dest": "/front/dist/index.tsx"
     }
   ]
 }
