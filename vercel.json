@@ -2,32 +2,25 @@
   "version": 2,
   "builds": [
     {
+      "src": "main/index.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "front/package.json",
       "use": "@vercel/static-build",
       "config": {
         "distDir": "dist"
       }
-    },
-    {
-      "src": "main/index.js",
-      "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/main/index.js"
+      "source": "/api/(.*)",
+      "destination": "/main/index.js"
     },
     {
-      "src": "/images/(.*)",
-      "dest": "/main/public/images/$1"
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/front/dist/index.tsx"
+      "source": "/(.*)",
+      "destination": "/front/$1"
     }
   ]
 }
