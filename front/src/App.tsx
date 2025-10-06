@@ -10,6 +10,7 @@ import ItemsShop from "./pages/ItemsShop";
 import ItemsSkins from "./pages/ItemsSkins";
 import ClanSearch from "./pages/ClanSearch";
 import NotFound from "./pages/NotFound";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const queryClient = new QueryClient();
 
