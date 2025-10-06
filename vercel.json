@@ -2,29 +2,38 @@
   "version": 2,
   "builds": [
     {
+      "src": "main/index.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "front/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist"
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "outputDirectory": "dist"
       }
     },
     {
-      "src": "main/index.js",
-      "use": "@vercel/node"
+      "src": "main/public/**",
+      "use": "@vercel/static",
+      "config": {
+        "includeFiles": "main/public/**"
+      }
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "/main/index.js"
+      "source": "/images/(.*)",
+      "destination": "/main/public/images/$1"
     },
     {
-      "src": "/images/(.*)",
-      "dest": "/main/public/images/$1"
+      "source": "/api/(.*)",
+      "destination": "/main/index.js?path=$1"
     },
     {
-      "src": "/(.*)",
-      "dest": "/front/dist/$1"
+      "source": "/(.*)",
+      "destination": "/front/$1"
     }
   ]
 }
