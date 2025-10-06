@@ -5,8 +5,7 @@
       "src": "front/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "buildCommand": "npm run build",
-        "outputDirectory": "dist"
+        "distDir": "dist"
       }
     },
     {
@@ -14,18 +13,22 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
+  "rewrites": [
     {
-      "src": "/images/(.*)",
-      "dest": "/main/public/images/$1"
+      "source": "/api/:path*",
+      "destination": "/main/index.js"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/main/index.js"
+      "source": "/images/:path*",
+      "destination": "/main/public/images/:path*"
     },
     {
-      "src": "/(.*)",
-      "dest": "/front/$1"
+      "source": "/assets/:path*",
+      "destination": "/front/dist/assets/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/front/dist/index.html"
     }
   ]
 }
