@@ -6,6 +6,7 @@ if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ path: pa
 
 const express = require('express');
 const axios = require('axios');
+const { Router } = require('express');
 const cors = require('cors'); // Importa o pacote cors
 
 const app = express();
@@ -14,6 +15,12 @@ const PORT = process.env.PORT || 3000;
 
 const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
 const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
+
+// --- DEBUG: Adiciona um log para cada requisição recebida ---
+app.use((req, res, next) => {
+  console.log(`[Vercel Request Log] Method: ${req.method}, URL: ${req.originalUrl}`);
+  next();
+});
 
 // Configura o Express para servir arquivos estáticos (CSS, JS, imagens) da pasta 'public'
 app.use(express.static('public'));
@@ -42,13 +49,16 @@ if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
   process.exit(1); // Encerra o processo se a chave não existir ou não for alterada
 }
 
+// Cria um roteador para agrupar todas as nossas rotas de API
+const apiRouter = Router();
+
 /**
  * Rota principal: exibe o formulário de busca.
  */
 /**
  * Rota de busca: processa o formulário, busca na API e exibe os resultados com paginação.
  */
-app.get('/search', async (req, res) => {
+apiRouter.get('/search', async (req, res) => {
   const { username } = req.query;
   const page = parseInt(req.query.page) || 1;
   const resultsPerPage = 5; // Defina quantos resultados por página
@@ -142,7 +152,7 @@ app.get('/search', async (req, res) => {
 /**
  * Rota para buscar a rotação de roles ativa.
  */
-app.get('/roleRotations', async (req, res) => {
+apiRouter.get('/roleRotations', async (req, res) => {
   try {
     // Usando o endpoint /roleRotations conforme solicitado
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roleRotations`;
@@ -211,7 +221,7 @@ app.get('/roleRotations', async (req, res) => {
 /**
  * Rota para buscar as ofertas ativas da loja.
  */
-app.get('/shop/activeOffers', async (req, res) => {
+apiRouter.get('/shop/activeOffers', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/shop/activeOffers`;
     const requestConfig = {
@@ -236,7 +246,7 @@ app.get('/shop/activeOffers', async (req, res) => {
 /**
  * Rota para buscar os dados da temporada atual do Battle Pass.
  */
-app.get('/battlePass/season', async (req, res) => {
+apiRouter.get('/battlePass/season', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
     const requestConfig = {
@@ -262,7 +272,7 @@ app.get('/battlePass/season', async (req, res) => {
 /**
  * Rota para buscar os dados da loja da temporada do Battle Pass.
  */
-app.get('/battlePass/shop', async (req, res) => {
+apiRouter.get('/battlePass/shop', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
     const requestConfig = {
@@ -288,7 +298,7 @@ app.get('/battlePass/shop', async (req, res) => {
 /**
  * Rota para buscar os desafios ativos do Battle Pass.
  */
-app.get('/battlePass/challenges', async (req, res) => {
+apiRouter.get('/battlePass/challenges', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`;
     const requestConfig = {
@@ -316,7 +326,7 @@ app.get('/battlePass/challenges', async (req, res) => {
 /**
  * Rota para buscar os highscores dos jogadores.
  */
-app.get('/players/highscores', async (req, res) => {
+apiRouter.get('/players/highscores', async (req, res) => {
   try {
     // Define 'xp' como o tipo de ranking padrão e busca o limite da query.
     const type = 'oldRank'; // Mantém o tipo de ranking
@@ -369,7 +379,7 @@ app.get('/players/highscores', async (req, res) => {
 /**
  * Rota para buscar clãs por nome e enriquecer com detalhes e membros.
  */
-app.get('/clans/search', async (req, res) => {
+apiRouter.get('/clans/search', async (req, res) => {
   const { name, language } = req.query;
 
   if (!name) {
@@ -427,7 +437,7 @@ app.get('/clans/search', async (req, res) => {
 });
 
 
-app.get('/items/:category', async (req, res) => {
+apiRouter.get('/items/:category', async (req, res) => {
   const { category } = req.params;
   // Lista de categorias válidas para segurança
   const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins', 'advancedRoleCardOffers'];
@@ -482,6 +492,9 @@ app.get('/items/:category', async (req, res) => {
     res.status(500).json({ error: `Não foi possível buscar os itens da categoria ${category}.` });
   }
 });
+
+// Diz ao Express para usar o roteador para todos os caminhos que começam com /api
+app.use('/api', apiRouter);
 
 // Inicia o servidor para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {
