@@ -5,7 +5,7 @@
       "src": "front/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist" 
+        "distDir": "dist"
       }
     },
     {
@@ -13,18 +13,25 @@
       "use": "@vercel/node"
     }
   ],
+  "rewrites": [
   "routes": [
     {
+      "source": "/api/:path*",
+      "destination": "/main/index.js"
       "src": "/api/(.*)",
       "dest": "/main/index.js"
     },
     {
+      "source": "/images/:path*",
+      "destination": "/main/public/images/:path*"
       "src": "/images/(.*)",
       "dest": "/main/public/images/$1"
     },
     {
+      "source": "/(.*)",
+      "destination": "/front/dist/index.html"
       "src": "/(.*)",
-      "dest": "/front"
+      "dest": "/front/dist/$1"
     }
   ]
 }
