@@ -278,11 +278,11 @@ const ItemsSkins = () => {
     <div className="min-h-screen bg-background">
       <NavigationBar />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Coluna de Filtros */}
-          <aside className="lg:col-span-1">
-            <Card className="bg-card/50 backdrop-blur border-accent/20 sticky top-24 mt-[84px]">
+      <main className="container mx-auto px-4 py-8 mt-[84px]">
+        {/* Filtros: Acima em telas pequenas, na lateral em telas grandes */}
+        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+          <aside className="lg:col-span-1 mb-8 lg:mb-0">
+            <Card className="bg-card/50 backdrop-blur border-accent/20 lg:sticky lg:top-24">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Filter className="w-5 h-5 text-primary" />
@@ -359,7 +359,7 @@ const ItemsSkins = () => {
             </Card>
           </aside>
 
-          {/* Coluna de Itens */}
+          {/* Grade de Itens */}
           <div className="lg:col-span-3">
             {isLoading && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -390,7 +390,7 @@ const ItemsSkins = () => {
               </div>
             )}
             {allItems && (
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {paginatedItems.map((item) => (
                   <button
                     key={item.id}
@@ -428,7 +428,7 @@ const ItemsSkins = () => {
           onClick={() => setSelectedCollection(null)}
         >
           <Card 
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card"
             onClick={(e) => e.stopPropagation()}
           >
             <CardContent className="p-6">

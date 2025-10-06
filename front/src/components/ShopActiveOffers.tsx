@@ -261,7 +261,7 @@ export const ShopActiveOffers = () => {
                 <h3 className="text-lg font-semibold text-primary mb-3">
                   {offerTypeTranslations[type] || type}
                 </h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {offerGroup.map((offer) => {
                     const Countdown = ({ offerType }: { offerType: string }) => {
                       // Define quais tipos de oferta usam o contador mensal

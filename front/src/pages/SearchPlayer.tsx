@@ -89,13 +89,13 @@ const SearchPlayer = () => {
 
             {/* Se houver resultados, mostra o cabeçalho e o botão de voltar */}
             {searchResult && (
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4">
               <GradientButton variant="outline" onClick={handleGoBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar
               </GradientButton>
               
-                <div className="text-right">
+                <div className="text-center md:text-right">
                   <h2 className="text-2xl font-bold text-foreground">
                     Resultados para "{currentQuery}"
                   </h2>

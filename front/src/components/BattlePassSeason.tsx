@@ -105,7 +105,7 @@ export const BattlePassSeason = () => {
               <img src={season.iconUrl} alt={`Temporada ${season.number}`} className="w-12 h-12" />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Dialog>
                 <DialogTrigger asChild>
                   <GradientButton variant="primary" className="w-full">

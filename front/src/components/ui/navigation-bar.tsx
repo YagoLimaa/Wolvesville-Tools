@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { Search, Users, Package, ArrowRight } from "lucide-react";
+import { Users, Package, ArrowRight, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { SearchInput } from "./search-input";
 import wolfLogo from "@/assets/wolf-logo.png";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion";
 
 export const NavigationBar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <header className="bg-card/80 backdrop-blur border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4">
@@ -19,26 +23,24 @@ export const NavigationBar = () => {
             </span>
           </Link>
 
-          {/* Search and Navigation */}
-          <div className="flex items-center gap-4">
+          {/* Desktop Search and Navigation */}
+          <div className="hidden md:flex items-center gap-4">
             {/* Search Form */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
                 const formData = new FormData(e.currentTarget);
                 const username = formData.get("username") as string;
-                if (username.trim()) {
-                  window.location.href = `/search?username=${encodeURIComponent(username.trim())}`;
-                }
+                if (username.trim()) navigate(`/search?username=${encodeURIComponent(username.trim())}`);
               }}
               className="relative"
             >
               <SearchInput
                 name="username"
                 placeholder="Buscar jogador..."
-                className="h-10 w-64 pr-10"
+                className="h-10 w-48 lg:w-64 pr-10"
               />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+              <button type="submit" aria-label="Buscar" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
@@ -118,8 +120,67 @@ export const NavigationBar = () => {
               </NavigationMenuList>
             </NavigationMenu>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Abrir menu">
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-card/95 backdrop-blur-lg border-t border-border shadow-lg">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            {/* Mobile Search Form */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.currentTarget);
+                const username = formData.get("username") as string;
+                if (username.trim()) {
+                  navigate(`/search?username=${encodeURIComponent(username.trim())}`);
+                  setIsMobileMenuOpen(false);
+                }
+              }}
+              className="relative"
+            >
+              <SearchInput
+                name="username"
+                placeholder="Buscar jogador..."
+                className="h-10 w-full pr-10"
+              />
+              <button type="submit" aria-label="Buscar" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+
+            {/* Mobile Navigation Links */}
+            <Accordion type="multiple" className="w-full">
+              <AccordionItem value="clan">
+                <AccordionTrigger className="text-base">
+                  <Users className="w-4 h-4 mr-2" /> Clã
+                </AccordionTrigger>
+                <AccordionContent className="pl-4">
+                  <Link to="/clan/search" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Buscar Clã</Link>
+                  <Link to="/clan/rankings" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Rankings de Clãs</Link>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="items">
+                <AccordionTrigger className="text-base">
+                  <Package className="w-4 h-4 mr-2" /> Itens
+                </AccordionTrigger>
+                <AccordionContent className="pl-4">
+                  <Link to="/items/skins" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Skins & Avatares</Link>
+                  <Link to="/items/shop" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Loja</Link>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
