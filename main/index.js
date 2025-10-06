@@ -16,12 +16,6 @@ const PORT = process.env.PORT || 3000;
 const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
 const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
 
-// --- DEBUG: Adiciona um log para cada requisição recebida ---
-app.use((req, res, next) => {
-  console.log(`[Vercel Request Log] Method: ${req.method}, URL: ${req.originalUrl}`);
-  next();
-});
-
 // Configura o Express para servir arquivos estáticos (CSS, JS, imagens) da pasta 'public'
 app.use(express.static('public'));
 

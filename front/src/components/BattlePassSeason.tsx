@@ -116,7 +116,7 @@ export const BattlePassSeason = () => {
                   <DialogHeader>
                     <DialogTitle>Recompensas da Temporada {season.number}</DialogTitle>
                   </DialogHeader>
-                  <div className="overflow-y-auto pr-4">
+                  <div className="overflow-y-auto">
                     <BattlePassRewards season={season} />
                   </div>
                 </DialogContent>
@@ -129,7 +129,7 @@ export const BattlePassSeason = () => {
                   <DialogHeader>
                     <DialogTitle>Loja da Temporada {season.number}</DialogTitle>
                   </DialogHeader>
-                  <div className="overflow-y-auto pr-4">
+                  <div className="overflow-y-auto">
                     <BattlePassShop />
                   </div>
                 </DialogContent>
