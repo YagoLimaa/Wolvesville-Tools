@@ -47,7 +47,7 @@ export const PlayersHighscores = () => {
           Top Players
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto">
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -63,52 +63,54 @@ export const PlayersHighscores = () => {
           </Alert>
         )}
         {players && (
-          <div className="space-y-3">
-            {players.slice(0, 10).map((player, index) => {
-              const rank = player.oldRank + 1;
-              const { Icon, color } = getRankIcon(rank);
-              return (
-                <Link
-                  key={player.playerId}
-                  to={`/search?username=${encodeURIComponent(player.username)}`}
-                  className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 hover:border-primary hover:shadow-glow-primary hover:scale-[1.02] ${
-                    rank <= 3 ? "bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30" : "bg-background/50 border-border"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Icon className={`w-5 h-5 ${color}`} />
-                      <span className="font-bold text-lg min-w-[20px]">#{rank}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      {player.equippedAvatar ? (
-                        <img src={player.equippedAvatar.url} alt={player.username} className="w-10 h-10 rounded-full border-2 border-primary/50" />
-                      ) : (
-                        <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-sm">
-                            {player.username.charAt(0)}
-                          </span>
-                        </div>
-                      )}
-                      <div>
-                        <div className="font-medium">{player.username}</div>
-                        {player.level && (
-                          <div className="text-sm text-muted-foreground">
-                            Level {player.level}
+          <div>
+            <div className="space-y-3 min-w-[480px]">
+              {players.slice(0, 10).map((player, index) => {
+                const rank = player.oldRank + 1;
+                const { Icon, color } = getRankIcon(rank);
+                return (
+                  <Link
+                    key={player.playerId}
+                    to={`/search?username=${encodeURIComponent(player.username)}`}
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 hover:border-primary hover:shadow-glow-primary hover:scale-[1.02] ${
+                      rank <= 3 ? "bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30" : "bg-background/50 border-border"
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`w-5 h-5 ${color}`} />
+                        <span className="font-bold text-lg min-w-[20px]">#{rank}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        {player.equippedAvatar ? (
+                          <img src={player.equippedAvatar.url} alt={player.username} className="w-10 h-10 rounded-full border-2 border-primary/50" />
+                        ) : (
+                          <div className="w-10 h-10 bg-gradient-primary rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">
+                              {player.username.charAt(0)}
+                            </span>
                           </div>
                         )}
+                        <div>
+                          <div className="font-medium">{player.username}</div>
+                          {player.level && (
+                            <div className="text-sm text-muted-foreground">
+                              Level {player.level}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="text-right">
-                    <div className="font-semibold text-primary">{player.xp.toLocaleString()}</div>
-                    <div className="text-xs text-muted-foreground">XP</div>
-                  </div>
-                </Link>
-              );
-            })}
+                    <div className="text-right">
+                      <div className="font-semibold text-primary">{player.xp.toLocaleString()}</div>
+                      <div className="text-xs text-muted-foreground">XP</div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
       </CardContent>
