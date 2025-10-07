@@ -9,7 +9,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <NavigationBar />
       
-      <main className="container mx-auto px-4 py-8 space-y-8">
+      <main className="px-4 pt-8 space-y-8">
         {/* Hero Section */}
         <div className="text-center space-y-4 py-12">
           <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
