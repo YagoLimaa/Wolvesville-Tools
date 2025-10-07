@@ -22,16 +22,16 @@ const Index = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid gap-8 lg:grid-cols-2">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Column */}
-          <div className="space-y-8">
+          <div className="flex flex-col gap-8 lg:w-1/2">
             <BattlePassSeason />
             <BattlePassChallenges />
             <PlayersHighscores />
           </div>
 
           {/* Right Column */}
-          <div className="space-y-8">
+          <div className="flex flex-col gap-8 lg:w-1/2">
             <RoleRotations />
           </div>
         </div>
