@@ -1,7 +1,16 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-// Remove custom ImportMetaEnv and ImportMeta interfaces, Vite provides these types globally.
+// A API retorna a imagem dentro de um objeto 'image'
+interface RoleFromApi {
+  id: string;
+  name: string;
+  description: string;
+  team: string;
+  aura: string;
+  image: { url: string };
+  [key: string]: unknown;
+}
 
 export interface Role {
   id: string;
@@ -22,15 +31,25 @@ interface RolesContextType {
 
 const RolesContext = React.createContext<RolesContextType | undefined>(undefined);
 
-const fetchAllRoles = async (): Promise<Role[]> => {
+const fetchAllRoles = async (): Promise<Role[]> => { 
   const response = await fetch('/api/roles');
   if (!response.ok) {
     throw new Error('Não foi possível buscar a lista de roles do backend.');
   }
-  return response.json();
+  const data: { roles: RoleFromApi[] } = await response.json();
+  
+  // Transforma os dados da API para o formato que o frontend espera
+  return data.roles.map(role => ({
+    ...role,
+    imageUrl: role.image.url, // Extrai a URL da imagem
+  }));
 };
 
-export const RolesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface RolesProviderProps {
+  children: React.ReactNode;
+}
+
+export const RolesProvider = ({ children }: RolesProviderProps) => {
   const { data: allRoles = [], isLoading, isError } = useQuery<Role[]>({
     queryKey: ['allRolesGlobal'],
     queryFn: fetchAllRoles,

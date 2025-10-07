@@ -1,28 +1,22 @@
-// Carrega as variáveis de ambiente do arquivo .env para process.env
 const path = require('path');
-// Adiciona a configuração do dotenv para carregar as variáveis do arquivo .env
-// Apenas em ambiente de desenvolvimento. Na Vercel, as variáveis são injetadas automaticamente.
+
 if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ path: path.resolve(__dirname, '.env') }); }
 
 const express = require('express');
 const axios = require('axios');
 const { Router } = require('express');
-const cors = require('cors'); // Importa o pacote cors
+const cors = require('cors');
 
 const app = express();
-// Usa a porta definida no .env ou 3000 como padrão
 const PORT = process.env.PORT || 3000;
 
 const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
 const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
 
-// Configura o Express para servir arquivos estáticos (CSS, JS, imagens) da pasta 'public'
 app.use(express.static('public'));
-
-// Habilita o CORS para permitir requisições do frontend
 const allowedOrigins = [
   'http://localhost:8080',
-  'https://wolvesvilletools.vercel.app', // Sua URL de desenvolvimento do frontend
+  'https://wolvesvilletools.vercel.app',
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
 ].filter(Boolean);
 
@@ -36,11 +30,10 @@ app.use(cors({
   }
 }));
 
-// Validação inicial para garantir que a chave da API foi configurada
 if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
   console.error('ERRO: A variável de ambiente WOLVESVILLE_API_KEY não foi definida no arquivo .env.');
   console.error('Por favor, adicione sua chave da API ao arquivo .env e reinicie o servidor.');
-  process.exit(1); // Encerra o processo se a chave não existir ou não for alterada
+  process.exit(1); 
 }
 
 // Cria um roteador para agrupar todas as nossas rotas de API
@@ -165,16 +158,11 @@ apiRouter.get('/roleRotations', async (req, res) => {
     // Processa cada modo de jogo retornado pela API
     const formattedRotations = response.data.map(rotationData => {
       const roles = (rotationData.roleRotations && rotationData.roleRotations.length > 0)
-        ? rotationData.roleRotations[0].roleRotation.roles.flat().map(r => {
-            // A API pode retornar um array de strings ou um objeto com a propriedade 'role'
-            const roleName = typeof r === 'string' ? r : r.role;
-            if (!roleName) return null;
-            return {
-              id: roleName,
-              name: roleName.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-              imageUrl: `/images/roles/${roleName}.svg`
-            };
-          }).filter(Boolean) // Remove quaisquer roles nulas ou vazias
+        ? rotationData.roleRotations[0].roleRotation.roles.flat().map(roleIdentifier => {
+
+            const roleId = typeof roleIdentifier === 'string' ? roleIdentifier : roleIdentifier.role;
+            return { id: roleId }; 
+          }).filter(Boolean) 
         : [];
 
       return {
@@ -209,6 +197,30 @@ apiRouter.get('/roleRotations', async (req, res) => {
   } catch (error) {
     console.error("Erro ao buscar rotação de roles:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar a rotação de roles. Tente novamente mais tarde.' });
+  }
+});
+
+/**
+ * Rota para buscar todas as roles.
+ */
+apiRouter.get('/roles', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /roles bem-sucedida ---');
+
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar a lista de roles:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar a lista de roles.' });
   }
 });
 

@@ -4,19 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Zap, AlertTriangle, Clock } from "lucide-react";
-
-// Define a estrutura de uma Role, conforme a API
-interface Role {
-  id: string;
-  name: string;
-  imageUrl: string;
-}
+import { useRoles } from "@/../../main/RolesContext"; // Importa apenas o hook
 
 // Define a estrutura da resposta da nossa API de rotação
 interface GameModeRotation {
   gameMode: string; // Usado como chave única
   gameModeName: string;
-  roles: Role[];
+  roles: { id: string }[]; // A API agora retorna apenas o ID da role
 }
 
 // Função para buscar os dados no nosso backend
@@ -89,11 +83,12 @@ const gameModeTranslations: { [key: string]: string } = {
 };
 
 export const RoleRotations = () => {
-  const { data: rotations, isLoading, isError, error } = useQuery<GameModeRotation[], Error>({
+  const { data: rotations, isLoading: isLoadingRotations, isError: isErrorRotations, error: errorRotations } = useQuery<GameModeRotation[], Error>({
     queryKey: ["roleRotations"],
     queryFn: fetchRoleRotations,
   });
   const timeLeft = useCountdownToNextWednesday();
+  const { rolesById, isLoading: isLoadingRoles } = useRoles();
 
   return (
     <Card className="bg-card/50 backdrop-blur border-accent/20">
@@ -111,41 +106,46 @@ export const RoleRotations = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading && (
+        {(isLoadingRotations || isLoadingRoles) && (
           <div className="space-y-4">
             <Skeleton className="h-8 w-1/2" />
             <Skeleton className="h-24 w-full" />
           </div>
         )}
 
-        {isError && (
+        {isErrorRotations && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
+            <AlertDescription>{errorRotations.message}</AlertDescription>
           </Alert>
         )}
 
         {rotations && rotations.length > 0 && (
           <div className="space-y-6">
             {rotations.map((rotation) => (
-              <div key={rotation.gameMode}>
+              <div key={rotation.gameMode}> 
                 <h3 className="text-lg font-semibold text-primary">
                   {gameModeTranslations[rotation.gameModeName] || rotation.gameModeName}
                 </h3>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {rotation.roles.map((role, index) => (
-                    <div key={`${role.id}-${index}`} className="group relative">
-                      <img
-                        src={role.imageUrl}
-                        alt={role.name}
-                        className="w-12 h-12 rounded-md bg-secondary border border-border transition-transform group-hover:scale-110"
-                      />
-                      <div className="absolute bottom-full mb-2 w-max max-w-xs px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                        {role.name}
+                  {rotation.roles.map((role, index) => {
+                    const fullRoleInfo = rolesById.get(role.id);
+                    if (!fullRoleInfo) return null; // Não renderiza se a role não for encontrada
+
+                    return (
+                      <div key={`${role.id}-${index}`} className="group relative">
+                        <img
+                          src={fullRoleInfo.imageUrl}
+                          alt={fullRoleInfo.name}
+                          className="w-12 h-12 rounded-md bg-secondary border border-border transition-transform group-hover:scale-110"
+                        />
+                        <div className="absolute bottom-full mb-2 w-max max-w-xs px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          {fullRoleInfo.name}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
