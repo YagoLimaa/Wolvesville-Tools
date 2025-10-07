@@ -27,7 +27,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html"
+      "dest": "/front/$1"
     }
   ]
 }
