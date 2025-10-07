@@ -6,10 +6,6 @@
       "use": "@vercel/node"
     },
     {
-      "src": "main/public",
-      "use": "@vercel/static"
-    },
-    {
       "src": "front/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -21,6 +17,10 @@
     {
       "src": "/api/(.*)",
       "dest": "/main/index.js"
+    },
+    {
+      "src": "/images/roles/(.*)",
+      "dest": "/main/public/images/roles/$1"
     },
     {
       "handle": "filesystem"
