@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Users, Package, ArrowRight, Menu, X } from "lucide-react";
+import { Users, Package, ArrowRight, Menu, X, Megaphone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { SearchInput } from "./search-input";
 import wolfLogo from "@/assets/wolf-logo.png";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion";
+import { AnnouncementsViewer } from "../AnnouncementsViewer";
 
 export const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -117,6 +119,20 @@ export const NavigationBar = () => {
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
+
+              {/* Botão de Anúncios */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(navigationMenuTriggerStyle(), "bg-background/50 hover:bg-accent/80 group")}>
+                    <Megaphone className="w-4 h-4 mr-2" />
+                    Atualizações
+                  </button> 
+                </PopoverTrigger>
+                <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0">
+                  <AnnouncementsViewer />
+                </PopoverContent>
+              </Popover>
+
               </NavigationMenuList>
             </NavigationMenu>
           </div>

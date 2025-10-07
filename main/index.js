@@ -442,6 +442,31 @@ apiRouter.get('/clans/search', async (req, res) => {
   }
 });
 
+/**
+ * Rota para buscar os anúncios mais recentes.
+ */
+apiRouter.get('/announcements', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/announcements`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+
+    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
+    const response = await axios.get(requestUrl, requestConfig);
+    console.log('--- Requisição para /announcements bem-sucedida ---');
+
+    // A API retorna os anúncios mais recentes primeiro, vamos manter essa ordem.
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar anúncios:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os anúncios.' });
+  }
+});
+
 
 apiRouter.get('/items/:category', async (req, res) => {
   const { category } = req.params;
