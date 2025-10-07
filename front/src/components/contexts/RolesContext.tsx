@@ -76,7 +76,6 @@ export const RolesProvider = ({ children }: RolesProviderProps) => {
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useRoles = (): RolesContextType => {
   const context = React.useContext(RolesContext);
   if (context === undefined) {

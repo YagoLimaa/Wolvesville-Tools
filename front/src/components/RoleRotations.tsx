@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Zap, AlertTriangle, Clock } from "lucide-react";
-import { useRoles } from "@/../../main/RolesContext"; // Importa apenas o hook
+import { Zap, AlertTriangle, Clock } from "lucide-react"; 
+import { useRoles } from "@/components/contexts/RolesContext"; // Importa apenas o hook
 
 // Define a estrutura da resposta da nossa API de rotação
 interface GameModeRotation {

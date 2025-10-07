@@ -390,7 +390,7 @@ const ItemsSkins = () => {
               </div>
             )}
             {allItems && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                 {paginatedItems.map((item) => (
                   <button
                     key={item.id}
@@ -434,7 +434,7 @@ const ItemsSkins = () => {
             <CardContent className="p-6">
               <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
               {collectionPieces.length > 0 ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
                   {collectionPieces.map(piece => (
                     <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity!] || 'border-gray-600/50'}`}>
                       <ItemImage item={piece} onImageError={handleImageError} />

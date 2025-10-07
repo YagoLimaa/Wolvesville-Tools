@@ -34,7 +34,7 @@ export const BattlePassShop = () => {
 
   if (isLoading || isLoadingItems) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {Array.from({ length: 8 }).map((_, i) => (
           <Skeleton key={i} className="h-40 w-full rounded-lg" />
         ))}
@@ -57,7 +57,7 @@ export const BattlePassShop = () => {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-5 sm:grid-cols-3 md:grid-cols-4 gap-4">
       {data.rewards.map((reward) => {
         let itemInfo = null;
         let imageUrl = "https://via.placeholder.com/100"; // Placeholder

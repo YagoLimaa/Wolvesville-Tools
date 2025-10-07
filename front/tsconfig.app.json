@@ -26,5 +26,5 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "../main/RolesContext.tsx"]
+  "include": ["src", "/front/src/components/contexts/RolesContext.tsx"]
 }
