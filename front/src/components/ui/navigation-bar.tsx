@@ -193,6 +193,16 @@ export const NavigationBar = () => {
                   <Link to="/items/shop" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Loja</Link>
                 </AccordionContent>
               </AccordionItem>
+              <AccordionItem value="updates">
+                <AccordionTrigger className="text-base">
+                  <Megaphone className="w-4 h-4 mr-2" /> Atualizações
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="max-h-[60vh] overflow-y-auto rounded-md border border-border -mx-4">
+                    <AnnouncementsViewer />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             </Accordion>
           </div>
         </div>
