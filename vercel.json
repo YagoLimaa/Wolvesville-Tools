@@ -6,6 +6,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "main/public",
+      "use": "@vercel/static"
+    },
+    {
       "src": "front/package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -19,15 +23,11 @@
       "dest": "/main/index.js"
     },
     {
-      "src": "/images/(.*)",
-      "dest": "/main/index.js"
-    },
-    {
       "handle": "filesystem"
     },
     {
       "src": "/(.*)",
-      "dest": "/front/$1"
+      "dest": "/index.html"
     }
   ]
 }
