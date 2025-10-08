@@ -184,5 +184,11 @@
       "title": "No Players Found",
       "description": "No players were found with the name \"{{query}}\"."
     }
+  },
+  "itemsContext": {
+    "fetchCategoryFailed": "Failed to fetch category: {{category}}",
+    "fetchCategoryError": "Error fetching item category {{category}}: ",
+    "combinedItemsLog": "--- [ItemsContext] Final combined items list: --- {{count}} items",
+    "hookScopeError": "useItems must be used within an ItemsProvider"
   }
 }

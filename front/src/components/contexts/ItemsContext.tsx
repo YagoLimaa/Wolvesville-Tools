@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 const validCategories = [
   'avatarItems',
@@ -74,7 +75,9 @@ interface ItemsContextType {
 
 const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined);
 
-const fetchAllItems = async (): Promise<Item[]> => {
+import type { TFunction } from 'i18next';
+
+const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
   // Busca todas as categorias, incluindo 'tags' e 'advancedRoleCardOffers'
   // 'avatarItemSets' é processado por último para ter prioridade no mapa de IDs.
   const categories = [...validCategories, 'tags', 'advancedRoleCardOffers'];
@@ -83,7 +86,7 @@ const fetchAllItems = async (): Promise<Item[]> => {
     try {
       const response = await fetch(`/api/items/${category}`);
       if (!response.ok) {
-        console.warn(`Falha ao buscar a categoria: ${category}`);
+        console.warn(t('itemsContext.fetchCategoryFailed', { category }));
         return [];
       }
       const itemsArray = await response.json() as ApiItem[];
@@ -94,21 +97,22 @@ const fetchAllItems = async (): Promise<Item[]> => {
         gender: (apiItem.gender as string | undefined)?.toLowerCase() as 'male' | 'female' | 'any' | undefined
       }));
     } catch (error) {
-      console.error(`Erro ao buscar a categoria de itens ${category}:`, error);
+      console.error(t('itemsContext.fetchCategoryError', { category }), error);
       return [];
     }
   });
 
   const results = await Promise.all(promises);
   const allItems = results.flat().filter(item => item && item.id);
-  console.log("--- [ItemsContext] Lista final de itens combinados: ---", allItems.length, "itens");
+  console.log(t('itemsContext.combinedItemsLog', { count: allItems.length }));
   return allItems;
 };
 
 export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useTranslation();
   const { data: allItems = [], isLoading, isError } = useQuery<Item[]>({
     queryKey: ['allItemsGlobal'],
-    queryFn: fetchAllItems,
+    queryFn: () => fetchAllItems(t),
     staleTime: 1000 * 60 * 60, // Cache de 1 hora
     refetchOnWindowFocus: false,
   });
@@ -135,8 +139,9 @@ export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 // eslint-disable-next-line react-refresh/only-export-components
 export const useItems = (): ItemsContextType => {
   const context = React.useContext(ItemsContext);
+  const { t } = useTranslation();
   if (context === undefined) {
-    throw new Error('useItems deve ser usado dentro de um ItemsProvider');
+    throw new Error(t('itemsContext.hookScopeError'));
   }
   return context;
 };

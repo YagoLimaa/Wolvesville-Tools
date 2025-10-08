@@ -11,6 +11,7 @@ import { Pagination } from "@/components/Pagination";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Search, AlertTriangle, Gem, Filter } from "lucide-react";
 import { PawPrint } from "lucide-react"; // Ícone para ProfileIcons
+import { useTranslation } from "react-i18next";
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
 interface ContainedItem {
@@ -19,7 +20,7 @@ interface ContainedItem {
   avatarItemId?: string;
   loadingScreenId?: string;
   emojiId?: string;
-  [key: string]: string | number | undefined; // Permite outras propriedades, mas de forma mais segura
+  [key: string]: string | number | undefined; // Permite outras propriedades, de forma mais segura
 }
 
 // Tipos para os itens contidos em coleções
@@ -55,7 +56,7 @@ const rarityColors = {
 };
 
 // Função para extrair e formatar um nome a partir da URL da imagem
-const getNameFromUrl = (url: string): string => {
+const getNameFromUrl = (url: string, t: (key: string) => string): string => {
   try {
     const filename = url.split('/').pop()?.split('.')[0] ?? '';
     // Remove prefixos e sufixos comuns e substitui hífens/sublinhados por espaços
@@ -65,7 +66,7 @@ const getNameFromUrl = (url: string): string => {
       .replace(/[-_]/g, ' ');
     return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
   } catch {
-    return "Item"; // Nome de fallback em caso de erro
+    return t("common.item"); // Nome de fallback em caso de erro
   }
 };
 
@@ -131,6 +132,24 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
 const ITEMS_PER_PAGE = 50;
 
 const ItemsSkins = () => {
+  const { t } = useTranslation();
+
+  const categoryDisplayNames: { [key: string]: string } = {
+    avatarItems: t('itemsSkins.categories.avatarItems'),
+    bodyPaints: t('itemsSkins.categories.bodyPaints'),
+    avatarItemSets: t('itemsSkins.categories.avatarItemSets'),
+    avatarItemCollections: t('itemsSkins.categories.avatarItemCollections'),
+    bundles: t('itemsSkins.categories.bundles'),
+    calendars: t('itemsSkins.categories.calendars'),
+    profileIcons: t('itemsSkins.categories.profileIcons'),
+    profileIconBorders: t('itemsSkins.categories.profileIconBorders'),
+    emojis: t('itemsSkins.categories.emojis'),
+    emojiCollections: t('itemsSkins.categories.emojiCollections'),
+    backgrounds: t('itemsSkins.categories.backgrounds'),
+    loadingScreens: t('itemsSkins.categories.loadingScreens'),
+    roleIcons: t('itemsSkins.categories.roleIcons'),
+    roseSkins: t('itemsSkins.categories.roseSkins'),
+  };
   const [searchTerm, setSearchTerm] = React.useState("");
   const [categoryFilter, setCategoryFilter] = React.useState("avatarItems");
   const [rarityFilter, setRarityFilter] = React.useState("all");
@@ -286,12 +305,12 @@ const ItemsSkins = () => {
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Filter className="w-5 h-5 text-primary" />
-                  Filtros
+                  {t('itemsSkins.filters')}
                 </h3>
                 <div className="relative mb-4">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Buscar item..."
+                      placeholder={t('itemsSkins.searchPlaceholder')}
                       className="pl-10 w-full"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -299,56 +318,56 @@ const ItemsSkins = () => {
                 </div>
                 <Accordion type="multiple" defaultValue={['type', 'rarity', 'gender', 'subtype']} className="w-full">
                   <AccordionItem value="type">
-                    <AccordionTrigger>Tipo de Item</AccordionTrigger>
+                    <AccordionTrigger>{t('itemsSkins.itemType')}</AccordionTrigger>
                     <AccordionContent>
                       <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todos os Tipos</SelectItem>
+                          <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
                           {Object.entries(categoryDisplayNames).map(([key, name]) => (
-                            <SelectItem key={key} value={key}>{name}</SelectItem>
+                            <SelectItem key={key} value={key}>{t(`itemsSkins.categories.${key}`, name)}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="rarity">
-                    <AccordionTrigger>Raridade</AccordionTrigger>
+                    <AccordionTrigger>{t('itemsSkins.rarity')}</AccordionTrigger>
                     <AccordionContent>
                       <Select value={rarityFilter} onValueChange={setRarityFilter}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todas as Raridades</SelectItem>
-                          <SelectItem value="common"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-gray-400" /> Comum</span></SelectItem>
-                          <SelectItem value="rare"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-blue-400" /> Raro</span></SelectItem>
-                          <SelectItem value="epic"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-purple-500" /> Épico</span></SelectItem>
-                          <SelectItem value="legendary"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-yellow-500" /> Lendário</span></SelectItem>
+                          <SelectItem value="all">{t('itemsSkins.allRarities')}</SelectItem>
+                          <SelectItem value="common"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-gray-400" /> {t('itemsSkins.common')}</span></SelectItem>
+                          <SelectItem value="rare"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-blue-400" /> {t('itemsSkins.rare')}</span></SelectItem>
+                          <SelectItem value="epic"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-purple-500" /> {t('itemsSkins.epic')}</span></SelectItem>
+                          <SelectItem value="legendary"><span className="flex items-center gap-2"><Gem className="w-4 h-4 text-yellow-500" /> {t('itemsSkins.legendary')}</span></SelectItem>
                         </SelectContent>
                       </Select>
                     </AccordionContent>
                   </AccordionItem>
                   {/* Filtros que só se aplicam a "Itens de Avatar" */}
                   <AccordionItem value="gender" disabled={categoryFilter !== 'avatarItems'}>
-                    <AccordionTrigger>Gênero</AccordionTrigger>
+                    <AccordionTrigger>{t('itemsSkins.gender')}</AccordionTrigger>
                     <AccordionContent>
                       <Select value={genderFilter} onValueChange={setGenderFilter} disabled={categoryFilter !== 'avatarItems'}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todos os Gêneros</SelectItem>
-                          <SelectItem value="male">Masculino</SelectItem>
-                          <SelectItem value="female">Feminino</SelectItem>
-                          <SelectItem value="any">Unissex</SelectItem>
+                          <SelectItem value="all">{t('itemsSkins.allGenders')}</SelectItem>
+                          <SelectItem value="male">{t('itemsSkins.male')}</SelectItem>
+                          <SelectItem value="female">{t('itemsSkins.female')}</SelectItem>
+                          <SelectItem value="any">{t('itemsSkins.unisex')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </AccordionContent>
                   </AccordionItem>
                   <AccordionItem value="subtype" disabled={categoryFilter !== 'avatarItems'}>
-                    <AccordionTrigger>Tipo (Avatar)</AccordionTrigger>
+                    <AccordionTrigger>{t('itemsSkins.avatarType')}</AccordionTrigger>
                     <AccordionContent>
                       <Select value={typeFilter} onValueChange={setTypeFilter} disabled={categoryFilter !== 'avatarItems'}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="all">Todos os Tipos</SelectItem>
+                          <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
                           {avatarItemTypes.map(type => <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -372,8 +391,8 @@ const ItemsSkins = () => {
               <Card className="bg-card/50 backdrop-blur border-accent/20 flex items-center justify-center h-96">
                 <Alert variant="destructive" className="w-auto">
                   <AlertTriangle className="h-4 w-4" />
-                  <AlertTitle>Erro ao Carregar Itens</AlertTitle>
-                  <AlertDescription>Não foi possível carregar a lista de itens. Tente recarregar a página.</AlertDescription>
+                  <AlertTitle>{t('itemsSkins.errorLoadingTitle')}</AlertTitle>
+                  <AlertDescription>{t('itemsSkins.errorLoadingDescription')}</AlertDescription>
                 </Alert>
               </Card>
             )}
@@ -411,8 +430,8 @@ const ItemsSkins = () => {
             {allItems && filteredItems.length === 0 && (
               <Card className="bg-card/50 backdrop-blur border-accent/20 flex items-center justify-center h-96">
                 <div className="text-center">
-                  <h2 className="text-2xl font-semibold text-muted-foreground">Nenhum item encontrado</h2>
-                  <p className="text-muted-foreground mt-2">Tente ajustar seus filtros de busca.</p>
+                  <h2 className="text-2xl font-semibold text-muted-foreground">{t('itemsSkins.noItemsFound')}</h2>
+                  <p className="text-muted-foreground mt-2">{t('itemsSkins.adjustFilters')}</p>
                 </div>
               </Card>
             )}
@@ -445,7 +464,7 @@ const ItemsSkins = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground">Não foi possível encontrar os detalhes das peças deste conjunto.</p>
+                <p className="text-center text-muted-foreground">{t('itemsSkins.collectionDetailsError')}</p>
               )}
             </CardContent>
           </Card>

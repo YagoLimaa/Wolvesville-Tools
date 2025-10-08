@@ -184,5 +184,11 @@
       "title": "Nenhum jogador encontrado",
       "description": "Não foram encontrados jogadores com o nome \"{{query}}\"."
     }
+  },
+  "itemsContext": {
+    "fetchCategoryFailed": "Falha ao buscar a categoria: {{category}}",
+    "fetchCategoryError": "Erro ao buscar a categoria de itens {{category}}: ",
+    "combinedItemsLog": "--- [ItemsContext] Lista final de itens combinados: --- {{count}} itens",
+    "hookScopeError": "useItems deve ser usado dentro de um ItemsProvider"
   }
 }

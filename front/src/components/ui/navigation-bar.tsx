@@ -141,22 +141,20 @@ export const NavigationBar = () => {
             </NavigationMenu>
           </div>
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
+            <LanguageSwitcher />
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Abrir menu">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
-          
         </div>
       </div>
-
       {/* Mobile Menu */}
       
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-card/95 backdrop-blur-lg border-t border-border shadow-lg">
           <div className="container mx-auto px-4 py-4 space-y-4">
             {/* Mobile Search Form */}
-            <LanguageSwitcher />
             <form
               onSubmit={(e) => {
                 e.preventDefault();

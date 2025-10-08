@@ -67,7 +67,7 @@ export const PlayersHighscores = () => {
         )}
         {players && (
           <div>
-            <div className="space-y-3 min-w-[480px]">
+            <div className="space-y-3 md:min-w-[480px]">
               {players.slice(0, 10).map((player, index) => {
                 const rank = player.oldRank + 1;
                 const { Icon, color } = getRankIcon(rank);
