@@ -33,7 +33,7 @@ const useCountdownToNextWednesday = () => {
     const calculateTimeLeft = () => {
       const now = new Date(); // Data/hora atual no fuso do cliente
       const targetDayOfWeek = 3; // Quarta-feira (Domingo=0, Segunda=1, ...)
-      const targetHour = 21;
+      const targetHour = 17;
 
       // Cria uma data alvo baseada na data atual
       const target = new Date(now);
