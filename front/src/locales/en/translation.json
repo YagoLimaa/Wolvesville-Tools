@@ -1,0 +1,188 @@
+{
+  "navigation": {
+    "home_title": "Wolvesville Tools",
+    "home_description": "Your complete hub for Wolvesville with everything you need: player search, stats, rotations, battle pass, and much more!",
+    "search_placeholder": "Search player...",
+    "clan": "Clan",
+    "search_clan": "Search Clan",
+    "search_clan_description": "Find information about clans",
+    "clan_rankings": "Clan Rankings",
+    "clan_rankings_description": "See the best clans",
+    "items": "Items",
+    "skins_and_avatars": "Skins & Avatars",
+    "skins_and_avatars_description": "All available skins",
+    "shop": "Shop",
+    "shop_description": "Active offers and items",
+    "updates": "Updates"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
+  },
+  "common": {
+    "error": "Error",
+    "item": "Item",
+    "gold": "Gold",
+    "gems": "Gems",
+    "roses": "Roses",
+    "level": "Level {{level}}",
+    "xp": "XP",
+    "updating": "Updating...",
+    "expired": "Expired",
+    "of": "of"
+  },
+  "battlePass": {
+    "fetchError": "Could not fetch Battle Pass data.",
+    "coinAlt": "Pass Coin",
+    "passCoins": "Pass Coins",
+    "shop": {
+      "fetchError": "Could not fetch Battle Pass shop data.",
+      "noItems": "No items in the pass shop to display.",
+      "exchangeVoucher": "Exchange Voucher",
+      "title": "Pass Shop",
+      "dialogTitle": "Season {{seasonNumber}} Shop"
+    },
+    "rewards": {
+      "unknownItem": "Unknown Item",
+      "noRewards": "No rewards to display.",
+      "level": "Level {{level}}",
+      "dialogTitle": "Season {{seasonNumber}} Rewards",
+      "viewButton": "View Full Battle Pass"
+    },
+    "challenges": {
+      "fetchError": "Could not fetch Battle Pass challenges.",
+      "title": "Pass Challenges",
+      "objective": "Objective: {{target}}",
+      "timeLeft": "{{days}}d {{hours}}h"
+    },
+    "season": {
+      "title": "Battle Pass - Current Season",
+      "season": "Season {{seasonNumber}}",
+      "endsIn": "Ends in {{daysLeft}} days",
+      "endingToday": "Ending today"
+    }
+  },
+  "clanCard": {
+    "members": "{{count}} Members",
+    "viewMembers": "View Members",
+    "clanMembers": "Clan Members",
+    "leader": "Leader",
+    "coLeader": "Co-leader",
+    "member": "Member"
+  },
+  "playerCard": {
+    "level": "Level",
+    "gameStats": "Game Stats",
+    "wins": "Wins:",
+    "losses": "Losses:",
+    "ties": "Ties:",
+    "village": "Village:",
+    "werewolf": "Werewolf:",
+    "playTime": "Time:",
+    "playTimeValue": "{{hours}}h {{minutes}}m",
+    "roses": "Roses",
+    "received": "Received:",
+    "sent": "Sent:",
+    "noBio": "No bio to display",
+    "hideAvatars": "Hide Avatars",
+    "showAllAvatars": "View All Avatars ({{count}})",
+    "clickToZoom": "Click to zoom",
+    "close": "Close"
+  },
+  "playersHighscores": {
+    "fetchError": "Could not fetch top players.",
+    "title": "Top Players"
+  },
+  "roleRotations": {
+    "fetchError": "Could not fetch role rotations.",
+    "title": "Weekly Rotations",
+    "gameModes": {
+      "Quick": "Quick Game",
+      "Sandbox": "Sandbox",
+      "Ranked League Silver": "Ranked League: Silver",
+      "Ranked League Gold": "Ranked League: Gold",
+      "Advanced": "Advanced",
+      "Assassins convention": "Assassins convention"
+    }
+  },
+  "shop": {
+    "fetchError": "Could not fetch shop offers.",
+    "title": "Shop Offers",
+    "offer": "Offer",
+    "detailsError": "Could not find the details for the items in this bundle.",
+    "clickToView": "Click to view details.",
+    "types": {
+      "AVATAR_ITEMS_SET": "Limited Outfits",
+      "ADVANCED_ROLE_CARD": "Advanced Roles",
+      "TAROT_OUTFITS": "Tarot Outfits",
+      "ZODIAC_ANIMAL_OUTFITS": "Zodiac Outfits",
+      "EMOJIS": "Emojis",
+      "AVATAR_ITEMS": "Avatar Item Packs"
+    },
+    "descriptions": {
+      "AVATAR_ITEMS_SET": "Limited-time outfit sets.",
+      "ADVANCED_ROLE_CARD": "Packs to unlock and upgrade advanced roles.",
+      "TAROT_OUTFITS": "Mystical clothing collections based on Tarot cards.",
+      "ZODIAC_ANIMAL_OUTFITS": "Special costumes inspired by Zodiac animals.",
+      "EMOJIS": "Exclusive emoji packs to use in-game.",
+      "AVATAR_ITEMS": "Avatar item packs to customize your character."
+    }
+  },
+  "itemsSkins": {
+    "filters": "Filters",
+    "searchPlaceholder": "Search item...",
+    "itemType": "Item Type",
+    "allTypes": "All Types",
+    "rarity": "Rarity",
+    "allRarities": "All Rarities",
+    "common": "Common",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary",
+    "gender": "Gender",
+    "allGenders": "All Genders",
+    "male": "Male",
+    "female": "Female",
+    "unisex": "Unisex",
+    "avatarType": "Avatar Type",
+    "errorLoadingTitle": "Error Loading Items",
+    "errorLoadingDescription": "Could not fetch items. Please try reloading the page.",
+    "noItemsFound": "No Items Found",
+    "adjustFilters": "Try adjusting your filters.",
+    "collectionDetailsError": "Could not load the details for this collection.",
+    "categories": {
+      "avatarItems": "Avatar Items",
+      "bodyPaints": "Body Paints",
+      "avatarItemSets": "Item Sets",
+      "avatarItemCollections": "Item Collections",
+      "bundles": "Bundles",
+      "calendars": "Calendars",
+      "profileIcons": "Profile Icons",
+      "profileIconBorders": "Icon Borders",
+      "emojis": "Emojis",
+      "emojiCollections": "Emoji Collections",
+      "backgrounds": "Backgrounds",
+      "loadingScreens": "Loading Screens",
+      "roleIcons": "Role Icons",
+      "roseSkins": "Rose Skins"
+    }
+  },
+  "searchPlayer": {
+    "fetchError": "Search failed. Check the username and try again.",
+    "searchError": "An error occurred while searching. Please try again later.",
+    "loadingItems": "Loading items...",
+    "placeholder": "Enter a player's name...",
+    "label": "Search Player",
+    "buttonText": "Search",
+    "goBack": "Back to search",
+    "resultsTitle": "Results for \"{{query}}\"",
+    "pagination": "Page {{currentPage}} of {{totalPages}}",
+    "loadingPlayers": "Searching for players...",
+    "noPlayersFound": {
+      "title": "No Players Found",
+      "description": "No players were found with the name \"{{query}}\"."
+    }
+  }
+}

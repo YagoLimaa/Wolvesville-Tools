@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Player } from "@/types/Player";
+import { useTranslation } from "react-i18next";
 import { Users, Trophy, Clock, Heart, Eye, EyeOff, X } from "lucide-react";
 import { useItems } from "./contexts/ItemsContext";
 
@@ -11,6 +12,7 @@ interface PlayerCardProps {
 }
 
 export const PlayerCard = ({ player }: PlayerCardProps) => {
+  const { t } = useTranslation();
   const [showAvatars, setShowAvatars] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
   const { itemsById } = useItems();
@@ -45,7 +47,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
               className="w-20 h-20 rounded-full border-2 border-primary shadow-glow-primary"
             />
             <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
-              {player.level === -1 ? '?' : player.level}
+              {player.level === -1 ? '?' : t('playerCard.level')} {player.level}
             </div>
           </div>
           <div className="flex-1">
@@ -88,12 +90,12 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           <div className="bg-secondary rounded-lg p-4">
             <h4 className="text-lg font-semibold mb-3 text-wolf-cyan">
               <Trophy className="inline w-5 h-5 mr-2" />
-              Estatísticas de Jogo
+              {t('playerCard.gameStats')}
             </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               {player.gameStats.totalWinCount !== -1 && (
                 <div>
-                  <span className="text-muted-foreground">Vitórias:</span>
+                  <span className="text-muted-foreground">{t('playerCard.wins')}</span>
                   <span className="ml-2 text-wolf-green font-bold">
                     {player.gameStats.totalWinCount}
                   </span>
@@ -101,7 +103,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
               )}
               {player.gameStats.totalLoseCount !== -1 && (
                 <div>
-                  <span className="text-muted-foreground">Derrotas:</span>
+                  <span className="text-muted-foreground">{t('playerCard.losses')}</span>
                   <span className="ml-2 text-destructive font-bold">
                     {player.gameStats.totalLoseCount}
                   </span>
@@ -109,7 +111,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
               )}
               {player.gameStats.totalTieCount !== -1 && (
                 <div>
-                  <span className="text-muted-foreground">Empates:</span>
+                  <span className="text-muted-foreground">{t('playerCard.ties')}</span>
                   <span className="ml-2 text-wolf-orange font-bold">
                     {player.gameStats.totalTieCount}
                   </span>
@@ -117,7 +119,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
               )}
               {player.gameStats.villageWinCount !== -1 && (
                 <div>
-                  <span className="text-muted-foreground">Vila:</span>
+                  <span className="text-muted-foreground">{t('playerCard.village')}</span>
                   <span className="ml-2 text-wolf-cyan font-bold">
                     {player.gameStats.villageWinCount}
                   </span>
@@ -125,7 +127,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
               )}
               {player.gameStats.werewolfWinCount !== -1 && (
                 <div>
-                  <span className="text-muted-foreground">Lobisomem:</span>
+                  <span className="text-muted-foreground">{t('playerCard.werewolf')}</span>
                   <span className="ml-2 text-wolf-purple font-bold">
                     {player.gameStats.werewolfWinCount}
                   </span>
@@ -135,10 +137,10 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                 <div>
                   <span className="text-muted-foreground">
                     <Clock className="inline w-3 h-3 mr-1" />
-                    Tempo:
+                    {t('playerCard.playTime')}
                   </span>
                   <span className="ml-2 text-foreground font-bold">
-                    {playTimeHours}h {playTimeMinutes}m
+                    {t('playerCard.playTimeValue', { hours: playTimeHours, minutes: playTimeMinutes })}
                   </span>
                 </div>
               )}
@@ -151,11 +153,11 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           <div className="bg-secondary rounded-lg p-4">
             <h4 className="text-lg font-semibold mb-3 text-wolf-pink text-center">
               <span className="text-2xl inline-block mr-2">🌹</span>
-              Rosas
+              {t('playerCard.roses')}
             </h4>
             <div className="flex justify-center items-center text-center gap-10">
-              {player.receivedRosesCount !== -1 && <span className="text-muted-foreground">Recebidas: <strong className="text-wolf-pink text-lg ml-2">{player.receivedRosesCount}</strong></span>}
-              {player.sentRosesCount !== -1 && <span className="text-muted-foreground">Enviadas: <strong className="text-wolf-orange text-lg ml-2">{player.sentRosesCount}</strong></span>}
+              {player.receivedRosesCount !== -1 && <span className="text-muted-foreground">{t('playerCard.received')} <strong className="text-wolf-pink text-lg ml-2">{player.receivedRosesCount}</strong></span>}
+              {player.sentRosesCount !== -1 && <span className="text-muted-foreground">{t('playerCard.sent')} <strong className="text-wolf-orange text-lg ml-2">{player.sentRosesCount}</strong></span>}
             </div>
           </div>
         )}
@@ -165,7 +167,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           <p className="text-muted-foreground italic text-center">
             {player.personalMessage
               ? `"${player.personalMessage}"`
-              : "Nenhuma bio para ser exibida"}
+              : t('playerCard.noBio')}
           </p>
         </div>
 
@@ -178,12 +180,12 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           {showAvatars ? (
             <>
               <EyeOff className="w-4 h-4 mr-2" />
-              Ocultar Avatares
+              {t('playerCard.hideAvatars')}
             </>
           ) : (
             <>
               <Eye className="w-4 h-4 mr-2" />
-              Ver Todos os Avatares ({player.avatars.length})
+              {t('playerCard.showAllAvatars', { count: player.avatars.length })}
             </>
           )}
         </GradientButton>
@@ -198,7 +200,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                 alt="Avatar"
                 className="w-32 h-32 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer object-cover"
                 onClick={() => setSelectedAvatar(avatar.url)}
-                title="Clique para ampliar"
+                title={t('playerCard.clickToZoom')}
               />
             ))}
           </div>
@@ -223,7 +225,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
             <button
               onClick={() => setSelectedAvatar(null)}
               className="absolute -top-3 -right-3 bg-destructive text-destructive-foreground rounded-full p-2 shadow-lg hover:bg-destructive/80 transition-colors"
-              aria-label="Fechar"
+              aria-label={t('playerCard.close')}
             >
               <X className="w-5 h-5" />
             </button>

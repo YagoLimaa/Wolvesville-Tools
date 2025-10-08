@@ -1,5 +1,6 @@
 import { GradientButton } from "@/components/ui/gradient-button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface PaginationProps {
   currentPage: number;
@@ -16,6 +17,8 @@ export const Pagination = ({
   hasNext,
   hasPrev,
 }: PaginationProps) => {
+  const { t } = useTranslation();
+
   if (totalPages <= 1) return null;
 
   return (
@@ -26,13 +29,13 @@ export const Pagination = ({
         disabled={!hasPrev}
       >
         <ChevronLeft className="w-4 h-4 mr-2" />
-        Anterior
+        {t('pagination.previous')}
       </GradientButton>
 
       <div className="flex items-center gap-2">
-        <span className="text-muted-foreground">Página</span>
+        <span className="text-muted-foreground">{t('pagination.page')}</span>
         <span className="text-primary font-bold text-lg">{currentPage}</span>
-        <span className="text-muted-foreground">de</span>
+        <span className="text-muted-foreground">{t('pagination.of')}</span>
         <span className="text-foreground font-bold">{totalPages}</span>
       </div>
 
@@ -41,7 +44,7 @@ export const Pagination = ({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={!hasNext}
       >
-        Próxima
+        {t('pagination.next')}
         <ChevronRight className="w-4 h-4 ml-2" />
       </GradientButton>
     </div>

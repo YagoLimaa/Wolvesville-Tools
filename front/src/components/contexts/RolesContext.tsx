@@ -34,7 +34,7 @@ const RolesContext = React.createContext<RolesContextType | undefined>(undefined
 const fetchAllRoles = async (): Promise<Role[]> => { 
   const response = await fetch('/api/roles');
   if (!response.ok) {
-    throw new Error('Não foi possível buscar a lista de roles do backend.');
+    throw new Error('fetch_error');
   }
   const data: { roles: RoleFromApi[] } = await response.json();
   

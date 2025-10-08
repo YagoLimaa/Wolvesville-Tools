@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useItems } from "./contexts/ItemsContext";
 
 interface BattlePassShopReward {
@@ -18,14 +19,16 @@ interface BattlePassShopData {
 }
 
 const fetchBattlePassShop = async (): Promise<BattlePassShopData> => {
+  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch('/api/battlePass/shop');
   if (!response.ok) {
-    throw new Error("Não foi possível buscar os dados da loja do Battle Pass.");
+    throw new Error("fetch_error");
   }
   return response.json();
 };
 
 export const BattlePassShop = () => {
+  const { t } = useTranslation();
   const { data, isLoading, isError, error } = useQuery<BattlePassShopData, Error>({
     queryKey: ["battlePassShop"],
     queryFn: fetchBattlePassShop,
@@ -46,22 +49,22 @@ export const BattlePassShop = () => {
     return (
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Erro</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
+        <AlertTitle>{t('common.error')}</AlertTitle>
+        <AlertDescription>{t('battlePass.shop.fetchError')}</AlertDescription>
       </Alert>
     );
   }
 
   if (!data || data.rewards.length === 0) {
-    return <p>Nenhum item na loja do passe para exibir.</p>;
+    return <p>{t('battlePass.shop.noItems')}</p>;
   }
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       {data.rewards.map((reward) => {
         let itemInfo = null;
-        let imageUrl = "https://via.placeholder.com/100"; // Placeholder
-        let itemName = "Item";
+        let imageUrl = "https://via.placeholder.com/100";
+        let itemName = t('common.item');
 
         if (reward.avatarItemId) {
           const item = itemsById.get(reward.avatarItemId);
@@ -72,10 +75,10 @@ export const BattlePassShop = () => {
           }
         } else if (reward.type === "ROLE_CARD_ABILITY_EXCHANGE_VOUCHER") {
           imageUrl = `https://www.wolvesville.com/static/media/role_card_ability_exchange_voucher.4a1cb8b754a6807e78da.png`;
-          itemName = "Voucher de Troca";
+          itemName = t('battlePass.shop.exchangeVoucher');
         } else if (reward.type === "GOLD") {
           imageUrl = `https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png`;
-          itemName = "Ouro";
+          itemName = t('common.gold');
         }
 
         return (
@@ -108,8 +111,8 @@ export const BattlePassShop = () => {
                   {/* Custo */}
                   <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-semibold text-white">
                     <img 
-                      src={`https://cdn2.wolvesville.com/battlePass/coins/bp44_single@2x.png`} 
-                      alt="Moeda do Passe" 
+                      src={`https://cdn2.wolvesville.com/battlePass/coins/bp44_single@2x.png`}
+                      alt={t('battlePass.coinAlt')}
                       className="w-4 h-4"
                     />
                     <span>{reward.costInBattlePassCoins}</span>

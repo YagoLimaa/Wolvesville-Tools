@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 import { Zap, AlertTriangle, Clock } from "lucide-react"; 
 import { useRoles } from "@/components/contexts/RolesContext"; // Importa apenas o hook
 
@@ -17,7 +18,7 @@ interface GameModeRotation {
 const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
   const response = await fetch('/api/roleRotations');
   if (!response.ok) {
-    throw new Error("Não foi possível buscar a rotação de roles.");
+    throw new Error("fetch_error");
   }
   // O backend retorna um array de rotações, então o retornamos diretamente.
   return response.json();
@@ -25,6 +26,7 @@ const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
 
 // Hook customizado para o contador
 const useCountdownToNextWednesday = () => {
+  const { t } = useTranslation();
   const [countDown, setCountDown] = useState(0);
 
   useEffect(() => {
@@ -66,23 +68,14 @@ const useCountdownToNextWednesday = () => {
   const seconds = Math.floor((countDown % (1000 * 60)) / 1000);
 
   if (countDown < 0) {
-    return "Atualizando...";
+    return t('common.updating');
   }
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 };
 
-// Mapeamento para traduzir os nomes dos modos de jogo
-const gameModeTranslations: { [key: string]: string } = {
-  "Quick": "Jogo Rápido",
-  "Sandbox": "Sandbox",
-  "Ranked League Silver": "Liga Ranqueada: Prata",
-  "Ranked League Gold": "Liga Ranqueada: Ouro",
-  "Advanced": "Avançado",
-  "Assassins convention": "Convenção de Assassinos",
-};
-
 export const RoleRotations = () => {
+  const { t } = useTranslation();
   const { data: rotations, isLoading: isLoadingRotations, isError: isErrorRotations, error: errorRotations } = useQuery<GameModeRotation[], Error>({
     queryKey: ["roleRotations"],
     queryFn: fetchRoleRotations,
@@ -96,7 +89,7 @@ export const RoleRotations = () => {
         <div className="flex justify-between items-center">
           <CardTitle className="flex items-center gap-2 text-xl">
             <Zap className="w-5 h-5 text-primary" />
-            Rotações da Semana
+            {t('roleRotations.title')}
           </CardTitle>
           {timeLeft && (
             <div className="text-sm text-muted-foreground flex items-center gap-2">
@@ -116,8 +109,8 @@ export const RoleRotations = () => {
         {isErrorRotations && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{errorRotations.message}</AlertDescription>
+            <AlertTitle>{t('common.error')}</AlertTitle>
+            <AlertDescription>{t('roleRotations.fetchError')}</AlertDescription>
           </Alert>
         )}
 
@@ -126,7 +119,7 @@ export const RoleRotations = () => {
             {rotations.map((rotation) => (
               <div key={rotation.gameMode}> 
                 <h3 className="text-lg font-semibold text-primary">
-                  {gameModeTranslations[rotation.gameModeName] || rotation.gameModeName}
+                  {t(`roleRotations.gameModes.${rotation.gameModeName}`, { defaultValue: rotation.gameModeName })}
                 </h3>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {rotation.roles.map((role, index) => {

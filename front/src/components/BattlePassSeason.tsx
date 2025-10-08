@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BattlePassRewards } from "./BattlePassRewards";
+import { useTranslation } from "react-i18next";
 import { BattlePassShop } from "./BattlePassShop";
 import { Trophy, Calendar, AlertTriangle } from "lucide-react";
 
@@ -43,25 +44,27 @@ export interface BattlePassSeasonData {
 }
 
 const fetchBattlePassSeason = async (): Promise<BattlePassSeasonData> => {
+  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch('/api/battlePass/season');
   if (!response.ok) {
-    throw new Error("Não foi possível buscar os dados do Battle Pass.");
+    throw new Error("fetch_error");
   }
   return response.json();
 };
 
 export const BattlePassSeason = () => {
+  const { t } = useTranslation();
   const { data: season, isLoading, isError, error } = useQuery<BattlePassSeasonData, Error>({
     queryKey: ["battlePassSeason"],
     queryFn: fetchBattlePassSeason,
   });
 
-  const getEndDate = () => {
+  const getEndDate = (season: BattlePassSeasonData | undefined) => {
     if (!season) return null;
     const startDate = new Date(season.startTime);
     const endDate = new Date(startDate.setDate(startDate.getDate() + season.durationInDays));
     const daysLeft = Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-    return daysLeft > 0 ? `Termina em ${daysLeft} dias` : "Terminando hoje";
+    return daysLeft > 0 ? t('battlePass.season.endsIn', { daysLeft }) : t('battlePass.season.endingToday');
   };
 
   return (
@@ -69,7 +72,7 @@ export const BattlePassSeason = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Trophy className="w-5 h-5 text-primary" />
-          Battle Pass - Temporada Atual
+          {t('battlePass.season.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -86,8 +89,8 @@ export const BattlePassSeason = () => {
         {isError && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
+            <AlertTitle>{t('common.error')}</AlertTitle>
+            <AlertDescription>{t('battlePass.fetchError')}</AlertDescription>
           </Alert>
         )}
 
@@ -96,25 +99,25 @@ export const BattlePassSeason = () => {
             {/* Season Info */}
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold">Temporada {season.number}</h3>
+                <h3 className="text-lg font-semibold">{t('battlePass.season.season', { seasonNumber: season.number })}</h3>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="w-4 h-4" />
-                  <span>{getEndDate()}</span>
+                  <span>{getEndDate(season)}</span>
                 </div>
               </div>
-              <img src={season.iconUrl} alt={`Temporada ${season.number}`} className="w-12 h-12" />
+              <img src={season.iconUrl} alt={t('battlePass.season.season', { seasonNumber: season.number })} className="w-12 h-12" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Dialog>
                 <DialogTrigger asChild>
                   <GradientButton variant="primary" className="w-full">
-                    Ver Battle Pass Completo
+                    {t('battlePass.rewards.viewButton')}
                   </GradientButton>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl h-[80vh] flex flex-col pr-6">
                   <DialogHeader>
-                    <DialogTitle>Recompensas da Temporada {season.number}</DialogTitle>
+                    <DialogTitle>{t('battlePass.rewards.dialogTitle', { seasonNumber: season.number })}</DialogTitle>
                   </DialogHeader>
                   <div className="overflow-y-auto -mr-6">
                     <BattlePassRewards season={season} />
@@ -123,11 +126,11 @@ export const BattlePassSeason = () => {
               </Dialog>
               <Dialog>
                 <DialogTrigger asChild>
-                  <GradientButton variant="outline" className="w-full">Loja do Passe</GradientButton>
+                  <GradientButton variant="outline" className="w-full">{t('battlePass.shop.title')}</GradientButton>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl h-[80vh] flex flex-col pr-6">
                   <DialogHeader>
-                    <DialogTitle>Loja da Temporada {season.number}</DialogTitle>
+                    <DialogTitle>{t('battlePass.shop.dialogTitle', { seasonNumber: season.number })}</DialogTitle>
                   </DialogHeader>
                   <div className="overflow-y-auto -mr-6">
                     <BattlePassShop />

@@ -8,10 +8,13 @@ import { SearchInput } from "./search-input";
 import wolfLogo from "@/assets/wolf-logo.png";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./accordion";
 import { AnnouncementsViewer } from "../AnnouncementsViewer";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <header className="bg-card/80 backdrop-blur border-b border-border sticky top-0 z-50">
@@ -39,7 +42,7 @@ export const NavigationBar = () => {
             >
               <SearchInput
                 name="username"
-                placeholder="Buscar jogador..."
+                placeholder={t('navigation.search_placeholder')}
                 className="h-10 w-48 lg:w-64 pr-10"
               />
               <button type="submit" aria-label="Buscar" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
@@ -48,12 +51,13 @@ export const NavigationBar = () => {
             </form>
             
             {/* Navigation Menu */}
+            <LanguageSwitcher />
             <NavigationMenu>
               <NavigationMenuList className="gap-2">
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-background/50 hover:bg-accent/80">
                   <Users className="w-4 h-4 mr-2" />
-                  Clã
+                  {t('navigation.clan')}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="p-4 w-80">
@@ -63,9 +67,9 @@ export const NavigationBar = () => {
                           to="/clan/search"
                           className="block p-3 rounded-lg hover:bg-accent/50 transition-colors"
                         >
-                          <div className="font-medium">Buscar Clã</div>
+                          <div className="font-medium">{t('navigation.search_clan')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Encontre informações sobre clãs
+                            {t('navigation.search_clan_description')}
                           </div>
                         </Link>
                       </NavigationMenuLink>
@@ -74,9 +78,9 @@ export const NavigationBar = () => {
                           to="/clan/rankings"
                           className="block p-3 rounded-lg hover:bg-accent/50 transition-colors"
                         >
-                          <div className="font-medium">Rankings de Clãs</div>
+                          <div className="font-medium">{t('navigation.clan_rankings')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Veja os melhores clãs
+                            {t('navigation.clan_rankings_description')}
                           </div>
                         </Link>
                       </NavigationMenuLink>
@@ -88,7 +92,7 @@ export const NavigationBar = () => {
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-background/50 hover:bg-accent/80">
                   <Package className="w-4 h-4 mr-2" />
-                  Itens
+                  {t('navigation.items')}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="p-4 w-80">
@@ -98,9 +102,9 @@ export const NavigationBar = () => {
                           to="/items/skins"
                           className="block p-3 rounded-lg hover:bg-accent/50 transition-colors"
                         >
-                          <div className="font-medium">Skins & Avatares</div>
+                          <div className="font-medium">{t('navigation.skins_and_avatars')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Todas as skins disponíveis
+                            {t('navigation.skins_and_avatars_description')}
                           </div>
                         </Link>
                       </NavigationMenuLink>
@@ -109,9 +113,9 @@ export const NavigationBar = () => {
                           to="/items/shop"
                           className="block p-3 rounded-lg hover:bg-accent/50 transition-colors"
                         >
-                          <div className="font-medium">Loja</div>
+                          <div className="font-medium">{t('navigation.shop')}</div>
                           <div className="text-sm text-muted-foreground">
-                            Ofertas ativas e itens
+                            {t('navigation.shop_description')}
                           </div>
                         </Link>
                       </NavigationMenuLink>
@@ -125,7 +129,7 @@ export const NavigationBar = () => {
                 <PopoverTrigger asChild>
                   <button className={cn(navigationMenuTriggerStyle(), "bg-background/50 hover:bg-accent/80 group")}>
                     <Megaphone className="w-4 h-4 mr-2" />
-                    Atualizações
+                    {t('navigation.updates')}
                   </button> 
                 </PopoverTrigger>
                 <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0">
@@ -136,21 +140,23 @@ export const NavigationBar = () => {
               </NavigationMenuList>
             </NavigationMenu>
           </div>
-
           {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Abrir menu">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
+          
         </div>
       </div>
 
       {/* Mobile Menu */}
+      
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-card/95 backdrop-blur-lg border-t border-border shadow-lg">
           <div className="container mx-auto px-4 py-4 space-y-4">
             {/* Mobile Search Form */}
+            <LanguageSwitcher />
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -165,7 +171,7 @@ export const NavigationBar = () => {
             >
               <SearchInput
                 name="username"
-                placeholder="Buscar jogador..."
+                placeholder={t('navigation.search_placeholder')}
                 className="h-10 w-full pr-10"
               />
               <button type="submit" aria-label="Buscar" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
@@ -177,25 +183,25 @@ export const NavigationBar = () => {
             <Accordion type="multiple" className="w-full">
               <AccordionItem value="clan">
                 <AccordionTrigger className="text-base">
-                  <Users className="w-4 h-4 mr-2" /> Clã
+                  <Users className="w-4 h-4 mr-2" /> {t('navigation.clan')}
                 </AccordionTrigger>
                 <AccordionContent className="pl-4">
-                  <Link to="/clan/search" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Buscar Clã</Link>
-                  <Link to="/clan/rankings" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Rankings de Clãs</Link>
+                  <Link to="/clan/search" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">{t('navigation.search_clan')}</Link>
+                  <Link to="/clan/rankings" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">{t('navigation.clan_rankings')}</Link>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="items">
                 <AccordionTrigger className="text-base">
-                  <Package className="w-4 h-4 mr-2" /> Itens
+                  <Package className="w-4 h-4 mr-2" /> {t('navigation.items')}
                 </AccordionTrigger>
                 <AccordionContent className="pl-4">
-                  <Link to="/items/skins" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Skins & Avatares</Link>
-                  <Link to="/items/shop" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">Loja</Link>
+                  <Link to="/items/skins" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">{t('navigation.skins_and_avatars')}</Link>
+                  <Link to="/items/shop" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">{t('navigation.shop')}</Link>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="updates">
                 <AccordionTrigger className="text-base">
-                  <Megaphone className="w-4 h-4 mr-2" /> Atualizações
+                  <Megaphone className="w-4 h-4 mr-2" /> {t('navigation.updates')}
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="max-h-[60vh] overflow-y-auto rounded-md border border-border -mx-4">

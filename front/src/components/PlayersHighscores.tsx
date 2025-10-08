@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 import { Trophy, Medal, Award, Crown, AlertTriangle } from "lucide-react";
 
 interface HighscorePlayer {
@@ -19,9 +20,10 @@ interface HighscorePlayer {
 }
 
 const fetchHighscores = async (): Promise<HighscorePlayer[]> => {
+  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch('/api/players/highscores?limit=10');
   if (!response.ok) {
-    throw new Error("Não foi possível buscar os melhores jogadores.");
+    throw new Error("fetch_error");
   }
   return response.json();
 };
@@ -34,6 +36,7 @@ const getRankIcon = (rank: number) => {
 };
 
 export const PlayersHighscores = () => {
+  const { t } = useTranslation();
   const { data: players, isLoading, isError, error } = useQuery<HighscorePlayer[], Error>({
     queryKey: ["playerHighscores"],
     queryFn: fetchHighscores,
@@ -44,7 +47,7 @@ export const PlayersHighscores = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <Trophy className="w-5 h-5 text-primary" />
-          Top Players
+          {t('playersHighscores.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="overflow-x-auto">
@@ -58,8 +61,8 @@ export const PlayersHighscores = () => {
         {isError && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
+            <AlertTitle>{t('common.error')}</AlertTitle>
+            <AlertDescription>{t('playersHighscores.fetchError')}</AlertDescription>
           </Alert>
         )}
         {players && (
@@ -96,7 +99,7 @@ export const PlayersHighscores = () => {
                           <div className="font-medium">{player.username}</div>
                           {player.level && (
                             <div className="text-sm text-muted-foreground">
-                              Level {player.level}
+                              {t('common.level', { level: player.level })}
                             </div>
                           )}
                         </div>
@@ -105,7 +108,7 @@ export const PlayersHighscores = () => {
 
                     <div className="text-right">
                       <div className="font-semibold text-primary">{player.xp.toLocaleString()}</div>
-                      <div className="text-xs text-muted-foreground">XP</div>
+                      <div className="text-xs text-muted-foreground">{t('common.xp')}</div>
                     </div>
                   </Link>
                 );

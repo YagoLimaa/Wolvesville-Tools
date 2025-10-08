@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from "react-i18next";
 import { ShoppingBag, Gem, AlertTriangle, X } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 
@@ -32,37 +33,18 @@ interface Offer {
 const fetchShopOffers = async (): Promise<Offer[]> => {
   const response = await fetch('/api/shop/activeOffers');
   if (!response.ok) {
-    throw new Error("Não foi possível buscar as ofertas da loja.");
+    throw new Error("fetch_error");
   }
   return response.json();
 };
 
-// Mapeamento para traduzir os nomes dos tipos de oferta
-const offerTypeTranslations: { [key: string]: string } = {
-  AVATAR_ITEMS_SET: "Roupas limitadas",
-  ADVANCED_ROLE_CARD: "Funções avançadas",
-  TAROT_OUTFITS: "Roupas de Tarô",
-  ZODIAC_ANIMAL_OUTFITS: "Roupas do Zodíaco",
-  EMOJIS: "Emojis",
-};
-
-// Mapeamento para as descrições das ofertas
-const offerTypeDescriptions: { [key: string]: string } = {
-  AVATAR_ITEMS_SET: "Conjuntos de roupas disponíveis por tempo limitado.",
-  ADVANCED_ROLE_CARD: "Pacotes para desbloquear e aprimorar funções avançadas.",
-  TAROT_OUTFITS: "Coleções de roupas místicas baseadas nas cartas de Tarô.",
-  ZODIAC_ANIMAL_OUTFITS: "Trajes especiais inspirados nos animais do Zodíaco.",
-  EMOJIS: "Pacotes de emojis exclusivos para usar no jogo.",
-  AVATAR_ITEMS: "Pacotes de itens de avatar para customizar seu personagem."
-};
-
 // Função para extrair e formatar o nome da oferta a partir da URL da imagem
-const getOfferNameFromUrl = (url: string): string => {
+const getOfferNameFromUrl = (url: string, t: (key: string) => string): string => {
   try {
     const filename = url.split('/').pop()?.split('.')[0] ?? '';
     return filename.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   } catch {
-    return "Oferta";
+    return t('shop.offer');
   }
 };
 
@@ -143,6 +125,7 @@ const useCountdownToNextMonth = (): { timeLeftFormatted: string; isEndingSoon: b
 };
 
 export const ShopActiveOffers = () => {
+  const { t } = useTranslation();
   const { data: offers, isLoading, isError, error } = useQuery<Offer[], Error>({
     queryKey: ["shopOffers"],
     queryFn: fetchShopOffers,
@@ -234,7 +217,7 @@ export const ShopActiveOffers = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
           <ShoppingBag className="w-5 h-5 text-primary" />
-          Ofertas da Loja
+          {t('shop.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -249,8 +232,8 @@ export const ShopActiveOffers = () => {
         {isError && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{error.message}</AlertDescription>
+            <AlertTitle>{t('common.error')}</AlertTitle>
+            <AlertDescription>{t('shop.fetchError')}</AlertDescription>
           </Alert>
         )}
 
@@ -259,7 +242,7 @@ export const ShopActiveOffers = () => {
             {Object.entries(groupedOffers).map(([type, offerGroup]) => (
               <div key={type}>
                 <h3 className="text-lg font-semibold text-primary mb-3">
-                  {offerTypeTranslations[type] || type}
+                  {t(`shop.types.${type}`, { defaultValue: type })}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {offerGroup.map((offer) => {
@@ -300,12 +283,12 @@ export const ShopActiveOffers = () => {
                               </div>
                             )}
                             <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                              {getOfferNameFromUrl(offer.promoImageUrl)}
+                              {getOfferNameFromUrl(offer.promoImageUrl, t)}
                             </div>
                           </button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{offerTypeDescriptions[offer.type] || "Clique para ver os detalhes."}</p>
+                          <p>{t(`shop.descriptions.${offer.type}`, { defaultValue: t('shop.clickToView') })}</p>
                         </TooltipContent>
                       </Tooltip>
                     );
@@ -322,9 +305,7 @@ export const ShopActiveOffers = () => {
             {selectedOffer && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-center text-2xl font-bold">
-                    {getOfferNameFromUrl(selectedOffer.promoImageUrl)}
-                  </DialogTitle>
+                  <DialogTitle className="text-center text-2xl font-bold">{getOfferNameFromUrl(selectedOffer.promoImageUrl, t)}</DialogTitle>
                 </DialogHeader>
                 <div className="overflow-y-auto pr-4 -mr-4">
                   {collectionPieces.length > 0 ? (
@@ -339,7 +320,7 @@ export const ShopActiveOffers = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center text-muted-foreground">Não foi possível encontrar os detalhes dos itens deste pacote.</p>
+                    <p className="text-center text-muted-foreground">{t('shop.detailsError')}</p>
                   )}
                 </div>
                 {selectedOffer.costInGems && (

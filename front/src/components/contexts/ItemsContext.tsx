@@ -1,23 +1,22 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-// Mapeia os nomes das chaves da API para nomes amigáveis
-const categoryDisplayNames: { [key: string]: string } = {
-  avatarItems: "Itens de Avatar",
-  bodyPaints: "Pinturas Corporais",
-  avatarItemSets: "Conjuntos de Avatar",
-  avatarItemCollections: "Coleções de Avatar",
-  bundles: "Pacotes",
-  calendars: "Calendários",
-  profileIcons: "Ícones de Perfil",
-  profileIconBorders: "Bordas de Ícone",
-  emojis: "Emojis",
-  emojiCollections: "Coleções de Emoji",
-  backgrounds: "Fundos",
-  loadingScreens: "Telas de Loading",
-  roleIcons: "Ícones de Papel",
-  roseSkins: "Skins de Rosa",
-};
+const validCategories = [
+  'avatarItems',
+  'bodyPaints',
+  'avatarItemSets',
+  'avatarItemCollections',
+  'bundles',
+  'calendars',
+  'profileIcons',
+  'profileIconBorders',
+  'emojis',
+  'emojiCollections',
+  'backgrounds',
+  'loadingScreens',
+  'roleIcons',
+  'roseSkins',
+];
 
 interface ContainedItem {
   type: string;
@@ -78,7 +77,7 @@ const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined
 const fetchAllItems = async (): Promise<Item[]> => {
   // Busca todas as categorias, incluindo 'tags' e 'advancedRoleCardOffers'
   // 'avatarItemSets' é processado por último para ter prioridade no mapa de IDs.
-  const categories = [...Object.keys(categoryDisplayNames), 'tags', 'advancedRoleCardOffers', 'avatarItemSets'];
+  const categories = [...validCategories, 'tags', 'advancedRoleCardOffers'];
 
   const promises = categories.map(async (category) => {
     try {

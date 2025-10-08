@@ -314,7 +314,7 @@ apiRouter.get('/battlePass/challenges', async (req, res) => {
       },
       // Passa o locale para a API do Wolvesville, usando 'pt' como padrão.
       params: {
-        locale: req.query.locale || 'pt'
+        locale: req.query.locale || 'en'
       }
     };
 

@@ -1,0 +1,188 @@
+{
+  "navigation": {
+    "home_title": "Wolvesville Tools",
+    "home_description": "Sua central completa para Wolvesville com tudo que você precisa: busca de jogadores, estatísticas, rotações, battle pass e muito mais!",
+    "search_placeholder": "Buscar jogador...",
+    "clan": "Clã",
+    "search_clan": "Buscar Clã",
+    "search_clan_description": "Encontre informações sobre clãs",
+    "clan_rankings": "Rankings de Clãs",
+    "clan_rankings_description": "Veja os melhores clãs",
+    "items": "Itens",
+    "skins_and_avatars": "Skins & Avatares",
+    "skins_and_avatars_description": "Todas as skins disponíveis",
+    "shop": "Loja",
+    "shop_description": "Ofertas ativas e itens",
+    "updates": "Atualizações"
+  },
+  "pagination": {
+    "previous": "Anterior",
+    "next": "Próxima",
+    "page": "Página",
+    "of": "de"
+  },
+  "common": {
+    "error": "Erro",
+    "item": "Item",
+    "gold": "Ouro",
+    "gems": "Gemas",
+    "roses": "Rosas",
+    "level": "Nível {{level}}",
+    "xp": "XP",
+    "updating": "Atualizando...",
+    "expired": "Expirado",
+    "of": "de"
+  },
+  "battlePass": {
+    "fetchError": "Não foi possível buscar os dados do Battle Pass.",
+    "coinAlt": "Moeda do Passe",
+    "passCoins": "Moedas do Passe",
+    "shop": {
+      "fetchError": "Não foi possível buscar os dados da loja do Battle Pass.",
+      "noItems": "Nenhum item na loja do passe para exibir.",
+      "exchangeVoucher": "Voucher de Troca",
+      "title": "Loja do Passe",
+      "dialogTitle": "Loja da Temporada {{seasonNumber}}"
+    },
+    "rewards": {
+      "unknownItem": "Item Desconhecido",
+      "noRewards": "Nenhuma recompensa para exibir.",
+      "level": "Nível {{level}}",
+      "dialogTitle": "Recompensas da Temporada {{seasonNumber}}",
+      "viewButton": "Ver Battle Pass Completo"
+    },
+    "challenges": {
+      "fetchError": "Não foi possível buscar os desafios do Battle Pass.",
+      "title": "Desafios do Passe",
+      "objective": "Objetivo: {{target}}",
+      "timeLeft": "{{days}}d {{hours}}h"
+    },
+    "season": {
+      "title": "Battle Pass - Temporada Atual",
+      "season": "Temporada {{seasonNumber}}",
+      "endsIn": "Termina em {{daysLeft}} dias",
+      "endingToday": "Terminando hoje"
+    }
+  },
+  "clanCard": {
+    "members": "{{count}} Membros",
+    "viewMembers": "Ver Membros",
+    "clanMembers": "Membros do Clã",
+    "leader": "Líder",
+    "coLeader": "Co-líder",
+    "member": "Membro"
+  },
+  "playerCard": {
+    "level": "Nível",
+    "gameStats": "Estatísticas de Jogo",
+    "wins": "Vitórias:",
+    "losses": "Derrotas:",
+    "ties": "Empates:",
+    "village": "Vila:",
+    "werewolf": "Lobisomem:",
+    "playTime": "Tempo:",
+    "playTimeValue": "{{hours}}h {{minutes}}m",
+    "roses": "Rosas",
+    "received": "Recebidas:",
+    "sent": "Enviadas:",
+    "noBio": "Nenhuma bio para ser exibida",
+    "hideAvatars": "Ocultar Avatares",
+    "showAllAvatars": "Ver Todos os Avatares ({{count}})",
+    "clickToZoom": "Clique para ampliar",
+    "close": "Fechar"
+  },
+  "playersHighscores": {
+    "fetchError": "Não foi possível buscar os melhores jogadores.",
+    "title": "Top Players"
+  },
+  "roleRotations": {
+    "fetchError": "Não foi possível buscar a rotação de roles.",
+    "title": "Rotações da Semana",
+    "gameModes": {
+      "Quick": "Jogo Rápido",
+      "Sandbox": "Sandbox",
+      "Ranked League Silver": "Liga Ranqueada: Prata",
+      "Ranked League Gold": "Liga Ranqueada: Ouro",
+      "Advanced": "Avançado",
+      "Assassins convention": "Convenção de Assassinos"
+    }
+  },
+  "shop": {
+    "fetchError": "Não foi possível buscar as ofertas da loja.",
+    "title": "Ofertas da Loja",
+    "offer": "Oferta",
+    "detailsError": "Não foi possível encontrar os detalhes dos itens deste pacote.",
+    "clickToView": "Clique para ver os detalhes.",
+    "types": {
+      "AVATAR_ITEMS_SET": "Roupas limitadas",
+      "ADVANCED_ROLE_CARD": "Funções avançadas",
+      "TAROT_OUTFITS": "Roupas de Tarô",
+      "ZODIAC_ANIMAL_OUTFITS": "Roupas do Zodíaco",
+      "EMOJIS": "Emojis",
+      "AVATAR_ITEMS": "Pacotes de itens de avatar"
+    },
+    "descriptions": {
+      "AVATAR_ITEMS_SET": "Conjuntos de roupas disponíveis por tempo limitado.",
+      "ADVANCED_ROLE_CARD": "Pacotes para desbloquear e aprimorar funções avançadas.",
+      "TAROT_OUTFITS": "Coleções de roupas místicas baseadas nas cartas de Tarô.",
+      "ZODIAC_ANIMAL_OUTFITS": "Trajes especiais inspirados nos animais do Zodíaco.",
+      "EMOJIS": "Pacotes de emojis exclusivos para usar no jogo.",
+      "AVATAR_ITEMS": "Pacotes de itens de avatar para customizar seu personagem."
+    }
+  },
+  "itemsSkins": {
+    "filters": "Filtros",
+    "searchPlaceholder": "Buscar item...",
+    "itemType": "Tipo de Item",
+    "allTypes": "Todos os Tipos",
+    "rarity": "Raridade",
+    "allRarities": "Todas as Raridades",
+    "common": "Comum",
+    "rare": "Raro",
+    "epic": "Épico",
+    "legendary": "Lendário",
+    "gender": "Gênero",
+    "allGenders": "Todos os Gêneros",
+    "male": "Masculino",
+    "female": "Feminino",
+    "unisex": "Unissex",
+    "avatarType": "Tipo de Avatar",
+    "errorLoadingTitle": "Erro ao Carregar Itens",
+    "errorLoadingDescription": "Não foi possível buscar os itens. Tente recarregar a página.",
+    "noItemsFound": "Nenhum Item Encontrado",
+    "adjustFilters": "Tente ajustar seus filtros.",
+    "collectionDetailsError": "Não foi possível carregar os detalhes desta coleção.",
+    "categories": {
+      "avatarItems": "Itens de Avatar",
+      "bodyPaints": "Pinturas Corporais",
+      "avatarItemSets": "Conjuntos de Itens",
+      "avatarItemCollections": "Coleções de Itens",
+      "bundles": "Pacotes",
+      "calendars": "Calendários",
+      "profileIcons": "Ícones de Perfil",
+      "profileIconBorders": "Bordas de Ícone",
+      "emojis": "Emojis",
+      "emojiCollections": "Coleções de Emojis",
+      "backgrounds": "Planos de Fundo",
+      "loadingScreens": "Telas de Carregamento",
+      "roleIcons": "Ícones de Função",
+      "roseSkins": "Skins de Rosa"
+    }
+  },
+  "searchPlayer": {
+    "fetchError": "A busca falhou. Verifique o nome de usuário e tente novamente.",
+    "searchError": "Ocorreu um erro ao buscar. Tente novamente mais tarde.",
+    "loadingItems": "Carregando itens...",
+    "placeholder": "Digite o nome de um jogador...",
+    "label": "Buscar Jogador",
+    "buttonText": "Buscar",
+    "goBack": "Voltar para a busca",
+    "resultsTitle": "Resultados para \"{{query}}\"",
+    "pagination": "Página {{currentPage}} de {{totalPages}}",
+    "loadingPlayers": "Buscando jogadores...",
+    "noPlayersFound": {
+      "title": "Nenhum jogador encontrado",
+      "description": "Não foram encontrados jogadores com o nome \"{{query}}\"."
+    }
+  }
+}

@@ -9,8 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useItems } from "../components/contexts/ItemsContext";
 import { SearchResult } from "@/types/Player";
 import { ArrowLeft, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const SearchPlayer = () => {
+  const { t } = useTranslation();
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { isLoading: isLoadingItems } = useItems();
@@ -34,7 +36,7 @@ const SearchPlayer = () => {
     try {
       const response = await fetch(`/api/search?username=${encodeURIComponent(username)}&page=${page}`);
       if (!response.ok) {
-        throw new Error("Falha ao buscar dados. A API do Wolvesville pode estar offline ou o backend não está rodando.");
+        throw new Error('fetchError');
       }
       const result = await response.json() as SearchResult;
 
@@ -43,7 +45,7 @@ const SearchPlayer = () => {
       setSearchParams({ username, page: page.toString() }); // Atualiza a URL com a busca atual
       window.scrollTo({ top: 0, behavior: 'smooth' }); // Rola para o topo
     } catch (err) {
-      setError("Erro ao buscar jogadores. Tente novamente.");
+      setError(t('searchPlayer.searchError'));
       setSearchResult(null);
     } finally {
       setIsLoading(false);
@@ -67,7 +69,7 @@ const SearchPlayer = () => {
       <main className="container mx-auto px-4 py-8">
         {isLoadingItems && (
           <div className="text-center text-muted-foreground text-lg">
-            Carregando dados de itens...
+            {t('searchPlayer.loadingItems')}
           </div>
         )}
         {!isLoadingItems && (
@@ -79,9 +81,9 @@ const SearchPlayer = () => {
                   <SearchForm 
                     onSearch={handleSearch} 
                     isLoading={isLoading}
-                    placeholder="Digite o nome do jogador..."
-                    label="Nome do Jogador:"
-                    buttonText="Buscar Jogador"
+                    placeholder={t('searchPlayer.placeholder')}
+                    label={t('searchPlayer.label')}
+                    buttonText={t('searchPlayer.buttonText')}
                   />
                 </CardContent>
               </Card>
@@ -92,20 +94,20 @@ const SearchPlayer = () => {
               <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4">
               <GradientButton variant="outline" onClick={handleGoBack}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar
+                {t('searchPlayer.goBack')}
               </GradientButton>
               
                 <div className="text-center md:text-right">
                   <h2 className="text-2xl font-bold text-foreground">
-                    Resultados para "{currentQuery}"
+                    {t('searchPlayer.resultsTitle', { query: currentQuery })}
                   </h2>
                   <p className="text-muted-foreground">
-                    Página {searchResult.pagination.currentPage} de {searchResult.pagination.totalPages}
+                    {t('searchPlayer.pagination', { currentPage: searchResult.pagination.currentPage, totalPages: searchResult.pagination.totalPages })}
                   </p>
                 </div>
             </div>
             )}
-            {isLoading && <p className="text-center text-muted-foreground text-lg">Buscando jogadores...</p>}
+            {isLoading && <p className="text-center text-muted-foreground text-lg">{t('searchPlayer.loadingPlayers')}</p>}
 
             {searchResult && searchResult.players.length > 0 && (
               <>
@@ -121,8 +123,8 @@ const SearchPlayer = () => {
             {searchResult && searchResult.players.length === 0 && !isLoading && (
               <Card className="p-8 text-center bg-secondary">
                 <Info className="w-12 h-12 mx-auto text-primary mb-4" />
-                <h3 className="text-xl font-semibold">Nenhum jogador encontrado</h3>
-                <p className="text-muted-foreground">Não encontramos ninguém com o nome "{currentQuery}". Verifique a ortografia e tente novamente.</p>
+                <h3 className="text-xl font-semibold">{t('searchPlayer.noPlayersFound.title')}</h3>
+                <p className="text-muted-foreground">{t('searchPlayer.noPlayersFound.description', { query: currentQuery })}</p>
               </Card>
             )}
 

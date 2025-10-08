@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Users, Star, ChevronDown } from "lucide-react";
 import { GradientButton } from "./ui/gradient-button";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 
 // Tipagem para os dados do clã que esperamos receber
@@ -30,15 +31,16 @@ interface ClanCardProps {
   clan: Clan;
 }
 
-// Mapeia os papéis para traduções e ícones
-const roleInfo = {
-  LEADER: { name: "Líder", icon: "👑" },
-  CO_LEADER: { name: "Co-líder", icon: "🛡️" },
-  MEMBER: { name: "Membro", icon: "⚔️" },
-};
-
 export const ClanCard = ({ clan }: ClanCardProps) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { t } = useTranslation();
+
+  // Mapeia os papéis para traduções e ícones
+  const roleInfo = {
+    LEADER: { name: t('clanCard.leader'), icon: "👑" },
+    CO_LEADER: { name: t('clanCard.coLeader'), icon: "🛡️" },
+    MEMBER: { name: t('clanCard.member'), icon: "⚔️" },
+  };
 
   return (
     <Card className="bg-card/80 backdrop-blur border-border hover:border-primary transition-all duration-300 hover:shadow-elevated overflow-hidden flex flex-col">
@@ -49,23 +51,23 @@ export const ClanCard = ({ clan }: ClanCardProps) => {
           <div className="flex items-center gap-4 mt-3">
             <Badge variant="secondary" className="text-sm">
               <Users className="w-4 h-4 mr-2" />
-              {clan.members.length} Membros
+              {t('clanCard.members', { count: clan.members.length })}
             </Badge>
             <Badge variant="secondary" className="text-sm">
               <Star className="w-4 h-4 mr-2 text-yellow-400" />
-              {clan.xp.toLocaleString()} XP
+              {clan.xp.toLocaleString()} {t('common.xp')}
             </Badge>
           </div>
           <CollapsibleTrigger asChild>
             <GradientButton variant="outline" className="mt-4 w-full">
-              Ver Membros <ChevronDown className={`w-4 h-4 ml-2 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+              {t('clanCard.viewMembers')} <ChevronDown className={`w-4 h-4 ml-2 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </GradientButton>
           </CollapsibleTrigger>
         </div>
 
         <CollapsibleContent>
           <div className="border-t border-border p-4 bg-background/30">
-            <h4 className="font-semibold text-md mb-3 text-center">Membros do Clã</h4>
+            <h4 className="font-semibold text-md mb-3 text-center">{t('clanCard.clanMembers')}</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
               {clan.members
                 .sort((a, b) => {

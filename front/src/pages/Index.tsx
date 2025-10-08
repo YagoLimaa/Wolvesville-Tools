@@ -3,8 +3,10 @@ import { RoleRotations } from "@/components/RoleRotations";
 import { BattlePassSeason } from "@/components/BattlePassSeason";
 import { BattlePassChallenges } from "@/components/BattlePassChallenges";
 import { PlayersHighscores } from "@/components/PlayersHighscores";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-background">
       <NavigationBar />
@@ -13,11 +15,10 @@ const Index = () => {
         {/* Hero Section */}
         <div className="text-center space-y-4 py-12">
           <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Wolvesville Tools
+            {t('navigation.home_title')}
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Sua central completa para Wolvesville com tudo que você precisa: busca de jogadores, 
-            estatísticas, rotações, battle pass e muito mais!
+            {t('navigation.home_description')}
           </p>
         </div>
 

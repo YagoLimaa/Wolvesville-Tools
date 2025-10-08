@@ -2,12 +2,13 @@ import * as React from "react";
 import { BattlePassSeasonData, BattlePassReward } from "./BattlePassSeason";
 import { Lock, HelpCircle } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
+import { useTranslation } from "react-i18next";
 
 interface BattlePassRewardsProps {
   season: BattlePassSeasonData;
 }
 
-const getRewardInfo = (reward: BattlePassReward, itemsById: Map<string, Item>, seasonNumber: number): { imageUrl: string, name: string } => {
+const getRewardInfo = (reward: BattlePassReward, itemsById: Map<string, Item>, seasonNumber: number, t: (key: string) => string): { imageUrl: string, name: string } => {
   const placeholder = { imageUrl: "https://via.placeholder.com/100", name: "Item Desconhecido" };
 
   if (!('type' in reward)) {
@@ -32,18 +33,18 @@ const getRewardInfo = (reward: BattlePassReward, itemsById: Map<string, Item>, s
       itemId = reward.loadingScreenId;
       break;
     case "ROSE_PACKAGE":
-      return { imageUrl: "https://www.wolvesville.com/static/media/rose_inventory_single.eb6af861d48bff85f73a.png", name: "Rosas" };
+      return { imageUrl: "https://www.wolvesville.com/static/media/rose_inventory_single.eb6af861d48bff85f73a.png", name: t('common.roses') };
     case "GEM":
-      return { imageUrl: "https://www.wolvesville.com/static/media/gem.439d7650def0b35d6a66.png", name: "Gemas" };
+      return { imageUrl: "https://www.wolvesville.com/static/media/gem.439d7650def0b35d6a66.png", name: t('common.gems') };
     case "GOLD":
-      return { imageUrl: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png", name: "Ouro" };
+      return { imageUrl: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png", name: t('common.gold') };
     case "BATTLE_PASS_COIN":
-      return { imageUrl: `https://cdn2.wolvesville.com/battlePass/coins/bp${seasonNumber}_single@2x.png`, name: "Moedas do Passe" };
+      return { imageUrl: `https://cdn2.wolvesville.com/battlePass/coins/bp${seasonNumber}_single@2x.png`, name: t('battlePass.passCoins') };
     case "RANDOM_PROFILE_ICON":
       break; 
     default:
       if (reward.imageUrl) {
-        return { imageUrl: reward.imageUrl, name: reward.type || "Item" };
+        return { imageUrl: reward.imageUrl, name: reward.type || t('common.item') };
       }
       return placeholder;
   }
@@ -58,16 +59,17 @@ const getRewardInfo = (reward: BattlePassReward, itemsById: Map<string, Item>, s
 
 export const BattlePassRewards = ({ season }: BattlePassRewardsProps) => {
   const { itemsById } = useItems();
+  const { t } = useTranslation();
 
   if (!season || !season.rewards) {
-    return <p>Nenhuma recompensa para exibir.</p>;
+    return <p>{t('battlePass.rewards.noRewards')}</p>;
   }
 
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
       {season.rewards.map((reward, index) => {
         const level = ("level" in reward && reward.level) ? reward.level : index + 1;
-        const { imageUrl, name } = getRewardInfo(reward, itemsById, season.number);
+        const { imageUrl, name } = getRewardInfo(reward, itemsById, season.number, t);
         const isRandomIcon = "type" in reward && reward.type === "RANDOM_PROFILE_ICON";
 
         return (
@@ -101,7 +103,7 @@ export const BattlePassRewards = ({ season }: BattlePassRewardsProps) => {
 
                   {/* Nível */}
                   <div className="absolute bottom-0 left-0 right-0 z-20 bg-black/60 py-0.5 text-center text-xs font-semibold text-white">
-                    Nível {level}
+                    {t('battlePass.rewards.level', { level })}
                   </div>
 
                   {/* Cadeado para itens pagos */}
