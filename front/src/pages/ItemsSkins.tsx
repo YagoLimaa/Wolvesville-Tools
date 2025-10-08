@@ -421,7 +421,7 @@ const ItemsSkins = () => {
                   >
                     <ItemImage item={item} onImageError={handleImageError} />
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-md">
-                      <p className="text-xs font-semibold text-white truncate">{item.name || getNameFromUrl(item.imageUrl)}</p>
+                      <p className="text-xs font-semibold text-white truncate">{item.name || getNameFromUrl(item.imageUrl, t)}</p>
                     </div>
                   </button>
                 ))}
@@ -451,14 +451,14 @@ const ItemsSkins = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <CardContent className="p-6">
-              <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl, t)}</h3>
               {collectionPieces.length > 0 ? (
                 <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
                   {collectionPieces.map(piece => (
                     <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity!] || 'border-gray-600/50'}`}>
                       <ItemImage item={piece} onImageError={handleImageError} />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-center">
-                        <p className="text-xs font-semibold text-white truncate">{piece.name || getNameFromUrl(piece.imageUrl)}</p>
+                        <p className="text-xs font-semibold text-white truncate">{piece.name || getNameFromUrl(piece.imageUrl, t)}</p>
                       </div>
                     </div>
                   ))}
