@@ -56,23 +56,22 @@ const useCountdownToNextWednesday = (): { timeLeftFormatted: string; isEndingSoo
     const calculateTimeLeft = () => {
       const now = new Date();
       const target = new Date(now);
-      const currentDay = now.getDay(); // Domingo = 0, Quarta = 3
-      const targetDay = 3; // Quarta-feira
+      const currentDay = now.getDay(); 
+      const targetDay = 3; 
 
       let daysToAdd = targetDay - currentDay;
-      // Se já passou da quarta-feira desta semana, ou se é quarta-feira mas já passou das 21h
       if (daysToAdd < 0 || (daysToAdd === 0 && now.getHours() >= 21)) {
-        daysToAdd += 7; // Mira na próxima semana
+        daysToAdd += 7; 
       }
 
       target.setDate(now.getDate() + daysToAdd);
-      // Define o horário para 21:00 (9 PM) do horário local do navegador
+      
       target.setHours(21, 0, 0, 0);
 
       setTimeLeft(target.getTime() - now.getTime());
     };
 
-    calculateTimeLeft(); // Calcula na primeira renderização
+    calculateTimeLeft(); 
     const interval = setInterval(() => {
       calculateTimeLeft();
     }, 1000);
@@ -93,14 +92,12 @@ const useCountdownToNextWednesday = (): { timeLeftFormatted: string; isEndingSoo
   return { timeLeftFormatted: `${days}d ${hours}h ${minutes}m ${seconds}s}`, isEndingSoon };
 };
 
-// Hook customizado para o contador de tempo restante até o próximo mês
 const useCountdownToNextMonth = (): { timeLeftFormatted: string; isEndingSoon: boolean } => {
   const [timeLeft, setTimeLeft] = React.useState(0);
 
   React.useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
-      // Define o alvo como o primeiro dia do próximo mês, à meia-noite
       const target = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
       setTimeLeft(target.getTime() - now.getTime());
     };
@@ -133,7 +130,6 @@ export const ShopActiveOffers = () => {
   const [selectedOffer, setSelectedOffer] = React.useState<Offer | null>(null);
   const { itemsById } = useItems();
 
-  // Agrupa as ofertas pelo tipo
   const groupedOffers = React.useMemo(() => {
     if (!offers) return {};
     return offers.reduce((acc, offer) => {
@@ -142,13 +138,11 @@ export const ShopActiveOffers = () => {
     }, {} as Record<string, Offer[]>);
   }, [offers]);
 
-  // Encontra as peças de uma coleção selecionada
   const collectionPieces = React.useMemo(() => {
     if (!selectedOffer) return [];
 
     const allItemIds: string[] = [];
 
-    // Lógica para Roupas (Sets de Avatar, Tarô, Zodíaco, etc.)
     if (selectedOffer.avatarItemSetIds && selectedOffer.avatarItemSetIds.length > 0) {
       const setIds = selectedOffer.avatarItemSetIds;
       const idsFromSets = setIds.flatMap(setId => {
@@ -158,7 +152,6 @@ export const ShopActiveOffers = () => {
       allItemIds.push(...idsFromSets);
     }
 
-    // Lógica para Itens de Avatar individuais (que vêm de uma coleção)
     if (selectedOffer.avatarItemIds && selectedOffer.avatarItemIds.length > 0) {
       allItemIds.push(...selectedOffer.avatarItemIds);
     } else if (selectedOffer.avatarItemsCollectionId) {
@@ -167,27 +160,21 @@ export const ShopActiveOffers = () => {
       allItemIds.push(...idsFromCollection);
     }
 
-    // Lógica para Funções Avançadas (Role Icons)
     if (selectedOffer.advancedRoleCardOfferId) {
       console.log("--- Debug: Oferta de Função Avançada ---");
-      // 1. Pega o ID da oferta de função avançada.
       const offerId = selectedOffer.advancedRoleCardOfferId;
       console.log("1. ID da Oferta (advancedRoleCardOfferId):", offerId);
 
-      // 2. Busca o item de oferta correspondente, que contém o ID do conjunto de avatar.
       const offerItem = itemsById.get(offerId);
       console.log("2. Item da Oferta encontrado no mapa 'itemsById':", offerItem);
 
       if (offerItem) {
-        // 3. Usa o avatarItemSetId de dentro do item de oferta para encontrar o conjunto real.
         const targetSetId = offerItem.avatarItemSetId as string; // Este é o ID do conjunto que queremos
         console.log("3. ID do Conjunto de Avatar (avatarItemSetId) encontrado no item da oferta:", targetSetId);
 
-        // Busca o item, mas garante que ele seja da categoria 'avatarItemSets'
         const itemSet = itemsById.get(targetSetId);
         console.log("4. Conjunto de Itens (itemSet) encontrado no mapa 'itemsById':", itemSet);
 
-        // A verificação crucial: o item encontrado DEVE ser da categoria 'avatarItemSets'
         if (itemSet && itemSet.category === 'avatarItemSets') {
 
         const idsFromSet = (itemSet?.avatarItemIds as string[] | undefined) || [];
@@ -196,7 +183,6 @@ export const ShopActiveOffers = () => {
       }
     }
 
-    // Lógica para Coleções de Emojis
     if (selectedOffer.emojisCollectionId) {
       const collectionId = selectedOffer.emojisCollectionId;
       const collectionItem = itemsById.get(collectionId);
@@ -204,7 +190,6 @@ export const ShopActiveOffers = () => {
       allItemIds.push(...emojiIds);
     }
 
-    // Usamos um Set para remover duplicatas, caso um item apareça em mais de uma categoria da oferta
     const uniqueItemIds = [...new Set(allItemIds)];
 
     return uniqueItemIds
@@ -247,14 +232,11 @@ export const ShopActiveOffers = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {offerGroup.map((offer) => {
                     const Countdown = ({ offerType }: { offerType: string }) => {
-                      // Define quais tipos de oferta usam o contador mensal
-                      const monthlyResetTypes = ['ZODIAC_ANIMAL_OUTFITS','TAROT_OUTFITS','ADVANCED_ROLE_CARD','AVATAR_ITEMS_SET','ADVANCED_ROLE_CARD','AVATAR_ITEMS']; // Apenas 'AVATAR_ITEMS' (bundles) usam o reset mensal.
+                      const monthlyResetTypes = ['ZODIAC_ANIMAL_OUTFITS','TAROT_OUTFITS','ADVANCED_ROLE_CARD','AVATAR_ITEMS_SET','ADVANCED_ROLE_CARD','AVATAR_ITEMS']; 
                       const useMonthlyCountdown = monthlyResetTypes.includes(offerType);
                       
-                      // Hooks devem ser chamados incondicionalmente no topo do componente.
                       const monthlyTimeLeft = useCountdownToNextMonth();
                       const weeklyTimeLeft = useCountdownToNextWednesday();
-                      // A lógica condicional é aplicada ao resultado dos hooks.
                       const timeLeft = useMonthlyCountdown ? monthlyTimeLeft : weeklyTimeLeft;
 
                       return (
@@ -299,7 +281,6 @@ export const ShopActiveOffers = () => {
           </div>
         )}
 
-        {/* Modal para exibir os itens da oferta */}
         <Dialog open={!!selectedOffer} onOpenChange={(isOpen) => !isOpen && setSelectedOffer(null)}>
           <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
             {selectedOffer && (
