@@ -393,72 +393,32 @@ apiRouter.get('/clans/search', async (req, res) => {
   }
 
   try {
-    // 1. Busca clãs pelo nome e idioma
     const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
-    const searchConfig = {
-      params: { name, language: language || 'pt-br' }, // Usa 'pt-br' como padrão se nenhum idioma for fornecido
-      headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' }
-    };
-    console.log(`--- Buscando clãs com nome: ${name} ---`);
-    const searchResponse = await axios.get(searchUrl, searchConfig);
-
-    const clansFound = searchResponse.data;
-    if (!clansFound || clansFound.length === 0) {
-      return res.json([]); // Retorna array vazio se nenhum clã for encontrado
+    
+    // Constrói os parâmetros de busca dinamicamente
+    const searchParams = { name };
+    if (language && language.toLowerCase() !== 'all') {
+      searchParams.language = language;
     }
 
-    // 2. Para cada clã, busca informações detalhadas e membros em paralelo
-    const detailedClansPromises = clansFound.map(async (clan) => {
-      try {
-        const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${clan.id}/info`; // Busca informações do clã
-        const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${clan.id}/members/detailed`; // Busca membros com detalhes
-        const headers = { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' };
+    const searchConfig = {
+      params: searchParams, 
+      headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' }
+    };
 
-        // Busca info e membros simultaneamente
-        const [infoResponse, membersResponse] = await Promise.all([
-          axios.get(infoUrl, { headers }),
-          axios.get(membersUrl, { headers })
-        ]);
+    console.log(`--- Buscando clãs com nome: ${name}, idioma: ${language || 'all'} ---`);
+    const searchResponse = await axios.get(searchUrl, searchConfig);
 
-        const membersWithDetailsPromises = membersResponse.data.map(async (member) => {
-          try {
-            const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
-            const playerDetailsResponse = await axios.get(playerDetailsUrl, { headers });
-            const playerDetails = playerDetailsResponse.data;
-
-            // Retorna um novo objeto combinado para evitar sobreposição de 'id'
-            return {
-              id: member.id, // Mantém o id original do membro do clã
-              username: playerDetails.username || member.username,
-              isCoLeader: member.isCoLeader,
-              equippedAvatar: playerDetails.equippedAvatar, // Pega o avatar dos detalhes do jogador
-            };
-          } catch (playerDetailsError) {
-            console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
-            return member; // Retorna o membro sem detalhes em caso de erro
-          }
-        });
-
-        const detailedMembers = await Promise.all(membersWithDetailsPromises);
-
-        // Combina os dados do clã com as informações e membros detalhados
-        return {
-          ...clan,
-          ...infoResponse.data,
-          members: detailedMembers, // Usa a lista de membros com detalhes
-        };
-      } catch (detailsError) {
-        console.error(`Erro ao buscar detalhes para o clã ${clan.id}:`, detailsError.message);
-        return null; // Retorna nulo se houver erro ao buscar detalhes
-      }
-    });
-
-    const detailedClans = (await Promise.all(detailedClansPromises)).filter(Boolean); // Filtra clãs nulos
-
-    res.json(detailedClans);
+    const clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+    
+    res.json(clansFound);
 
   } catch (error) {
     console.error("Erro ao buscar clãs:", error.message);
+    // Passa o erro da API externa através, se possível
+    if (error.response) {
+      return res.status(error.response.status).json(error.response.data);
+    }
     res.status(500).json({ error: 'Não foi possível buscar os clãs. Tente novamente mais tarde.' });
   }
 });

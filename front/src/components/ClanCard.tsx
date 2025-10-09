@@ -1,18 +1,14 @@
-import * as React from "react";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Star, ChevronDown } from "lucide-react";
-import { GradientButton } from "./ui/gradient-button";
+import { Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 
-// Tipagem para os dados do clã que esperamos receber
+// As tipagens são mantidas para compatibilidade com a página de busca que busca esses dados
 export interface ClanMember {
   id: string;
   username: string;
   isCoLeader?: boolean;
-  // Corrigido: A API retorna 'equippedAvatar' para os membros detalhados do clã
   equippedAvatar?: {
     url: string;
   };
@@ -22,9 +18,9 @@ export interface Clan {
   id: string;
   name: string;
   description: string;
-  iconUrl: string;
   xp: number;
-  members: ClanMember[];
+  memberCount: number;
+  members: ClanMember[]; 
 }
 
 interface ClanCardProps {
@@ -32,75 +28,29 @@ interface ClanCardProps {
 }
 
 export const ClanCard = ({ clan }: ClanCardProps) => {
-  const [isOpen, setIsOpen] = React.useState(false);
   const { t } = useTranslation();
-
-  // Mapeia os papéis para traduções e ícones
-  const roleInfo = {
-    LEADER: { name: t('clanCard.leader'), icon: "👑" },
-    CO_LEADER: { name: t('clanCard.coLeader'), icon: "🛡️" },
-    MEMBER: { name: t('clanCard.member'), icon: "⚔️" },
-  };
 
   return (
     <div className="h-fit w-full">
-      <Card className="bg-card/80 backdrop-blur border-border hover:border-primary transition-all duration-300 hover:shadow-elevated overflow-hidden flex flex-col">
-      <Collapsible key={clan.id} open={isOpen} onOpenChange={setIsOpen}>
-        <div className="p-6 flex flex-col items-center text-center">
-          <Link to={`/clan/${clan.id}`}>
-            <CardTitle className="text-2xl font-bold text-primary hover:underline">{clan.name}</CardTitle>
-          </Link>
-          <p className="text-sm text-muted-foreground italic mt-1 min-h-[40px] flex-grow">"{clan.description}"</p>
-          <div className="flex items-center gap-4 mt-3">
-            <Badge variant="secondary" className="text-sm">
-              <Users className="w-4 h-4 mr-2" />
-              {t('clanCard.members', { count: clan.members.length })}
-            </Badge>
-            <Badge variant="secondary" className="text-sm">
-              <Star className="w-4 h-4 mr-2 text-yellow-400" />
-              {clan.xp.toLocaleString()} {t('common.xp')}
-            </Badge>
-          </div>
-          <CollapsibleTrigger asChild>
-            <GradientButton variant="outline" className="mt-4 w-full">
-              {t('clanCard.viewMembers')} <ChevronDown className={`w-4 h-4 ml-2 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
-            </GradientButton>
-          </CollapsibleTrigger>
+      <Card className="bg-card/80 backdrop-blur border-border hover:border-primary transition-all duration-300 hover:shadow-elevated overflow-hidden flex flex-col p-6 text-center">
+        <Link to={`/clan/${clan.id}`} className="group">
+          <CardTitle className="text-2xl font-bold text-primary group-hover:underline">
+            {clan.name}
+          </CardTitle>
+        </Link>
+        <p className="text-sm text-muted-foreground italic mt-1 min-h-[40px] flex-grow">
+          "{clan.description}"
+        </p>
+        <div className="flex items-center justify-center gap-4 mt-3">
+          <Badge variant="secondary" className="text-sm">
+            <Users className="w-4 h-4 mr-2" />
+            {t("clanCard.members", { count: clan.memberCount })}
+          </Badge>
+          <Badge variant="secondary" className="text-sm">
+            <Star className="w-4 h-4 mr-2 text-yellow-400" />
+            {clan.xp.toLocaleString()} {t("common.xp")}
+          </Badge>
         </div>
-
-        <CollapsibleContent>
-          <div className="border-t border-border p-4 bg-background/30">
-            <h4 className="font-semibold text-md mb-3 text-center">{t('clanCard.clanMembers')}</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
-              {clan.members
-                .sort((a, b) => {
-                  const getRoleValue = (m: ClanMember, index: number) => {
-                    if (index === 0) return 0; // O primeiro da lista é o Líder
-                    if (m.isCoLeader) return 1;
-                    return 2; // Todos os outros são membros
-                  };
-                  return getRoleValue(a, clan.members.indexOf(a)) - getRoleValue(b, clan.members.indexOf(b));
-                })
-                .map((member, index) => {
-                  const roleKey = index === 0 ? 'LEADER' : (member.isCoLeader ? 'CO_LEADER' : 'MEMBER');
-                  const role = roleInfo[roleKey];
-                  const avatarUrl = member.equippedAvatar?.url || "https://cdn-avatars2.wolvesville.com/ad3466d4-8798-4b9b-a5e7-2ae7d2343c58@2x.png";
-                  return (
-                    <Link to={`/search?username=${encodeURIComponent(member.username)}`} key={member.id} className="block">
-                      <div className="flex items-center gap-2 bg-secondary p-2 rounded-md text-sm hover:bg-primary/20 transition-colors h-full">
-                        <img src={avatarUrl} alt={member.username} className="w-8 h-8 rounded-full border-2 border-primary/50" />
-                        <div className="overflow-hidden">
-                          <p className="font-bold truncate" title={member.username}>{member.username}</p>
-                          <p className="text-xs text-muted-foreground"><span className="mr-1">{role.icon}</span>{role.name}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-            </div>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
       </Card>
     </div>
   );
