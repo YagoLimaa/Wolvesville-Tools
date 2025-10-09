@@ -10,6 +10,7 @@ import SearchPlayer from "./pages/SearchPlayer";
 import ItemsShop from "./pages/ItemsShop";
 import ItemsSkins from "./pages/ItemsSkins";
 import ClanSearch from "./pages/ClanSearch";
+import ClanInfo from "./pages/ClanInfo";
 import NotFound from "./pages/NotFound";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/search" element={<SearchPlayer />} />
             <Route path="/items/shop" element={<ItemsShop />} />
               <Route path="/clan/search" element={<ClanSearch />} />
+              <Route path="/clan/:id" element={<ClanInfo />} />
               <Route path="/items/skins" element={<ItemsSkins />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

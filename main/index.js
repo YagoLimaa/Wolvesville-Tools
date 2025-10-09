@@ -92,8 +92,8 @@ apiRouter.get('/search', async (req, res) => {
               'Accept': 'application/json'
             }
           });
-          // Adiciona um objeto simplificado contendo apenas o nome do clã
-          player.clan = { name: clanResponse.data.name };
+          // Adiciona um objeto contendo o nome e a ID do clã
+          player.clan = { id: player.clanId, name: clanResponse.data.name };
         } catch (clanError) {
           console.error(`Erro ao buscar detalhes do clã ${player.clanId}:`, clanError.message);
           player.clan = null; // Garante que não haverá erro no template se a busca do clã falhar
@@ -420,11 +420,32 @@ apiRouter.get('/clans/search', async (req, res) => {
           axios.get(membersUrl, { headers })
         ]);
 
-        // Combina os dados do clã com as informações e membros
+        const membersWithDetailsPromises = membersResponse.data.map(async (member) => {
+          try {
+            const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
+            const playerDetailsResponse = await axios.get(playerDetailsUrl, { headers });
+            const playerDetails = playerDetailsResponse.data;
+
+            // Retorna um novo objeto combinado para evitar sobreposição de 'id'
+            return {
+              id: member.id, // Mantém o id original do membro do clã
+              username: playerDetails.username || member.username,
+              isCoLeader: member.isCoLeader,
+              equippedAvatar: playerDetails.equippedAvatar, // Pega o avatar dos detalhes do jogador
+            };
+          } catch (playerDetailsError) {
+            console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
+            return member; // Retorna o membro sem detalhes em caso de erro
+          }
+        });
+
+        const detailedMembers = await Promise.all(membersWithDetailsPromises);
+
+        // Combina os dados do clã com as informações e membros detalhados
         return {
           ...clan,
           ...infoResponse.data,
-          members: membersResponse.data,
+          members: detailedMembers, // Usa a lista de membros com detalhes
         };
       } catch (detailsError) {
         console.error(`Erro ao buscar detalhes para o clã ${clan.id}:`, detailsError.message);
@@ -439,6 +460,61 @@ apiRouter.get('/clans/search', async (req, res) => {
   } catch (error) {
     console.error("Erro ao buscar clãs:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar os clãs. Tente novamente mais tarde.' });
+  }
+});
+
+/**
+ * Rota para buscar detalhes de um clã específico.
+ */
+apiRouter.get('/clan/:id', async (req, res) => {
+  const { id } = req.params;
+  const headers = { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' };
+
+  try {
+    const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/info`;
+    const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/members/detailed`;
+
+    console.log(`--- Buscando detalhes para o clã: ${id} ---`);
+    const [infoResponse, membersResponse] = await Promise.all([
+      axios.get(infoUrl, { headers }),
+      axios.get(membersUrl, { headers })
+    ]);
+
+    // Se o clã não for encontrado, retorna 404
+    if (!infoResponse.data || !infoResponse.data.id) {
+      return res.status(404).json({ error: `Clan with ID ${id} not found.` });
+    }
+
+    const membersWithDetailsPromises = membersResponse.data.map(async (member) => {
+        try {
+            const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
+            const playerDetailsResponse = await axios.get(playerDetailsUrl, { headers });
+            const playerDetails = playerDetailsResponse.data;
+            return {
+              id: member.id,
+              username: playerDetails.username || member.username,
+              isCoLeader: member.isCoLeader,
+              equippedAvatar: playerDetails.equippedAvatar,
+              level: playerDetails.level, // Also get the level
+            };
+        } catch (playerDetailsError) {
+            console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
+            return member;
+        }
+    });
+
+    const detailedMembers = await Promise.all(membersWithDetailsPromises);
+
+    const combinedData = {
+      ...infoResponse.data,
+      members: detailedMembers,
+    };
+
+    res.json(combinedData);
+
+  } catch (error) {
+    console.error(`Erro ao buscar dados do clã ${id}:`, error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os dados do clã.' });
   }
 });
 

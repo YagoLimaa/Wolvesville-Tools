@@ -43,10 +43,13 @@ export const ClanCard = ({ clan }: ClanCardProps) => {
   };
 
   return (
-    <Card className="bg-card/80 backdrop-blur border-border hover:border-primary transition-all duration-300 hover:shadow-elevated overflow-hidden flex flex-col">
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <div className="h-fit w-full">
+      <Card className="bg-card/80 backdrop-blur border-border hover:border-primary transition-all duration-300 hover:shadow-elevated overflow-hidden flex flex-col">
+      <Collapsible key={clan.id} open={isOpen} onOpenChange={setIsOpen}>
         <div className="p-6 flex flex-col items-center text-center">
-          <CardTitle className="text-2xl font-bold text-primary">{clan.name}</CardTitle>
+          <Link to={`/clan/${clan.id}`}>
+            <CardTitle className="text-2xl font-bold text-primary hover:underline">{clan.name}</CardTitle>
+          </Link>
           <p className="text-sm text-muted-foreground italic mt-1 min-h-[40px] flex-grow">"{clan.description}"</p>
           <div className="flex items-center gap-4 mt-3">
             <Badge variant="secondary" className="text-sm">
@@ -98,6 +101,7 @@ export const ClanCard = ({ clan }: ClanCardProps) => {
           </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+      </Card>
+    </div>
   );
 };

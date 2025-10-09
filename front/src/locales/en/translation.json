@@ -31,7 +31,8 @@
     "xp": "XP",
     "updating": "Updating...",
     "expired": "Expired",
-    "of": "of"
+    "of": "of",
+    "back": "Back"
   },
   "battlePass": {
     "fetchError": "Could not fetch Battle Pass data.",
@@ -190,5 +191,16 @@
     "fetchCategoryError": "Error fetching item category {{category}}: ",
     "combinedItemsLog": "--- [ItemsContext] Final combined items list: --- {{count}} items",
     "hookScopeError": "useItems must be used within an ItemsProvider"
+  },
+  "clanInfo": {
+    "minLevel": "Min. Level",
+    "language": "Language",
+    "creationDate": "Creation Date",
+    "joinType": "Join Rules",
+    "role": "Role",
+    "fetchError": "Could not fetch clan data.",
+    "joinByRequest": "By Request",
+    "open": "Open",
+    "closed": "Closed"
   }
 }

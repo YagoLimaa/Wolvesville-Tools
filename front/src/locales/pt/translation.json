@@ -31,7 +31,8 @@
     "xp": "XP",
     "updating": "Atualizando...",
     "expired": "Expirado",
-    "of": "de"
+    "of": "de",
+    "back": "Voltar"
   },
   "battlePass": {
     "fetchError": "Não foi possível buscar os dados do Battle Pass.",

@@ -6,6 +6,7 @@ import { Player } from "@/types/Player";
 import { useTranslation } from "react-i18next";
 import { Users, Trophy, Clock, Heart, Eye, EyeOff, X } from "lucide-react";
 import { useItems } from "./contexts/ItemsContext";
+import { Link } from "react-router-dom";
 
 interface PlayerCardProps {
   player: Player;
@@ -40,18 +41,18 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
     <Card className="bg-card border-border hover:border-primary transition-all duration-300 hover:shadow-elevated">
       <CardHeader className="pb-4">
         <div className="flex items-start gap-4">
-          <div className="relative">
+          <div className="flex flex-col items-center gap-2">
             <img
               src={player.equippedAvatar.url}
               alt={`Avatar de ${player.username}`}
               className="w-20 h-20 rounded-full border-2 border-primary shadow-glow-primary"
             />
-            <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
+            <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
               {player.level === -1 ? '?' : t('playerCard.level')} {player.level}
             </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-2xl font-bold text-foreground mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-2xl font-bold text-foreground mb-2 break-words">
               {player.username}
             </h3>
             <div className="flex flex-wrap gap-2 mb-2">
@@ -59,10 +60,12 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                 {player.status}
               </Badge>
               {player.clan && (
-                <Badge variant="outline" className="border-wolf-green text-wolf-green text-sm px-3 py-1">
-                  <Users className="w-4 h-4 mr-2" />
-                  {player.clan.name}
-                </Badge>
+                <Link to={`/clan/${player.clan.id}`}>
+                  <Badge variant="outline" className="border-wolf-green text-wolf-green text-sm px-3 py-1 hover:bg-wolf-green/10 transition-colors">
+                    <Users className="w-4 h-4 mr-2" />
+                    {player.clan.name}
+                  </Badge>
+                </Link>
               )}
             </div>
             <div className="flex flex-wrap gap-2">

@@ -4,6 +4,7 @@ export interface Player {
   level: number;
   status: string;
   clan?: {
+    id: string;
     name: string;
   };
   equippedAvatar: {
