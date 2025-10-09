@@ -199,7 +199,7 @@ const ClanInfoPage = () => {
                 {sortedMembers.map((member, index) => (
                   <TableRow key={member.id}>
                     <TableCell>
-                      <img src={member.equippedAvatar?.url || 'https://via.placeholder.com/40'} alt={member.username} className="w-10 h-10 rounded-full" />
+                      <img src={member.equippedAvatar?.url || 'https://via.placeholder.com/40'} alt={member.username} className="w-10 h-10 rounded-full object-cover" />
                     </TableCell>
                     <TableCell className="font-medium">
                       <Link to={`/search?username=${encodeURIComponent(member.username)}`} className="hover:underline">

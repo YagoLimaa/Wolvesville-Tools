@@ -218,7 +218,7 @@ const ClanSearch = () => {
                     onChange={(e) => setLocalSearchTerm(e.target.value)}
                   />
                 </div>
-                                  <div className="flex flex-wrap items-center justify-end gap-4">                  <div className="flex items-center gap-2">
+                                  <div className="flex flex-col sm:flex-row items-center gap-4">                  <div className="flex items-center gap-2">
                     <Select value={language} onValueChange={setLanguage}>
                       <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Idioma" />
