@@ -388,15 +388,14 @@ apiRouter.get('/players/highscores', async (req, res) => {
 apiRouter.get('/clans/search', async (req, res) => {
   const { name, language } = req.query;
 
-  if (!name) {
-    return res.status(400).json({ error: 'O nome do clã é obrigatório.' });
-  }
-
   try {
     const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
     
     // Constrói os parâmetros de busca dinamicamente
-    const searchParams = { name };
+    const searchParams = {};
+    if (name) {
+      searchParams.name = name;
+    }
     if (language && language.toLowerCase() !== 'all') {
       searchParams.language = language;
     }
@@ -406,7 +405,7 @@ apiRouter.get('/clans/search', async (req, res) => {
       headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' }
     };
 
-    console.log(`--- Buscando clãs com nome: ${name}, idioma: ${language || 'all'} ---`);
+    console.log(`--- Buscando clãs com parâmetros: ${JSON.stringify(searchParams)} ---`);
     const searchResponse = await axios.get(searchUrl, searchConfig);
 
     const clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
