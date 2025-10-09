@@ -189,7 +189,7 @@ const ClanInfoPage = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[60px]"></TableHead>
+                  <TableHead className="w-[80px]"></TableHead>
                   <TableHead>{t('playerCard.username')}</TableHead>
                   <TableHead>{t('playerCard.level')}</TableHead>
                   <TableHead>{t('clanInfo.role')}</TableHead>
@@ -199,7 +199,7 @@ const ClanInfoPage = () => {
                 {sortedMembers.map((member, index) => (
                   <TableRow key={member.id}>
                     <TableCell>
-                      <img src={member.equippedAvatar?.url || 'https://via.placeholder.com/40'} alt={member.username} className="w-10 h-10 rounded-full object-cover" />
+                      <img src={member.equippedAvatar?.url || 'https://via.placeholder.com/40'} alt={member.username} className="w-16 h-16 rounded-full object-cover" />
                     </TableCell>
                     <TableCell className="font-medium">
                       <Link to={`/search?username=${encodeURIComponent(member.username)}`} className="hover:underline">
