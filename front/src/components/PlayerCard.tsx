@@ -45,7 +45,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
             <img
               src={player.equippedAvatar.url}
               alt={`Avatar de ${player.username}`}
-              className="w-20 h-20 rounded-full border-2 border-primary shadow-glow-primary"
+              className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-primary shadow-glow-primary object-cover flex-shrink-0"
             />
             <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
               {player.level === -1 ? '?' : t('playerCard.level')} {player.level}
