@@ -196,15 +196,17 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
         {/* Avatar Gallery */}
         {showAvatars && (
           <div className="flex flex-wrap justify-center gap-4 bg-secondary rounded-lg p-4">
-            {player.avatars.map((avatar, index) => (
-              <img
-                key={index}
-                src={avatar.url}
-                alt="Avatar"
-                className="w-32 h-32 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer object-cover"
-                onClick={() => setSelectedAvatar(avatar.url)}
-                title={t('playerCard.clickToZoom')}
-              />
+            {player.avatars && Array.isArray(player.avatars) && player.avatars.map((avatar, index) => (
+              avatar && avatar.url && (
+                <img
+                  key={index}
+                  src={avatar.url}
+                  alt="Avatar"
+                  className="w-32 h-32 rounded-lg border border-border hover:border-primary transition-colors cursor-pointer object-cover"
+                  onClick={() => setSelectedAvatar(avatar.url)}
+                  title={t('playerCard.clickToZoom')}
+                />
+              )
             ))}
           </div>
         )}
