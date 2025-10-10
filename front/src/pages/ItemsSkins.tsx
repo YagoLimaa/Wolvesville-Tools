@@ -125,7 +125,7 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
   const isFallback = imageSrc.includes("ad3466d4-8798-4b9b-a5e7-2ae7d2343c58");
 
   return (
-    <img src={imageSrc} alt={item.name || item.id} className={`w-full h-full object-contain p-2 ${isFallback ? 'bg-black/20 rounded-md' : ''}`} onError={handleError} />
+    <img src={imageSrc} alt={item.name || item.id} className={`w-full h-full ${['bundles', 'avatarItemCollections', 'avatarItemSets'].includes(item.category) ? 'object-cover' : 'object-contain'} ${['bundles', 'avatarItemCollections', 'avatarItemSets'].includes(item.category) ? '' : 'p-2'} ${isFallback ? 'bg-black/20 rounded-md' : ''}`} onError={handleError} />
   );
 };
 
@@ -453,7 +453,7 @@ const ItemsSkins = () => {
             <CardContent className="p-6">
               <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl, t)}</h3>
               {collectionPieces.length > 0 ? (
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {collectionPieces.map(piece => (
                     <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity!] || 'border-gray-600/50'}`}>
                       <ItemImage item={piece} onImageError={handleImageError} />
