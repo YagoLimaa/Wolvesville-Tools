@@ -13,7 +13,8 @@
     "skins_and_avatars_description": "Todas as skins disponíveis",
     "shop": "Loja",
     "shop_description": "Ofertas ativas e itens",
-    "updates": "Atualizações"
+    "updates": "Atualizações",
+    "unofficial": "Não Oficial"
   },
   "pagination": {
     "previous": "Anterior",
@@ -191,5 +192,9 @@
     "fetchCategoryError": "Erro ao buscar a categoria de itens {{category}}: ",
     "combinedItemsLog": "--- [ItemsContext] Lista final de itens combinados: --- {{count}} itens",
     "hookScopeError": "useItems deve ser usado dentro de um ItemsProvider"
+  },
+  "footer": {
+    "unofficial_notice": "Site não oficial do wolvesville",
+    "api_disclaimer": "feito por Yagod"
   }
 }

@@ -14,6 +14,7 @@ import ClanRankings from "./pages/ClanRankings";
 import ClanInfo from "./pages/ClanInfo";
 import NotFound from "./pages/NotFound";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Footer } from "./components/ui/Footer";
 
 const queryClient = new QueryClient();
 
@@ -25,16 +26,21 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/search" element={<SearchPlayer />} />
-            <Route path="/items/shop" element={<ItemsShop />} />
-              <Route path="/clan/search" element={<ClanSearch />} />
-              <Route path="/clan/rankings" element={<ClanRankings />} />
-              <Route path="/clan/:id" element={<ClanInfo />} />
-              <Route path="/items/skins" element={<ItemsSkins />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className="flex flex-col min-h-screen">
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/search" element={<SearchPlayer />} />
+                  <Route path="/items/shop" element={<ItemsShop />} />
+                  <Route path="/clan/search" element={<ClanSearch />} />
+                  <Route path="/clan/rankings" element={<ClanRankings />} />
+                  <Route path="/clan/:id" element={<ClanInfo />} />
+                  <Route path="/items/skins" element={<ItemsSkins />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
           </BrowserRouter>
         </TooltipProvider>
       </ItemsProvider>
@@ -43,3 +49,4 @@ const App = () => (
 );
 
 export default App;
+

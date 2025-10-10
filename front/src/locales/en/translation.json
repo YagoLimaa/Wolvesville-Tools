@@ -13,7 +13,8 @@
     "skins_and_avatars_description": "All available skins",
     "shop": "Shop",
     "shop_description": "Active offers and items",
-    "updates": "Updates"
+    "updates": "Updates",
+    "unofficial": "Unofficial"
   },
   "pagination": {
     "previous": "Previous",
@@ -202,5 +203,9 @@
     "joinByRequest": "By Request",
     "open": "Open",
     "closed": "Closed"
+  },
+  "footer": {
+    "unofficial_notice": "Unofficial wolvesville website",
+    "api_disclaimer": "made by Yagod"
   }
 }
