@@ -42,7 +42,7 @@ const getTimeLeft = (startTime: string, durationInDays: number, t: (key: string,
 export const BattlePassChallenges = () => {
   const { t, i18n } = useTranslation();
   const { data: challenges, isLoading, isError, error } = useQuery<Challenge[], Error>({
-    queryKey: ["battlePassChallenges"],
+    queryKey: ["battlePassChallenges", i18n.language],
     queryFn: () => fetchBattlePassChallenges(i18n.language),
   });
 
