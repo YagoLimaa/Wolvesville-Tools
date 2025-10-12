@@ -16,7 +16,6 @@ interface Offer {
   expireDate: string;
   promoImageUrl: string;
   costInGems?: number;
-  // Adicionando outras propriedades como opcionais
   avatarItemIds?: string[];
   avatarItemSetIds?: (
     | {
@@ -38,7 +37,6 @@ const fetchShopOffers = async (): Promise<Offer[]> => {
   return response.json();
 };
 
-// Função para extrair e formatar o nome da oferta a partir da URL da imagem
 const getOfferNameFromUrl = (url: string, t: (key: string) => string): string => {
   try {
     const filename = url.split('/').pop()?.split('.')[0] ?? '';
@@ -48,7 +46,6 @@ const getOfferNameFromUrl = (url: string, t: (key: string) => string): string =>
   }
 };
 
-// Hook customizado para o contador de tempo restante
 const useCountdownToNextWednesday = (): { timeLeftFormatted: string; isEndingSoon: boolean } => {
   const [timeLeft, setTimeLeft] = React.useState(0);
 
@@ -161,24 +158,16 @@ export const ShopActiveOffers = () => {
     }
 
     if (selectedOffer.advancedRoleCardOfferId) {
-      console.log("--- Debug: Oferta de Função Avançada ---");
       const offerId = selectedOffer.advancedRoleCardOfferId;
-      console.log("1. ID da Oferta (advancedRoleCardOfferId):", offerId);
-
       const offerItem = itemsById.get(offerId);
-      console.log("2. Item da Oferta encontrado no mapa 'itemsById':", offerItem);
 
       if (offerItem) {
-        const targetSetId = offerItem.avatarItemSetId as string; // Este é o ID do conjunto que queremos
-        console.log("3. ID do Conjunto de Avatar (avatarItemSetId) encontrado no item da oferta:", targetSetId);
-
+        const targetSetId = offerItem.avatarItemSetId as string;
         const itemSet = itemsById.get(targetSetId);
-        console.log("4. Conjunto de Itens (itemSet) encontrado no mapa 'itemsById':", itemSet);
 
         if (itemSet && itemSet.category === 'avatarItemSets') {
-
-        const idsFromSet = (itemSet?.avatarItemIds as string[] | undefined) || [];
-        allItemIds.push(...idsFromSet);
+          const idsFromSet = (itemSet?.avatarItemIds as string[] | undefined) || [];
+          allItemIds.push(...idsFromSet);
         }
       }
     }

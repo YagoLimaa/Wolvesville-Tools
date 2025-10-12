@@ -101,19 +101,16 @@ export const BattlePassRewards = ({ season }: BattlePassRewardsProps) => {
                     </>
                   )}
 
-                  {/* Nível */}
                   <div className="absolute bottom-0 left-0 right-0 z-20 bg-black/60 py-0.5 text-center text-xs font-semibold text-white">
                     {t('battlePass.rewards.level', { level })}
                   </div>
 
-                  {/* Cadeado para itens pagos */}
                   {"free" in reward && !reward.free && (
                     <div className="absolute right-1.5 top-1.5 z-20 text-white/70">
                       <Lock className="h-3 w-3" />
                     </div>
                   )}
 
-                  {/* Quantidade */}
                   {"amount" in reward && reward.amount > 1 && (
                     <div className="absolute left-1.5 top-1 z-20 text-lg font-extrabold text-white" style={{ textShadow: "1px 1px 3px black" }}>
                       {reward.amount}x

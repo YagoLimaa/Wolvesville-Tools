@@ -38,10 +38,9 @@ const fetchAllRoles = async (): Promise<Role[]> => {
   }
   const data: { roles: RoleFromApi[] } = await response.json();
   
-  // Transforma os dados da API para o formato que o frontend espera
   return data.roles.map(role => ({
     ...role,
-    imageUrl: role.image.url, // Extrai a URL da imagem
+    imageUrl: role.image.url,
   }));
 };
 

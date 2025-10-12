@@ -21,7 +21,6 @@ const SearchPlayer = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Efeito para buscar automaticamente se houver um 'username' na URL
   useEffect(() => {
     const usernameFromUrl = searchParams.get("username");
     if (usernameFromUrl) {
@@ -42,8 +41,8 @@ const SearchPlayer = () => {
 
       setSearchResult(result);
       setCurrentQuery(username);
-      setSearchParams({ username, page: page.toString() }); // Atualiza a URL com a busca atual
-      window.scrollTo({ top: 0, behavior: 'smooth' }); // Rola para o topo
+      setSearchParams({ username, page: page.toString() });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(t('searchPlayer.searchError'));
       setSearchResult(null);
@@ -74,7 +73,6 @@ const SearchPlayer = () => {
         )}
         {!isLoadingItems && (
           <div className="space-y-6">
-            {/* Se não houver resultados, mostra o formulário de busca */}
             {!searchResult && (
               <Card className="max-w-md mx-auto bg-card/50 backdrop-blur border-accent/20">
                 <CardContent className="p-6">
@@ -89,7 +87,6 @@ const SearchPlayer = () => {
               </Card>
             )}
 
-            {/* Se houver resultados, mostra o cabeçalho e o botão de voltar */}
             {searchResult && (
               <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4">
               <GradientButton variant="outline" onClick={handleGoBack}>
@@ -111,7 +108,6 @@ const SearchPlayer = () => {
 
             {searchResult && searchResult.players.length > 0 && (
               <>
-                {/* Players Grid */}
                 <div className="grid gap-6">
                   {searchResult.players.map((player) => (
                     <PlayerCard key={player.id} player={player} />
@@ -128,7 +124,6 @@ const SearchPlayer = () => {
               </Card>
             )}
 
-            {/* Pagination - Only show if there are results and more than one page */}
             {searchResult && searchResult.pagination.totalPages > 1 && (
               <Pagination
                 currentPage={searchResult.pagination.currentPage}

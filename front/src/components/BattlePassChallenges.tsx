@@ -17,7 +17,6 @@ interface Challenge {
 }
 
 const fetchBattlePassChallenges = async (language: string): Promise<Challenge[]> => {
-  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch(`/api/battlePass/challenges?locale=${language}`);
   if (!response.ok) {
     throw new Error("fetch_error");

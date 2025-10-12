@@ -12,7 +12,6 @@ const Index = () => {
       <NavigationBar />
       
       <main className="px-4 pt-8 space-y-8">
-        {/* Hero Section */}
         <div className="text-center space-y-4 py-12">
           <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
             {t('navigation.home_title')}
@@ -22,16 +21,13 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Main Content Grid */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Left Column */}
           <div className="flex flex-col gap-8 lg:w-1/2">
             <BattlePassSeason />
             <BattlePassChallenges />
             <PlayersHighscores />
           </div>
 
-          {/* Right Column */}
           <div className="flex flex-col gap-8 lg:w-1/2">
             <RoleRotations />
           </div>

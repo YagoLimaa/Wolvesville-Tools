@@ -55,7 +55,7 @@ export interface Item {
   bodyPaints?: { id: string; }[];
   roseSkins?: { id: string; }[];
   backgrounds?: { id: string; }[];
-  [key: string]: unknown; // Permite outras propriedades
+  [key: string]: unknown;
 }
 
 // Interface para os itens como eles vêm da API, antes de adicionar a categoria
@@ -90,7 +90,6 @@ const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
         return [];
       }
       const itemsArray = await response.json() as ApiItem[];
-      // Adiciona a categoria a cada item e normaliza o gênero
       return itemsArray.map((apiItem: ApiItem): Item => ({
         ...apiItem,
         category,

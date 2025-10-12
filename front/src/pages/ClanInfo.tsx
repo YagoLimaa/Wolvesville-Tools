@@ -17,7 +17,6 @@ import {
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { Button } from "@/components/ui/button";
 
-// Define the types for the clan data
 interface ClanMember {
   id: string;
   username: string;
@@ -43,7 +42,6 @@ interface ClanInfoData {
   members: ClanMember[];
 }
 
-// Type guard to check if the data is valid ClanInfoData
 function isClanInfoData(data: unknown): data is ClanInfoData {
   return (
     typeof data === 'object' &&

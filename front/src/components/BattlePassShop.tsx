@@ -19,7 +19,6 @@ interface BattlePassShopData {
 }
 
 const fetchBattlePassShop = async (): Promise<BattlePassShopData> => {
-  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch('/api/battlePass/shop');
   if (!response.ok) {
     throw new Error("fetch_error");
@@ -89,13 +88,11 @@ export const BattlePassShop = () => {
             <div className="aspect-square w-full">
               <div className="relative h-full w-full">
                 <div className="flex h-full w-full flex-col items-center justify-center bg-gray-800/50 p-1">
-                  {/* Imagem de fundo */}
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm"
                     style={{ backgroundImage: `url(${imageUrl})` }}
                   />
 
-                  {/* Imagem principal */}
                   <img
                     alt={itemName}
                     draggable="false"
@@ -103,12 +100,10 @@ export const BattlePassShop = () => {
                     className="relative z-10 h-full w-full object-contain p-4 transition-transform duration-300 group-hover:scale-110"
                   />
 
-                  {/* Nome do item */}
                   <div className="absolute top-2 left-2 right-2 z-20 bg-black/60 px-2 py-1 text-center text-xs font-semibold text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-md">
                     <p className="truncate">{itemName}</p>
                   </div>
 
-                  {/* Custo */}
                   <div className="absolute bottom-2 right-2 z-20 flex items-center gap-1 rounded-full bg-black/60 px-2 py-1 text-xs font-semibold text-white">
                     <img 
                       src={`https://cdn2.wolvesville.com/battlePass/coins/bp44_single@2x.png`}

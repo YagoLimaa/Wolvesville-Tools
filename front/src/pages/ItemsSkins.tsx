@@ -10,7 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Pagination } from "@/components/Pagination";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Search, AlertTriangle, Gem, Filter } from "lucide-react";
-import { PawPrint } from "lucide-react"; // Ícone para ProfileIcons
+import { PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
@@ -20,32 +20,13 @@ interface ContainedItem {
   avatarItemId?: string;
   loadingScreenId?: string;
   emojiId?: string;
-  [key: string]: string | number | undefined; // Permite outras propriedades, de forma mais segura
+  [key: string]: string | number | undefined;
 }
 
-// Tipos para os itens contidos em coleções
 interface ContainedItemIdentifier {
   id: string | number;
   type: string;
 }
-
-// Mapeia os nomes das chaves da API para nomes amigáveis
-const categoryDisplayNames: { [key: string]: string } = {
-  avatarItems: "Itens de Avatar",
-  bodyPaints: "Pinturas Corporais",
-  avatarItemSets: "Conjuntos de Avatar",
-  avatarItemCollections: "Coleções de Avatar",
-  bundles: "Pacotes",
-  calendars: "Calendários",
-  profileIcons: "Ícones de Perfil",
-  profileIconBorders: "Bordas de Ícone",
-  emojis: "Emojis",
-  emojiCollections: "Coleções de Emoji",
-  backgrounds: "Fundos",
-  loadingScreens: "Telas de Loading",
-  roleIcons: "Ícones de Papel",
-  roseSkins: "Skins de Rosa",
-};
 
 const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4 };
 const rarityColors = {
@@ -55,30 +36,27 @@ const rarityColors = {
   legendary: "border-yellow-500/50",
 };
 
-// Função para extrair e formatar um nome a partir da URL da imagem
 const getNameFromUrl = (url: string, t: (key: string) => string): string => {
   try {
     const filename = url.split('/').pop()?.split('.')[0] ?? '';
     // Remove prefixos e sufixos comuns e substitui hífens/sublinhados por espaços
     const cleanedName = filename
-      .replace(/bp\d+-/, '') // Remove prefixos de passe de batalha, ex: bp44-
-      .replace(/_store|@\dx/g, '') // Remove sufixos como _store, @2x, @3x
+      .replace(/bp\d+-/, '')
+      .replace(/_store|@\dx/g, '')
       .replace(/[-_]/g, ' ');
     return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
   } catch {
-    return t("common.item"); // Nome de fallback em caso de erro
+    return t("common.item");
   }
 };
 
-// Componente para renderizar a imagem do item com lógica de fallback
 const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: string) => void; }) => {
   const [imageSrc, setImageSrc] = React.useState(item.imageUrl);
   const [hasError, setHasError] = React.useState(false);
 
-  // Reseta a imagem se o item mudar
   React.useEffect(() => {
     setImageSrc(item.imageUrl);
-    setHasError(false); // Reseta o estado de erro quando o item muda
+    setHasError(false);
   }, [item.imageUrl]);
 
   // Caso especial para profileIcons que não têm imagem
@@ -96,7 +74,6 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
     const baseCdn = "https://cdn2.wolvesville.com";
     let fallbackUrl = '';
 
-    // Constrói a URL de fallback baseada na categoria do item
     switch (item.category) {
       case "avatarItems":
         fallbackUrl = `${baseCdn}/avatarItems/${item.id}.store@2x.png`;
@@ -108,11 +85,9 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
       // e para as quais conhecemos o padrão do CDN.
     }
 
-    // Se um fallback foi construído e é diferente da URL atual, tenta usá-lo.
     if (fallbackUrl && fallbackUrl !== imageSrc) {
       setImageSrc(fallbackUrl);
     } else {
-      // Se não há fallback ou ele também falhou, usa a imagem de fallback final.
       // Verifica para não entrar em loop se a própria imagem de fallback falhar.
       const FALLBACK_IMAGE_URL = "https://cdn-avatars2.wolvesville.com/ad3466d4-8798-4b9b-a5e7-2ae7d2343c58@2x.png";
       if (imageSrc !== FALLBACK_IMAGE_URL) {
@@ -121,7 +96,6 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
     }
   };
 
-  // Adiciona um fundo escuro se a imagem for a de fallback
   const isFallback = imageSrc.includes("ad3466d4-8798-4b9b-a5e7-2ae7d2343c58");
 
   return (
@@ -203,12 +177,10 @@ const ItemsSkins = () => {
     });
   }, [sortedItems, searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter]);
 
-  // Efeito para resetar a página quando os filtros mudam
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter]);
 
-  // Itens paginados para exibição
   const paginatedItems = React.useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
@@ -223,7 +195,6 @@ const ItemsSkins = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Extrai os tipos únicos de itens de avatar para o filtro
   const avatarItemTypes = React.useMemo(() => {
     if (!allItems) return [];
     const types = new Set(allItems.filter(i => i.category === 'avatarItems' && i.type).map(i => i.type!));
@@ -233,7 +204,6 @@ const ItemsSkins = () => {
   // Categorias que abrem popup
   const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars'];
 
-  // Encontra as peças de uma coleção selecionada (conjunto, calendário, etc.)
   const collectionPieces = React.useMemo(() => {
     if (!selectedCollection || !allItems) return [];
 
@@ -276,9 +246,7 @@ const ItemsSkins = () => {
   // Lista de categorias de itens individuais que podem pertencer a uma coleção
   const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
 
-  // Função para lidar com o clique em um item
   const handleItemClick = (item: Item) => {
-    // Se for uma coleção, abre o popup com suas peças
     if (collectionCategories.includes(item.category)) {
       setSelectedCollection(item);
     } else if (item.parentSetId && allItems) {
@@ -298,7 +266,6 @@ const ItemsSkins = () => {
       <NavigationBar />
 
       <main className="container mx-auto px-4 py-8 mt-[84px]">
-        {/* Filtros: Acima em telas pequenas, na lateral em telas grandes */}
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
           <aside className="lg:col-span-1 mb-8 lg:mb-0">
             <Card className="bg-card/50 backdrop-blur border-accent/20 lg:sticky lg:top-24">
@@ -378,7 +345,6 @@ const ItemsSkins = () => {
             </Card>
           </aside>
 
-          {/* Grade de Itens */}
           <div className="lg:col-span-3">
             {isLoading && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -396,7 +362,6 @@ const ItemsSkins = () => {
                 </Alert>
               </Card>
             )}
-            {/* Paginação no Topo */}
             {totalPages > 1 && (
               <div className="mb-4 flex justify-end">
                 <Pagination
@@ -440,7 +405,6 @@ const ItemsSkins = () => {
         </div>
       </main>
 
-      {/* Modal para exibir as peças do conjunto */}
       {selectedCollection && (
         <div 
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"

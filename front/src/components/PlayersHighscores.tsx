@@ -20,7 +20,6 @@ interface HighscorePlayer {
 }
 
 const fetchHighscores = async (): Promise<HighscorePlayer[]> => {
-  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch('/api/players/highscores?limit=10');
   if (!response.ok) {
     throw new Error("fetch_error");

@@ -14,7 +14,6 @@ export interface Reward {
   type: string;
   amount: number;
   free: boolean;
-  // Adicionando outras propriedades como opcionais
   emojiId?: string;
   avatarItemIdMale?: string;
   avatarItemIdFemale?: string;
@@ -23,7 +22,7 @@ export interface Reward {
   profileIconId?: string;
   bodyPaintId?: string;
   loadingScreenId?: string;
-  imageUrl: string; // Adicionando a URL da imagem
+  imageUrl: string;
 }
 
 export interface BattlePassCoinReward {
@@ -44,7 +43,6 @@ export interface BattlePassSeasonData {
 }
 
 const fetchBattlePassSeason = async (): Promise<BattlePassSeasonData> => {
-  // A tradução do erro da API deve ser feita no frontend
   const response = await fetch('/api/battlePass/season');
   if (!response.ok) {
     throw new Error("fetch_error");
@@ -96,7 +94,6 @@ export const BattlePassSeason = () => {
 
         {season && (
           <div className="space-y-6">
-            {/* Season Info */}
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold">{t('battlePass.season.season', { seasonNumber: season.number })}</h3>

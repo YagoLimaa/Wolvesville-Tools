@@ -1,20 +1,19 @@
 const path = require('path');
 
+// Este arquivo não será mais o servidor principal, mas pode ser mantido para desenvolvimento local.
+// A lógica principal será movida para /functions/api/[[path]].js para deploy na Cloudflare.
+// Para manter o desenvolvimento local funcionando, você pode adaptar este arquivo ou
+// usar uma ferramenta como `wrangler` da Cloudflare.
+// Por enquanto, vamos focar no deploy.
+
+// As dependências ainda são necessárias para a lógica da API.
+const axios = require('axios');
+const cors = require('cors');
+const express = require('express'); // Mantido para o servidor de desenvolvimento local
+
 if (process.env.NODE_ENV !== 'production') { require('dotenv').config({ path: path.resolve(__dirname, '.env') }); }
 
-const express = require('express');
-const axios = require('axios');
-const { Router } = require('express');
-const cors = require('cors');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
-const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
-
-app.use(express.static('public'));
-const allowedOrigins = [
+const allowedOrigins = [ // A configuração de CORS será gerenciada de outra forma na Cloudflare
   'http://localhost:8080',
   'https://wolvesvilletools.vercel.app',
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
@@ -22,6 +21,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Para desenvolvimento local, a lógica de CORS permanece.
+    // Em produção na Cloudflare, você pode configurar cabeçalhos personalizados se necessário,
+    // mas geralmente a origem da requisição será a mesma do seu site,
+    // ou você pode configurar domínios personalizados.
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -30,25 +33,26 @@ app.use(cors({
   }
 }));
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
+const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
+
+app.use(express.static('public'));
+
 if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
   console.error('ERRO: A variável de ambiente WOLVESVILLE_API_KEY não foi definida no arquivo .env.');
   console.error('Por favor, adicione sua chave da API ao arquivo .env e reinicie o servidor.');
   process.exit(1); 
 }
 
-// Cria um roteador para agrupar todas as nossas rotas de API
 const apiRouter = Router();
-
-/**
- * Rota principal: exibe o formulário de busca.
- */
-/**
- * Rota de busca: processa o formulário, busca na API e exibe os resultados com paginação.
- */
+// A lógica abaixo será movida para /functions/api/[[path]].js
 apiRouter.get('/search', async (req, res) => {
   const { username } = req.query;
   const page = parseInt(req.query.page) || 1;
-  const resultsPerPage = 5; // Defina quantos resultados por página
+  const resultsPerPage = 5;
 
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/search`;
@@ -60,12 +64,6 @@ apiRouter.get('/search', async (req, res) => {
       }
     };
 
-    // --- Informações de Debug ---
-    console.log('--- Iniciando requisição para a API ---');
-    console.log('URL de destino:', requestUrl);
-    console.log('Parâmetros:', requestConfig.params);
-    console.log('Headers enviados:', requestConfig.headers);
-    console.log('------------------------------------');
     const response = await axios.get(requestUrl, requestConfig);
 
     // Garante que allPlayers seja sempre um array.
@@ -73,11 +71,11 @@ apiRouter.get('/search', async (req, res) => {
     // ele será convertido para um array vazio.
     let allPlayers;
     if (Array.isArray(response.data)) {
-      allPlayers = response.data; // A resposta já é um array
+      allPlayers = response.data;
     } else if (response.data && typeof response.data === 'object' && Object.keys(response.data).length > 0) {
-      allPlayers = [response.data]; // A resposta é um objeto único, transforma em array
+      allPlayers = [response.data];
     } else {
-      allPlayers = []; // A resposta é um objeto vazio ou outro formato, considera como sem resultados
+      allPlayers = [];
     }
 
     // Para cada jogador encontrado, busca os detalhes do clã se ele tiver um clanId
@@ -85,14 +83,12 @@ apiRouter.get('/search', async (req, res) => {
       if (player.clanId) {
         try {
           const clanUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${player.clanId}/info`;
-          console.log(`Buscando informações do clã em: ${clanUrl}`);
           const clanResponse = await axios.get(clanUrl, {
             headers: {
               'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
               'Accept': 'application/json'
             }
           });
-          // Adiciona um objeto contendo o nome e a ID do clã
           player.clan = { id: player.clanId, name: clanResponse.data.name };
         } catch (clanError) {
           console.error(`Erro ao buscar detalhes do clã ${player.clanId}:`, clanError.message);
@@ -102,15 +98,12 @@ apiRouter.get('/search', async (req, res) => {
     }
 
     if (!allPlayers || allPlayers.length === 0) {
-      // Se nenhum jogador for encontrado, retorna uma estrutura JSON vazia
-      // que o frontend consegue entender.
       return res.json({
         players: [],
         pagination: { currentPage: 1, totalPages: 1 }
       });
     }
 
-    // Lógica de Paginação
     const totalPages = Math.ceil(allPlayers.length / resultsPerPage);
     const startIndex = (page - 1) * resultsPerPage;
     const endIndex = startIndex + resultsPerPage;
@@ -131,17 +124,12 @@ apiRouter.get('/search', async (req, res) => {
 
   } catch (error) {
     console.error("Erro ao buscar dados da API Wolvesville:", error.message);
-    // Em caso de erro, envia uma resposta de erro em JSON
     res.status(500).json({ error: 'Não foi possível conectar à API do Wolvesville. Tente novamente mais tarde.' });
   }
 });
 
-/**
- * Rota para buscar a rotação de roles ativa.
- */
 apiRouter.get('/roleRotations', async (req, res) => {
   try {
-    // Usando o endpoint /roleRotations conforme solicitado
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roleRotations`;
     const requestConfig = {
       headers: {
@@ -149,17 +137,11 @@ apiRouter.get('/roleRotations', async (req, res) => {
         'Accept': 'application/json'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /roleRotations bem-sucedida ---');
 
-
-    // Processa cada modo de jogo retornado pela API
     const formattedRotations = response.data.map(rotationData => {
       const roles = (rotationData.roleRotations && rotationData.roleRotations.length > 0)
         ? rotationData.roleRotations[0].roleRotation.roles.flat().map(roleIdentifier => {
-
             const roleId = typeof roleIdentifier === 'string' ? roleIdentifier : roleIdentifier.role;
             return { id: roleId }; 
           }).filter(Boolean) 
@@ -200,9 +182,6 @@ apiRouter.get('/roleRotations', async (req, res) => {
   }
 });
 
-/**
- * Rota para buscar todas as roles.
- */
 apiRouter.get('/roles', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
@@ -212,11 +191,7 @@ apiRouter.get('/roles', async (req, res) => {
         'Accept': 'application/json'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /roles bem-sucedida ---');
-
     res.json(response.data);
   } catch (error) {
     console.error("Erro ao buscar a lista de roles:", error.message);
@@ -224,9 +199,6 @@ apiRouter.get('/roles', async (req, res) => {
   }
 });
 
-/**
- * Rota para buscar as ofertas ativas da loja.
- */
 apiRouter.get('/shop/activeOffers', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/shop/activeOffers`;
@@ -236,22 +208,14 @@ apiRouter.get('/shop/activeOffers', async (req, res) => {
         'Accept': 'application/json'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /shop/activeOffers bem-sucedida ---');
-
     res.json(response.data);
-
   } catch (error) {
     console.error("Erro ao buscar ofertas da loja:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar as ofertas da loja. Tente novamente mais tarde.' });
   }
 });
 
-/**
- * Rota para buscar os dados da temporada atual do Battle Pass.
- */
 apiRouter.get('/battlePass/season', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
@@ -261,23 +225,15 @@ apiRouter.get('/battlePass/season', async (req, res) => {
         'Accept': 'application/json'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /battlePass/season bem-sucedida ---');
-
     // Envia os dados brutos da API, a lógica da imagem será tratada no frontend
     res.json(response.data);
-
   } catch (error) {
     console.error("Erro ao buscar dados da temporada do Battle Pass:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar os dados da temporada.' });
   }
 });
 
-/**
- * Rota para buscar os dados da loja da temporada do Battle Pass.
- */
 apiRouter.get('/battlePass/shop', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
@@ -287,23 +243,15 @@ apiRouter.get('/battlePass/shop', async (req, res) => {
         'Accept': 'application/json'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /battlePass/shop bem-sucedida ---');
-
     // Envia os dados brutos da API, a lógica de exibição será tratada no frontend
     res.json(response.data);
-
   } catch (error) {
     console.error("Erro ao buscar dados da loja do Battle Pass:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar os dados da loja do passe.' });
   }
 });
 
-/**
- * Rota para buscar os desafios ativos do Battle Pass.
- */
 apiRouter.get('/battlePass/challenges', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`;
@@ -312,16 +260,11 @@ apiRouter.get('/battlePass/challenges', async (req, res) => {
         'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
         'Accept': 'application/json'
       },
-      // Passa o locale para a API do Wolvesville, usando 'pt' como padrão.
       params: {
         locale: req.query.locale || 'en'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /battlePass/challenges bem-sucedida ---');
-
     res.json(response.data);
   } catch (error) {
     console.error("Erro ao buscar desafios do Battle Pass:", error.message);
@@ -329,14 +272,10 @@ apiRouter.get('/battlePass/challenges', async (req, res) => {
   }
 });
 
-/**
- * Rota para buscar os highscores dos jogadores.
- */
 apiRouter.get('/players/highscores', async (req, res) => {
   try {
-    // Define 'xp' como o tipo de ranking padrão e busca o limite da query.
-    const type = 'oldRank'; // Mantém o tipo de ranking
-    const { limit = 10 } = req.query; // Reintroduz o limite, com 10 como padrão
+    const type = 'oldRank';
+    const { limit = 10 } = req.query;
 
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/highscores`;
     const requestConfig = {
@@ -344,12 +283,9 @@ apiRouter.get('/players/highscores', async (req, res) => {
         'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
         'Accept': 'application/json'
       },
-      params: { type, limit } // Adiciona o 'limit' à requisição para a API
+      params: { type, limit }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} com params: ${JSON.stringify(requestConfig.params)} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /players/highscores bem-sucedida ---');
 
     // A API não respeita o 'limit' para 'oldRank', então cortamos a lista manualmente.
     const allPlayersFromApi = response.data.allTime || [];
@@ -371,7 +307,6 @@ apiRouter.get('/players/highscores', async (req, res) => {
         });
     });
 
-    // Aguarda todas as requisições de detalhes terminarem
     const detailedPlayers = await Promise.all(playerDetailPromises);
 
     res.json(detailedPlayers);
@@ -382,16 +317,12 @@ apiRouter.get('/players/highscores', async (req, res) => {
   }
 });
 
-/**
- * Rota para buscar clãs por nome e enriquecer com detalhes e membros.
- */
 apiRouter.get('/clans/search', async (req, res) => {
   const { name, language } = req.query;
 
   try {
     const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
     
-    // Constrói os parâmetros de busca dinamicamente
     const searchParams = {};
     if (name) {
       searchParams.name = name;
@@ -404,8 +335,6 @@ apiRouter.get('/clans/search', async (req, res) => {
       params: searchParams, 
       headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' }
     };
-
-    console.log(`--- Buscando clãs com parâmetros: ${JSON.stringify(searchParams)} ---`);
     const searchResponse = await axios.get(searchUrl, searchConfig);
 
     const clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
@@ -422,9 +351,6 @@ apiRouter.get('/clans/search', async (req, res) => {
   }
 });
 
-/**
- * Rota para buscar detalhes de um clã específico.
- */
 apiRouter.get('/clan/:id', async (req, res) => {
   const { id } = req.params;
   const headers = { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' };
@@ -433,13 +359,11 @@ apiRouter.get('/clan/:id', async (req, res) => {
     const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/info`;
     const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/members/detailed`;
 
-    console.log(`--- Buscando detalhes para o clã: ${id} ---`);
     const [infoResponse, membersResponse] = await Promise.all([
       axios.get(infoUrl, { headers }),
       axios.get(membersUrl, { headers })
     ]);
 
-    // Se o clã não for encontrado, retorna 404
     if (!infoResponse.data || !infoResponse.data.id) {
       return res.status(404).json({ error: `Clan with ID ${id} not found.` });
     }
@@ -454,7 +378,7 @@ apiRouter.get('/clan/:id', async (req, res) => {
               username: playerDetails.username || member.username,
               isCoLeader: member.isCoLeader,
               equippedAvatar: playerDetails.equippedAvatar,
-              level: playerDetails.level, // Also get the level
+              level: playerDetails.level,
             };
         } catch (playerDetailsError) {
             console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
@@ -477,9 +401,6 @@ apiRouter.get('/clan/:id', async (req, res) => {
   }
 });
 
-/**
- * Rota para buscar os anúncios mais recentes.
- */
 apiRouter.get('/announcements', async (req, res) => {
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/announcements`;
@@ -489,11 +410,7 @@ apiRouter.get('/announcements', async (req, res) => {
         'Accept': 'application/json'
       }
     };
-
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
-    console.log('--- Requisição para /announcements bem-sucedida ---');
-
     // A API retorna os anúncios mais recentes primeiro, vamos manter essa ordem.
     res.json(response.data);
   } catch (error) {
@@ -516,13 +433,11 @@ apiRouter.get('/items/:category', async (req, res) => {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/${category}`;
     const requestConfig = { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' } };
 
-    console.log(`--- Iniciando requisição para ${requestUrl} ---`);
     const response = await axios.get(requestUrl, requestConfig);
 
     // Normaliza a resposta para garantir que sempre seja um array de itens
     const itemsArray = Array.isArray(response.data) ? response.data : (response.data.list ? Object.values(response.data.list) : Object.values(response.data));
 
-    // Função para extrair nome da URL se não existir
     const getNameFromUrl = (url) => {
       if (!url || typeof url !== 'string') return "Item";
       try {
@@ -534,7 +449,6 @@ apiRouter.get('/items/:category', async (req, res) => {
       }
     };
 
-    // Processa cada item para garantir que tenha imageUrl e name
     const processedItems = itemsArray.map(item => {
       const newItem = { ...item };
       // Garante que imageUrl exista, pegando de fontes alternativas
@@ -545,7 +459,6 @@ apiRouter.get('/items/:category', async (req, res) => {
       if (!newItem.name) {
         newItem.name = newItem.title || getNameFromUrl(newItem.imageUrl);
       }
-      // Converte raridade para minúsculas
       if (newItem.rarity) {
         newItem.rarity = String(newItem.rarity).toLowerCase();
       }
@@ -559,10 +472,8 @@ apiRouter.get('/items/:category', async (req, res) => {
   }
 });
 
-// Diz ao Express para usar o roteador para todos os caminhos que começam com /api
 app.use('/api', apiRouter);
 
-// Inicia o servidor para desenvolvimento local
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
@@ -570,5 +481,4 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Exporta o app para a Vercel
 module.exports = app;

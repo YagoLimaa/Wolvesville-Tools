@@ -20,20 +20,15 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
 
   const getBadgeImage = (badgeId: string) => {
     const badgeItem = itemsById.get(badgeId);
-    // Se o item da insígnia for encontrado no nosso mapa, usa a imageUrl dele.
-    // Caso contrário, usa uma imagem de placeholder.
     return badgeItem?.imageUrl || "https://via.placeholder.com/48";
   };
 
-  // Verifica se há alguma estatística de jogo pública para exibir o card
   const hasPublicGameStats =
     Object.values(player.gameStats).some((value) => value !== -1);
 
-  // Verifica se há dados sobre rosas para exibir o card
   const hasRosesStats =
     player.receivedRosesCount !== -1 || player.sentRosesCount !== -1;
 
-  // Formata o tempo de jogo para horas e minutos
   const playTimeHours = Math.floor(player.gameStats.totalPlayTimeInMinutes / 60);
   const playTimeMinutes = player.gameStats.totalPlayTimeInMinutes % 60;
 
@@ -88,7 +83,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Game Stats */}
         {hasPublicGameStats && (
           <div className="bg-secondary rounded-lg p-4">
             <h4 className="text-lg font-semibold mb-3 text-wolf-cyan">
@@ -151,7 +145,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           </div>
         )}
 
-        {/* Roses */}
         {hasRosesStats && (
           <div className="bg-secondary rounded-lg p-4">
             <h4 className="text-lg font-semibold mb-3 text-wolf-pink text-center">
@@ -165,7 +158,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           </div>
         )}
 
-        {/* Personal Message */}
         <div className="bg-secondary rounded-lg p-4">
           <p className="text-muted-foreground italic text-center">
             {player.personalMessage
@@ -174,7 +166,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           </p>
         </div>
 
-        {/* Avatar Gallery Toggle */}
         <GradientButton
           variant="outline"
           onClick={() => setShowAvatars(!showAvatars)}
@@ -193,7 +184,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           )}
         </GradientButton>
 
-        {/* Avatar Gallery */}
         {showAvatars && (
           <div className="flex flex-wrap justify-center gap-4 bg-secondary rounded-lg p-4">
             {player.avatars && Array.isArray(player.avatars) && player.avatars.map((avatar, index) => (
@@ -212,7 +202,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
         )}
       </CardContent>
 
-      {/* Avatar Modal */}
       {selectedAvatar && (
         <div
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"

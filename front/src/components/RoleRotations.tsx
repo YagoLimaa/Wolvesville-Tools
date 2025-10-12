@@ -5,44 +5,37 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { Zap, AlertTriangle, Clock } from "lucide-react"; 
-import { useRoles } from "@/components/contexts/RolesContext"; // Importa apenas o hook
+import { useRoles } from "@/components/contexts/RolesContext";
 
-// Define a estrutura da resposta da nossa API de rotação
 interface GameModeRotation {
   gameMode: string; // Usado como chave única
   gameModeName: string;
   roles: { id: string }[]; // A API agora retorna apenas o ID da role
 }
 
-// Função para buscar os dados no nosso backend
 const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
   const response = await fetch('/api/roleRotations');
   if (!response.ok) {
     throw new Error("fetch_error");
   }
-  // O backend retorna um array de rotações, então o retornamos diretamente.
   return response.json();
 };
 
-// Hook customizado para o contador
 const useCountdownToNextWednesday = () => {
   const { t } = useTranslation();
   const [countDown, setCountDown] = useState(0);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const now = new Date(); // Data/hora atual no fuso do cliente
+      const now = new Date();
       const targetDayOfWeek = 3; // Quarta-feira (Domingo=0, Segunda=1, ...)
       const targetHour = 17;
 
-      // Cria uma data alvo baseada na data atual
       const target = new Date(now);
 
-      // Calcula quantos dias faltam para a próxima quarta-feira
       const currentDay = now.getDay();
       let daysToAdd = (targetDayOfWeek - currentDay + 7) % 7;
 
-      // Se for quarta-feira e já passou das 21h, mira na próxima semana
       if (daysToAdd === 0 && now.getHours() >= targetHour) {
         daysToAdd = 7;
       }
@@ -57,7 +50,7 @@ const useCountdownToNextWednesday = () => {
       calculateTimeLeft();
     }, 1000);
 
-    calculateTimeLeft(); // Calcula na primeira renderização
+    calculateTimeLeft();
 
     return () => clearInterval(interval);
   }, []);
