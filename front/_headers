@@ -1,0 +1,29 @@
+# /front/_headers
+
+# Servir arquivos HTML
+/*.html
+  Content-Type: text/html; charset=utf-8
+
+# Servir arquivos CSS
+/*.css
+  Content-Type: text/css; charset=utf-8
+
+# Servir arquivos JavaScript (ESTA É A CORREÇÃO PRINCIPAL)
+/*.js
+  Content-Type: application/javascript; charset=utf-8
+
+# Servir imagens e fontes
+/*.png
+  Content-Type: image/png
+/*.jpg
+  Content-Type: image/jpeg
+/*.jpeg
+  Content-Type: image/jpeg
+/*.gif
+  Content-Type: image/gif
+/*.svg
+  Content-Type: image/svg+xml
+/*.ico
+  Content-Type: image/x-icon
+/*.woff2
+  Content-Type: font/woff2
