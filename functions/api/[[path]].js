@@ -241,7 +241,7 @@ export async function onRequest(context) {
     const itemsMatch = path.match(/^\/items\/([^/]+)$/);
     if (itemsMatch) {
         const category = itemsMatch[1];
-        const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins'];
+        const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins', 'advancedRoleCardOffers'];
 
         if (!validCategories.includes(category)) {
             return jsonResponse({ error: 'Categoria de item inválida.' }, 400);
