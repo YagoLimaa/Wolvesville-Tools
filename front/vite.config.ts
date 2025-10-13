@@ -5,7 +5,7 @@ import path from "path"
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => {
   return {
-    base: '/',
+    base: command === 'serve' ? '/' : './',
     plugins: [react()],
     resolve: {
       alias: {
