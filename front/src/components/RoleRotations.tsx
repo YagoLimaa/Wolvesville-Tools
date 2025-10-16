@@ -123,9 +123,9 @@ export const RoleRotations = () => {
                     rotation.roles.forEach(role => {
                       const fullRoleInfo = rolesById.get(role.id);
                       if (fullRoleInfo) {
-                        if (fullRoleInfo.team === 'VILLAGER') {
+                        if (fullRoleInfo.team === 'VILLAGER' || fullRoleInfo.team === 'RANDOM_VILLAGER') {
                           villagers.push(fullRoleInfo);
-                        } else if (fullRoleInfo.team === 'WEREWOLF') {
+                        } else if (fullRoleInfo.team === 'WEREWOLF' || fullRoleInfo.team === 'RANDOM_WEREWOLF') {
                           werewolves.push(fullRoleInfo);
                         } else {
                           solo.push(fullRoleInfo);
