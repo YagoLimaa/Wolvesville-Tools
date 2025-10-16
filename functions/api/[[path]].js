@@ -90,7 +90,10 @@ export async function onRequest(context) {
         const formattedRotations = response.data.map(rotationData => {
             const roles = (rotationData.roleRotations && rotationData.roleRotations.length > 0)
                 ? rotationData.roleRotations[0].roleRotation.roles.flat().map(roleIdentifier => {
-                    const roleId = typeof roleIdentifier === 'string' ? roleIdentifier : roleIdentifier.role;
+                    let roleId = typeof roleIdentifier === 'string' ? roleIdentifier : roleIdentifier.role;
+                    if (roleId === 'red-lady') {
+                        roleId = 'harlot';
+                    }
                     return { id: roleId };
                 }).filter(Boolean)
                 : [];

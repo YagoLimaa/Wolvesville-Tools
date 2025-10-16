@@ -110,17 +110,33 @@ export const RoleRotations = () => {
         {rotations && rotations.length > 0 && (
           <div className="space-y-6">
             {rotations.map((rotation) => (
-              <div key={rotation.gameMode}> 
+              <div key={rotation.gameMode}>
                 <h3 className="text-lg font-semibold text-primary">
                   {t(`roleRotations.gameModes.${rotation.gameModeName}`, { defaultValue: rotation.gameModeName })}
                 </h3>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {rotation.roles.map((role, index) => {
-                    const fullRoleInfo = rolesById.get(role.id);
-                    if (!fullRoleInfo) return null; // Não renderiza se a role não for encontrada
+                  {(() => {
+                    const villagers: any[] = [];
+                    const werewolves: any[] = [];
+                    const solo: any[] = [];
 
-                    return (
-                      <div key={`${role.id}-${index}`} className="group relative">
+                    rotation.roles.forEach(role => {
+                      const fullRoleInfo = rolesById.get(role.id);
+                      if (fullRoleInfo) {
+                        if (fullRoleInfo.team === 'VILLAGER') {
+                          villagers.push(fullRoleInfo);
+                        } else if (fullRoleInfo.team === 'WEREWOLF') {
+                          werewolves.push(fullRoleInfo);
+                        } else {
+                          solo.push(fullRoleInfo);
+                        }
+                      }
+                    });
+
+                    const sortedRoles = [...villagers, ...werewolves, ...solo];
+
+                    return sortedRoles.map((fullRoleInfo, index) => (
+                      <div key={`${fullRoleInfo.id}-${index}`} className="group relative">
                         <img
                           src={fullRoleInfo.imageUrl}
                           alt={fullRoleInfo.name}
@@ -130,8 +146,8 @@ export const RoleRotations = () => {
                           {fullRoleInfo.name}
                         </div>
                       </div>
-                    );
-                  })}
+                    ));
+                  })()}
                 </div>
               </div>
             ))}

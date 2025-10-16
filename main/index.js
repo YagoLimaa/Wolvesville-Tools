@@ -19,6 +19,9 @@ const allowedOrigins = [ // A configuração de CORS será gerenciada de outra f
   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined
 ].filter(Boolean);
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(cors({
   origin: (origin, callback) => {
     // Para desenvolvimento local, a lógica de CORS permanece.
@@ -33,9 +36,6 @@ app.use(cors({
   }
 }));
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 const WOLVESVILLE_API_KEY = process.env.WOLVESVILLE_API_KEY;
 const WOLVESVILLE_API_BASE_URL = 'https://api.wolvesville.com';
 
@@ -47,7 +47,7 @@ if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
   process.exit(1); 
 }
 
-const apiRouter = Router();
+const apiRouter = express.Router();
 // A lógica abaixo será movida para /functions/api/[[path]].js
 apiRouter.get('/search', async (req, res) => {
   const { username } = req.query;
@@ -142,7 +142,10 @@ apiRouter.get('/roleRotations', async (req, res) => {
     const formattedRotations = response.data.map(rotationData => {
       const roles = (rotationData.roleRotations && rotationData.roleRotations.length > 0)
         ? rotationData.roleRotations[0].roleRotation.roles.flat().map(roleIdentifier => {
-            const roleId = typeof roleIdentifier === 'string' ? roleIdentifier : roleIdentifier.role;
+            let roleId = typeof roleIdentifier === 'string' ? roleIdentifier : roleIdentifier.role;
+            if (roleId === 'red-lady') {
+              roleId = 'harlot';
+            }
             return { id: roleId }; 
           }).filter(Boolean) 
         : [];
