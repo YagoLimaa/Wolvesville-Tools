@@ -3,6 +3,8 @@
     "home_title": "Wolvesville Tools",
     "home_description": "Sua central completa para Wolvesville com tudo que você precisa: busca de jogadores, estatísticas, rotações, battle pass e muito mais!",
     "search_placeholder": "Buscar jogador...",
+    "search_player": "Buscar Jogador",
+    "search_player_desc": "Encontre jogadores e veja suas estatísticas",
     "clan": "Clã",
     "search_clan": "Buscar Clã",
     "search_clan_description": "Encontre informações sobre clãs",
@@ -14,6 +16,8 @@
     "shop": "Loja",
     "shop_description": "Ofertas ativas e itens",
     "updates": "Atualizações",
+    "battle_pass": "Passe de Batalha",
+    "battle_pass_desc": "Veja as recompensas e desafios da temporada",
     "unofficial": "Não Oficial"
   },
   "pagination": {

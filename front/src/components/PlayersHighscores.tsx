@@ -49,7 +49,7 @@ export const PlayersHighscores = () => {
           {t('playersHighscores.title')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="overflow-x-auto">
+      <CardContent>
         {isLoading && (
           <div className="space-y-3">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -66,7 +66,7 @@ export const PlayersHighscores = () => {
         )}
         {players && (
           <div>
-            <div className="space-y-3 md:min-w-[480px]">
+            <div className="space-y-3">
               {players.slice(0, 10).map((player, index) => {
                 const rank = player.oldRank + 1;
                 const { Icon, color } = getRankIcon(rank);

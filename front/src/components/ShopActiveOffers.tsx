@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
-import { ShoppingBag, Gem, AlertTriangle, X } from "lucide-react";
+import { ShoppingBag, Gem, AlertTriangle } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 
-// Interface atualizada para corresponder à resposta real da API
 interface Offer {
   type: string;
   expireDate: string;
   promoImageUrl: string;
+  iconUrl?: string;
   costInGems?: number;
   avatarItemIds?: string[];
   avatarItemSetIds?: (
@@ -27,6 +27,11 @@ interface Offer {
   advancedRoleCardOfferId?: string;
   avatarItemsCollectionId?: string;
   emojisCollectionId?: string;
+}
+
+// Local type to avoid using 'any'
+interface ContainedItemForShop {
+  avatarItemId?: string;
 }
 
 const fetchShopOffers = async (): Promise<Offer[]> => {
@@ -46,145 +51,183 @@ const getOfferNameFromUrl = (url: string, t: (key: string) => string): string =>
   }
 };
 
-const useCountdownToNextWednesday = (): { timeLeftFormatted: string; isEndingSoon: boolean } => {
-  const [timeLeft, setTimeLeft] = React.useState(0);
-
-  React.useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const target = new Date(now);
-      const currentDay = now.getDay(); 
-      const targetDay = 3; 
-
-      let daysToAdd = targetDay - currentDay;
-      if (daysToAdd < 0 || (daysToAdd === 0 && now.getHours() >= 21)) {
-        daysToAdd += 7; 
-      }
-
-      target.setDate(now.getDate() + daysToAdd);
-      
-      target.setHours(21, 0, 0, 0);
-
-      setTimeLeft(target.getTime() - now.getTime());
-    };
-
-    calculateTimeLeft(); 
-    const interval = setInterval(() => {
-      calculateTimeLeft();
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  if (timeLeft <= 0) {
-    return { timeLeftFormatted: "Expirado", isEndingSoon: true };
-  }
-
-  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-  const isEndingSoon = timeLeft < 2 * 60 * 60 * 1000; // Menos de 2 horas
-
-  return { timeLeftFormatted: `${days}d ${hours}h ${minutes}m ${seconds}s}`, isEndingSoon };
-};
-
-const useCountdownToNextMonth = (): { timeLeftFormatted: string; isEndingSoon: boolean } => {
-  const [timeLeft, setTimeLeft] = React.useState(0);
-
-  React.useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const target = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
-      setTimeLeft(target.getTime() - now.getTime());
-    };
-
-    calculateTimeLeft();
-    const interval = setInterval(calculateTimeLeft, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  if (timeLeft <= 0) {
-    return { timeLeftFormatted: "Expirado", isEndingSoon: true };
-  }
-
-  const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-  const isEndingSoon = timeLeft < 2 * 60 * 60 * 1000; // Menos de 2 horas
-
-  return { timeLeftFormatted: `${days}d ${hours}h ${minutes}m ${seconds}s}`, isEndingSoon };
-};
-
 export const ShopActiveOffers = () => {
   const { t } = useTranslation();
-  const { data: offers, isLoading, isError, error } = useQuery<Offer[], Error>({
+  const { data: offers, isLoading, isError } = useQuery<Offer[], Error>({
     queryKey: ["shopOffers"],
     queryFn: fetchShopOffers,
   });
-  const [selectedOffer, setSelectedOffer] = React.useState<Offer | null>(null);
-  const { itemsById } = useItems();
-
-  const groupedOffers = React.useMemo(() => {
-    if (!offers) return {};
-    return offers.reduce((acc, offer) => {
-      (acc[offer.type] = acc[offer.type] || []).push(offer);
-      return acc;
-    }, {} as Record<string, Offer[]>);
-  }, [offers]);
+  const [selectedSet, setSelectedSet] = React.useState<Item | null>(null);
+  const { itemsById, allItems } = useItems();
 
   const collectionPieces = React.useMemo(() => {
-    if (!selectedOffer) return [];
-
+    if (!selectedSet) return [];
     const allItemIds: string[] = [];
 
-    if (selectedOffer.avatarItemSetIds && selectedOffer.avatarItemSetIds.length > 0) {
-      const setIds = selectedOffer.avatarItemSetIds;
-      const idsFromSets = setIds.flatMap(setId => {
-        const itemSet = itemsById.get(typeof setId === 'string' ? setId : setId.id);
-        return (itemSet?.avatarItemIds as string[] | undefined) || [];
-      });
-      allItemIds.push(...idsFromSets);
+    if (selectedSet.avatarItemIds && Array.isArray(selectedSet.avatarItemIds)) {
+      allItemIds.push(...selectedSet.avatarItemIds);
     }
-
-    if (selectedOffer.avatarItemIds && selectedOffer.avatarItemIds.length > 0) {
-      allItemIds.push(...selectedOffer.avatarItemIds);
-    } else if (selectedOffer.avatarItemsCollectionId) {
-      const collectionItem = itemsById.get(selectedOffer.avatarItemsCollectionId);
-      const idsFromCollection = (collectionItem?.avatarItemIds as string[] | undefined) || [];
-      allItemIds.push(...idsFromCollection);
-    }
-
-    if (selectedOffer.advancedRoleCardOfferId) {
-      const offerId = selectedOffer.advancedRoleCardOfferId;
-      const offerItem = itemsById.get(offerId);
-
-      if (offerItem) {
-        const targetSetId = offerItem.avatarItemSetId as string;
-        const itemSet = itemsById.get(targetSetId);
-
-        if (itemSet && itemSet.category === 'avatarItemSets') {
-          const idsFromSet = (itemSet?.avatarItemIds as string[] | undefined) || [];
-          allItemIds.push(...idsFromSet);
-        }
-      }
-    }
-
-    if (selectedOffer.emojisCollectionId) {
-      const collectionId = selectedOffer.emojisCollectionId;
-      const collectionItem = itemsById.get(collectionId);
-      const emojiIds = (collectionItem?.emojis as { id: string }[] | undefined)?.map(emoji => emoji.id) || [];
-      allItemIds.push(...emojiIds);
+    if (selectedSet.items && Array.isArray(selectedSet.items)) {
+      const itemIdsFromItems = (selectedSet.items as ContainedItemForShop[])
+        .map(i => i.avatarItemId)
+        .filter(Boolean) as string[];
+      allItemIds.push(...itemIdsFromItems);
     }
 
     const uniqueItemIds = [...new Set(allItemIds)];
-
     return uniqueItemIds
       .map(itemId => itemsById.get(itemId))
       .filter((item): item is NonNullable<typeof item> => !!item);
-  }, [selectedOffer, itemsById]);
+  }, [selectedSet, itemsById]);
+
+  const categorizedSkins = React.useMemo(() => {
+    const categories = new Map<string, React.ReactNode[]>();
+    if (!offers) return categories;
+
+    for (const offer of offers) {
+      const categoryName = t(`shop.types.${offer.type}`, { defaultValue: getOfferNameFromUrl(offer.promoImageUrl, t) });
+      let cards: React.ReactNode[] = [];
+
+      const hasSets = offer.avatarItemSetIds && offer.avatarItemSetIds.length > 0;
+      const isAdvancedRoleCard = offer.type === 'ADVANCED_ROLE_CARD' && offer.advancedRoleCardOfferId;
+      const isAvatarItems = offer.type === 'AVATAR_ITEMS' && offer.avatarItemsCollectionId;
+
+      if (hasSets) {
+        cards = offer.avatarItemSetIds!.map(setIdObj => {
+          const setId = typeof setIdObj === 'string' ? setIdObj : setIdObj.id;
+          const itemSet = itemsById.get(setId);
+          if (!itemSet || !itemSet.promoImageUrl) return null;
+          const displayName = (itemSet.name as string) || getOfferNameFromUrl(itemSet.promoImageUrl as string, t);
+          return (
+            <Tooltip key={setId}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setSelectedSet(itemSet)}
+                  className="relative group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors duration-300 text-left w-full"
+                >
+                  <img src={itemSet.promoImageUrl as string} alt={displayName} className="w-full h-41 object-contain p-2 transition-transform duration-300 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  {offer.costInGems && (
+                    <div className="absolute bottom-2 right-2">
+                      <Badge variant="secondary" className="bg-primary/20 text-primary">
+                        <Gem className="w-3 h-3 mr-1" />
+                        {offer.costInGems}
+                      </Badge>
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    {displayName}
+                  </div>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent><p>{displayName}</p></TooltipContent>
+            </Tooltip>
+          );
+        });
+      } else if (isAdvancedRoleCard) {
+        const intermediateItem = itemsById.get(offer.advancedRoleCardOfferId!);
+        if (intermediateItem && intermediateItem.avatarItemSetId && typeof intermediateItem.avatarItemSetId === 'string') {
+          const finalSet = allItems.find(item => item.id === (intermediateItem.avatarItemSetId as string) && item.category === 'avatarItemSets');
+          if (finalSet && finalSet.promoImageUrl) {
+            const displayName = (finalSet.name as string) || getOfferNameFromUrl(finalSet.promoImageUrl as string, t);
+            cards.push(
+              <Tooltip key={finalSet.id}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setSelectedSet(finalSet)}
+                    className="relative group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors duration-300 text-left w-full"
+                  >
+                    <img src={finalSet.promoImageUrl as string} alt={displayName} className="w-full h-41 object-contain p-2 transition-transform duration-300 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    {offer.costInGems && (
+                      <div className="absolute bottom-2 right-2">
+                        <Badge variant="secondary" className="bg-primary/20 text-primary">
+                          <Gem className="w-3 h-3 mr-1" />
+                          {offer.costInGems}
+                        </Badge>
+                      </div>
+                    )}
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      {displayName}
+                    </div>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent><p>{displayName}</p></TooltipContent>
+              </Tooltip>
+            );
+          }
+        }
+      } else if (isAvatarItems) {
+        const collectionItem = itemsById.get(offer.avatarItemsCollectionId!);
+        if (collectionItem) {
+          const displaySet: Item = {
+            ...collectionItem,
+            promoImageUrl: offer.promoImageUrl,
+            name: collectionItem.name || getOfferNameFromUrl(offer.promoImageUrl, t)
+          };
+          const displayName = displaySet.name;
+          cards.push(
+            <Tooltip key={displaySet.id}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setSelectedSet(displaySet)}
+                  className="relative group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors duration-300 text-left w-full"
+                >
+                  <img src={offer.iconUrl || offer.promoImageUrl} alt={displayName} className="w-full h-28 object-contain p-2 transition-transform duration-300 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                  {offer.costInGems && (
+                    <div className="absolute bottom-2 right-2">
+                      <Badge variant="secondary" className="bg-primary/20 text-primary">
+                        <Gem className="w-3 h-3 mr-1" />
+                        {offer.costInGems}
+                      </Badge>
+                    </div>
+                  )}
+                  <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    {displayName}
+                  </div>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent><p>{displayName}</p></TooltipContent>
+            </Tooltip>
+          );
+        }
+      } else {
+        cards.push(
+          <Tooltip key={offer.promoImageUrl}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => { /* Handle non-set click */ }}
+                className="relative group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors duration-300 text-left w-full"
+              >
+                <img src={offer.promoImageUrl} alt={offer.type} className="w-full h-28 object-contain p-2 transition-transform duration-300 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                {offer.costInGems && (
+                  <div className="absolute bottom-2 right-2">
+                    <Badge variant="secondary" className="bg-primary/20 text-primary">
+                      <Gem className="w-3 h-3 mr-1" />
+                      {offer.costInGems}
+                    </Badge>
+                  </div>
+                )}
+                <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                  {getOfferNameFromUrl(offer.promoImageUrl, t)}
+                </div>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent><p>{getOfferNameFromUrl(offer.promoImageUrl, t)}</p></TooltipContent>
+          </Tooltip>
+        );
+      }
+
+      if (!categories.has(categoryName)) {
+        categories.set(categoryName, []);
+      }
+      categories.get(categoryName)!.push(...cards.filter(Boolean));
+    }
+
+    return categories;
+  }, [offers, itemsById, allItems, t]);
 
   return (
     <Card className="bg-card/50 backdrop-blur border-accent/20">
@@ -197,7 +240,7 @@ export const ShopActiveOffers = () => {
       <CardContent>
         {isLoading && (
           <div className="space-y-4">
-            {Array.from({ length: 2 }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <Skeleton key={i} className="h-40 w-full rounded-lg" />
             ))}
           </div>
@@ -213,79 +256,38 @@ export const ShopActiveOffers = () => {
 
         {offers && (
           <div className="space-y-6">
-            {Object.entries(groupedOffers).map(([type, offerGroup]) => (
-              <div key={type}>
+            {Array.from(categorizedSkins.entries()).map(([category, cards]) => (
+              <div key={category}>
                 <h3 className="text-lg font-semibold text-primary mb-3">
-                  {t(`shop.types.${type}`, { defaultValue: type })}
+                  {category}
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {offerGroup.map((offer) => {
-                    const Countdown = ({ offerType }: { offerType: string }) => {
-                      const monthlyResetTypes = ['ZODIAC_ANIMAL_OUTFITS','TAROT_OUTFITS','ADVANCED_ROLE_CARD','AVATAR_ITEMS_SET','ADVANCED_ROLE_CARD','AVATAR_ITEMS']; 
-                      const useMonthlyCountdown = monthlyResetTypes.includes(offerType);
-                      
-                      const monthlyTimeLeft = useCountdownToNextMonth();
-                      const weeklyTimeLeft = useCountdownToNextWednesday();
-                      const timeLeft = useMonthlyCountdown ? monthlyTimeLeft : weeklyTimeLeft;
-
-                      return (
-                        <div className={`absolute top-2 right-2 px-2 py-1 bg-black/60 text-xs rounded-full font-semibold ${timeLeft.isEndingSoon ? 'text-red-500 animate-pulse' : 'text-white'}`}>
-                          {timeLeft.timeLeftFormatted}
-                        </div>
-                      );
-                    };
-                    return (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            key={offer.promoImageUrl}
-                            onClick={() => setSelectedOffer(offer)}
-                            className="relative group overflow-hidden rounded-lg border border-border hover:border-primary transition-colors duration-300 text-left w-full"
-                          >
-                            <img src={offer.promoImageUrl} alt={offer.type} className="w-full h-40 object-cover transition-transform duration-300 group-hover:scale-110" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                            <Countdown offerType={offer.type} />
-                            {offer.costInGems && (
-                              <div className="absolute bottom-2 right-2">
-                                <Badge variant="secondary" className="bg-primary/20 text-primary">
-                                  <Gem className="w-3 h-3 mr-1" />
-                                  {offer.costInGems}
-                                </Badge>
-                              </div>
-                            )}
-                            <div className="absolute top-2 left-2 px-2 py-1 bg-black/50 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                              {getOfferNameFromUrl(offer.promoImageUrl, t)}
-                            </div>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t(`shop.descriptions.${offer.type}`, { defaultValue: t('shop.clickToView') })}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    );
-                  })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {cards}
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <Dialog open={!!selectedOffer} onOpenChange={(isOpen) => !isOpen && setSelectedOffer(null)}>
+        <Dialog open={!!selectedSet} onOpenChange={(isOpen) => !isOpen && setSelectedSet(null)}>
           <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
-            {selectedOffer && (
+            {selectedSet && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="text-center text-2xl font-bold">{getOfferNameFromUrl(selectedOffer.promoImageUrl, t)}</DialogTitle>
+                  <DialogTitle className="text-center text-2xl font-bold">{(selectedSet.name as string) || ""}</DialogTitle>
                 </DialogHeader>
+                <div className="relative mb-4 flex justify-center">
+                  <img src={selectedSet.promoImageUrl as string} alt={selectedSet.name as string} className="h-auto max-h-40 object-contain rounded-lg border border-border" />
+                </div>
                 <div className="overflow-y-auto pr-4 -mr-4">
                   {collectionPieces.length > 0 ? (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                       {collectionPieces.map(piece => piece && (
-                        <div key={piece.id} className="relative group aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-secondary/50 border border-border">
-                          <img src={piece.imageUrl} alt={piece.name} className="w-full h-full object-contain" />
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-md">
-                            <p className="text-xs font-semibold text-white truncate">{piece.name}</p>
+                        <div key={piece.id} className="flex flex-col items-center gap-2 text-center">
+                          <div className="aspect-square w-full p-2 rounded-lg bg-secondary/50 border border-border">
+                            <img src={piece.imageUrl} alt={piece.name} className="w-full h-full object-contain" />
                           </div>
+                          <p className="text-xs font-semibold text-white truncate w-full">{piece.name}</p>
                         </div>
                       ))}
                     </div>
@@ -293,13 +295,6 @@ export const ShopActiveOffers = () => {
                     <p className="text-center text-muted-foreground">{t('shop.detailsError')}</p>
                   )}
                 </div>
-                {selectedOffer.costInGems && (
-                  <div className="mt-4 pt-4 border-t border-border text-center">
-                    <Badge variant="default" className="text-lg px-4 py-2">
-                      <Gem className="w-5 h-5 mr-2" /> {selectedOffer.costInGems}
-                    </Badge>
-                  </div>
-                )}
               </>
             )}
           </DialogContent>

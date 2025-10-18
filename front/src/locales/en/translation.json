@@ -3,6 +3,8 @@
     "home_title": "Wolvesville Tools",
     "home_description": "Your complete hub for Wolvesville with everything you need: player search, stats, rotations, battle pass, and much more!",
     "search_placeholder": "Search player...",
+    "search_player": "Search Player",
+    "search_player_desc": "Find players and view their stats",
     "clan": "Clan",
     "search_clan": "Search Clan",
     "search_clan_description": "Find information about clans",
@@ -14,6 +16,8 @@
     "shop": "Shop",
     "shop_description": "Active offers and items",
     "updates": "Updates",
+    "battle_pass": "Battle Pass",
+    "battle_pass_desc": "View season rewards and challenges",
     "unofficial": "Unofficial"
   },
   "pagination": {
