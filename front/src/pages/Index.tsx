@@ -109,14 +109,6 @@ const Index = () => {
                 <RoleRotations />
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("playersHighscores.title")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <PlayersHighscores />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>

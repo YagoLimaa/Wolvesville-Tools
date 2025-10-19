@@ -5,11 +5,12 @@ import { SearchForm } from "@/components/SearchForm";
 import { PlayerCard } from "@/components/PlayerCard";
 import { Pagination } from "@/components/Pagination";
 import { GradientButton } from "@/components/ui/gradient-button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { useItems } from "../components/contexts/ItemsContext";
 import { SearchResult } from "@/types/Player";
 import { ArrowLeft, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { PlayersHighscores } from "@/components/PlayersHighscores";
 
 const SearchPlayer = () => {
   const { t } = useTranslation();
@@ -72,27 +73,38 @@ const SearchPlayer = () => {
           </div>
         )}
         {!isLoadingItems && (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {!searchResult && (
-              <Card className="max-w-md mx-auto bg-card/50 backdrop-blur border-accent/20">
-                <CardContent className="p-6">
-                  <SearchForm 
-                    onSearch={handleSearch} 
-                    isLoading={isLoading}
-                    placeholder={t('searchPlayer.placeholder')}
-                    label={t('searchPlayer.label')}
-                    buttonText={t('searchPlayer.buttonText')}
-                  />
-                </CardContent>
-              </Card>
+              <>
+                <div className="text-center max-w-xl mx-auto">
+                  <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                    {t('searchPlayer.title')}
+                  </h1>
+                  <p className="mt-4 text-lg text-muted-foreground">
+                    {t('searchPlayer.subtitle')}
+                  </p>
+                  <div className="mt-8">
+                    <SearchForm 
+                      onSearch={handleSearch} 
+                      isLoading={isLoading}
+                      placeholder={t('searchPlayer.placeholder')}
+                      label={t('searchPlayer.label')}
+                      buttonText={t('searchPlayer.buttonText')}
+                    />
+                  </div>
+                </div>
+                <div className="mt-12">
+                  <PlayersHighscores />
+                </div>
+              </>
             )}
 
             {searchResult && (
               <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4">
-              <GradientButton variant="outline" onClick={handleGoBack}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t('searchPlayer.goBack')}
-              </GradientButton>
+                <GradientButton variant="outline" onClick={handleGoBack}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  {t('searchPlayer.goBack')}
+                </GradientButton>
               
                 <div className="text-center md:text-right">
                   <h2 className="text-2xl font-bold text-foreground">
@@ -102,18 +114,23 @@ const SearchPlayer = () => {
                     {t('searchPlayer.pagination', { currentPage: searchResult.pagination.currentPage, totalPages: searchResult.pagination.totalPages })}
                   </p>
                 </div>
-            </div>
+              </div>
             )}
+
             {isLoading && <p className="text-center text-muted-foreground text-lg">{t('searchPlayer.loadingPlayers')}</p>}
 
             {searchResult && searchResult.players.length > 0 && (
-              <>
-                <div className="grid gap-6">
-                  {searchResult.players.map((player) => (
-                    <PlayerCard key={player.id} player={player} />
-                  ))}
-                </div>
-              </>
+              <div className="grid md:grid-cols-2 gap-6">
+                {searchResult.players.map((player, index) => (
+                  <div
+                    key={player.id}
+                    className="animate-in fade-in zoom-in-95"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <PlayerCard player={player} />
+                  </div>
+                ))}
+              </div>
             )}
 
             {searchResult && searchResult.players.length === 0 && !isLoading && (

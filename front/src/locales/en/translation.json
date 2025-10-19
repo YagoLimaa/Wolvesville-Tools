@@ -176,6 +176,8 @@
     }
   },
   "searchPlayer": {
+    "title": "Find any Wolvesville Player",
+    "subtitle": "Enter the username below to search for a player and view their profile, stats, and avatars.",
     "fetchError": "Search failed. Check the username and try again.",
     "searchError": "An error occurred while searching. Please try again later.",
     "loadingItems": "Loading items...",
@@ -188,7 +190,7 @@
     "loadingPlayers": "Searching for players...",
     "noPlayersFound": {
       "title": "No Players Found",
-      "description": "No players were found with the name \"{{query}}\"."
+      "description": "No players were found with the name \"{{query}}\""
     }
   },
   "itemsContext": {

@@ -176,6 +176,8 @@
     }
   },
   "searchPlayer": {
+    "title": "Encontre qualquer Jogador do Wolvesville",
+    "subtitle": "Digite o nome de usuário abaixo para procurar por um jogador e ver seu perfil, estatísticas e avatares.",
     "fetchError": "A busca falhou. Verifique o nome de usuário e tente novamente.",
     "searchError": "Ocorreu um erro ao buscar. Tente novamente mais tarde.",
     "loadingItems": "Carregando itens...",
