@@ -102,8 +102,7 @@ const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
   });
 
   const results = await Promise.all(promises);
-  const allItems = results.flat().filter(item => item && item.id);
-  console.log(t('itemsContext.combinedItemsLog', { count: allItems.length }));
+  const allItems = results.flat().filter(item => item && item.id)
   return allItems;
 };
 
