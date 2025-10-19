@@ -3,6 +3,7 @@ import { BattlePassSeasonData, BattlePassReward } from "./BattlePassSeason";
 import { Lock, HelpCircle } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 import { useTranslation } from "react-i18next";
+import { CustomFontAwesomeIcon } from "./ui/font-awesome-icon";
 
 interface BattlePassRewardsProps {
   season: BattlePassSeasonData;
@@ -85,6 +86,10 @@ export const BattlePassRewards = ({ season }: BattlePassRewardsProps) => {
                   {isRandomIcon ? (
                     <div className="relative z-10 flex h-full w-full items-center justify-center">
                       <HelpCircle className="h-1/2 w-1/2 text-white/80" />
+                    </div>
+                  ) : name && name.startsWith("font-awesome-") ? (
+                    <div className="relative z-10 flex h-full w-full items-center justify-center">
+                      <CustomFontAwesomeIcon iconName={name} className="h-1/2 w-1/2 text-white/80" />
                     </div>
                   ) : (
                     <>

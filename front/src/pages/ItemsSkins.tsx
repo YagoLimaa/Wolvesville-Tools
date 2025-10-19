@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Search, AlertTriangle, Gem, Filter } from "lucide-react";
 import { PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { CustomFontAwesomeIcon } from "@/components/ui/font-awesome-icon";
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
 interface ContainedItem {
@@ -51,17 +52,21 @@ const getNameFromUrl = (url: string, t: (key: string) => string): string => {
 };
 
 const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: string) => void; }) => {
-  const [imageSrc, setImageSrc] = React.useState(item.imageUrl);
+  const [imageSrc, setImageSrc] = React.useState(item.imageUrl || '');
   const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
-    setImageSrc(item.imageUrl);
+    setImageSrc(item.imageUrl || '');
     setHasError(false);
   }, [item.imageUrl]);
 
-  // Caso especial para profileIcons que não têm imagem
-  if (item.category === 'profileIcons') {
-    return <div className="w-full h-full flex items-center justify-center"><PawPrint className="w-1/2 h-1/2 text-muted-foreground" /></div>;
+  // Caso especial para profileIcons que são ícones do FontAwesome
+  if (item.category === 'profileIcons' && item.name?.startsWith('font-awesome-')) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <CustomFontAwesomeIcon iconName={item.name} className="w-1/2 h-1/2 text-muted-foreground" />
+      </div>
+    );
   }
 
   const handleError = () => {
@@ -96,7 +101,7 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
     }
   };
 
-  const isFallback = imageSrc.includes("ad3466d4-8798-4b9b-a5e7-2ae7d2343c58");
+  const isFallback = imageSrc?.includes("ad3466d4-8798-4b9b-a5e7-2ae7d2343c58");
 
   return (
     <img src={imageSrc} alt={item.name || item.id} className={`w-full h-full ${['bundles', 'avatarItemCollections', 'avatarItemSets'].includes(item.category) ? 'object-cover' : 'object-contain'} ${['bundles', 'avatarItemCollections', 'avatarItemSets'].includes(item.category) ? '' : 'p-2'} ${isFallback ? 'bg-black/20 rounded-md' : ''}`} onError={handleError} />
@@ -109,18 +114,18 @@ const ItemsSkins = () => {
   const { t } = useTranslation();
 
   const categoryDisplayNames: { [key: string]: string } = {
-    avatarItems: t('itemsSkins.categories.avatarItems'),
-    bodyPaints: t('itemsSkins.categories.bodyPaints'),
-    avatarItemSets: t('itemsSkins.categories.avatarItemSets'),
     avatarItemCollections: t('itemsSkins.categories.avatarItemCollections'),
+    avatarItems: t('itemsSkins.categories.avatarItems'),
+    avatarItemSets: t('itemsSkins.categories.avatarItemSets'),
+    backgrounds: t('itemsSkins.categories.backgrounds'),
+    bodyPaints: t('itemsSkins.categories.bodyPaints'),
     bundles: t('itemsSkins.categories.bundles'),
     calendars: t('itemsSkins.categories.calendars'),
-    profileIcons: t('itemsSkins.categories.profileIcons'),
-    profileIconBorders: t('itemsSkins.categories.profileIconBorders'),
-    emojis: t('itemsSkins.categories.emojis'),
     emojiCollections: t('itemsSkins.categories.emojiCollections'),
-    backgrounds: t('itemsSkins.categories.backgrounds'),
+    emojis: t('itemsSkins.categories.emojis'),
     loadingScreens: t('itemsSkins.categories.loadingScreens'),
+    profileIconBorders: t('itemsSkins.categories.profileIconBorders'),
+    profileIcons: t('itemsSkins.categories.profileIcons'),
     roleIcons: t('itemsSkins.categories.roleIcons'),
     roseSkins: t('itemsSkins.categories.roseSkins'),
   };
@@ -291,7 +296,9 @@ const ItemsSkins = () => {
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
-                          {Object.entries(categoryDisplayNames).map(([key, name]) => (
+                          {Object.entries(categoryDisplayNames)
+                            .sort(([, nameA], [, nameB]) => nameA.localeCompare(nameB))
+                            .map(([key, name]) => (
                             <SelectItem key={key} value={key}>{t(`itemsSkins.categories.${key}`, name)}</SelectItem>
                           ))}
                         </SelectContent>
@@ -335,7 +342,13 @@ const ItemsSkins = () => {
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
-                          {avatarItemTypes.map(type => <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>)}
+                          {avatarItemTypes
+                            .sort((a, b) => a.localeCompare(b))
+                            .map(type => (
+                              <SelectItem key={type} value={type}>
+                                {type.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </AccordionContent>
