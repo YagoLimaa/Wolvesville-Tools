@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { SearchForm } from "@/components/SearchForm";
 import { ClanCard, Clan } from "@/components/ClanCard";
@@ -9,113 +10,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { debounce } from "@/lib/utils";
 
-// Correct list of locales based on game flags
-const locales: { [key: string]: string } = {
-  "all": "Todos",
-  "br": "Brasil",
-  "de": "Alemanha",
-  "fr": "França",
-  "gb": "Reino Unido",
-  "th": "Tailândia",
-  "vn": "Vietnã",
-  "tr": "Turquia",
-  "aq": "Antártida",
-  "ar": "Argentina",
-  "at": "Áustria",
-  "au": "Austrália",
-  "ax": "Ilhas Aland",
-  "az": "Azerbaijão",
-  "be": "Bélgica",
-  "bg": "Bulgária",
-  "bh": "Bahrein",
-  "bm": "Bermudas",
-  "bn": "Brunei",
-  "bs": "Bahamas",
-  "bw": "Botsuana",
-  "by": "Bielorrússia",
-  "ca": "Canadá",
-  "cd": "Congo",
-  "cf": "República Centro-Africana",
-  "ch": "Suíça",
-  "ck": "Ilhas Cook",
-  "cl": "Chile",
-  "cn": "China",
-  "co": "Colômbia",
-  "cr": "Costa Rica",
-  "cy": "Chipre",
-  "cz": "República Tcheca",
-  "dk": "Dinamarca",
-  "do": "República Dominicana",
-  "dz": "Argélia",
-  "ee": "Estônia",
-  "es": "Espanha",
-  "eu": "União Europeia",
-  "fi": "Finlândia",
-  "fj": "Fiji",
-  "gn": "Guiné",
-  "gr": "Grécia",
-  "gt": "Guatemala",
-  "hk": "Hong Kong",
-  "hr": "Croácia",
-  "hu": "Hungria",
-  "id": "Indonésia",
-  "ie": "Irlanda",
-  "il": "Israel",
-  "im": "Ilha de Man",
-  "in": "Índia",
-  "is": "Islândia",
-  "it": "Itália",
-  "jm": "Jamaica",
-  "jp": "Japão",
-  "kh": "Camboja",
-  "kp": "Coreia do Norte",
-  "kr": "Coreia do Sul",
-  "kw": "Kuwait",
-  "kz": "Cazaquistão",
-  "la": "Laos",
-  "lr": "Libéria",
-  "lt": "Lituânia",
-  "lu": "Luxemburgo",
-  "ma": "Marrocos",
-  "md": "Moldávia",
-  "mn": "Mongólia",
-  "mx": "México",
-  "my": "Malásia",
-  "nc": "Nova Caledônia",
-  "nl": "Holanda",
-  "no": "Noruega",
-  "np": "Nepal",
-  "nz": "Nova Zelândia",
-  "pa": "Panamá",
-  "pe": "Peru",
-  "ph": "Filipinas",
-  "pk": "Paquistão",
-  "pl": "Polônia",
-  "ps": "Palestina",
-  "pt": "Portugal",
-  "py": "Paraguai",
-  "ro": "Romênia",
-  "rs": "Sérvia",
-  "ru": "Rússia",
-  "se": "Suécia",
-  "sg": "Singapura",
-  "si": "Eslovênia",
-  "sk": "Eslováquia",
-  "so": "Somália",
-  "sr": "Suriname",
-  "sy": "Síria",
-  "tw": "Taiwan",
-  "ua": "Ucrânia",
-  "ug": "Uganda",
-  "us": "Estados Unidos",
-  "uy": "Uruguai",
-  "va": "Vaticano",
-  "vi": "Vietnã",
-  "ye": "Iêmen",
-  "za": "África do Sul",
-};
+const localesList = [
+  "all", "br", "de", "fr", "gb", "th", "vn", "tr", "aq", "ar", "at", "au", 
+  "ax", "az", "be", "bg", "bh", "bm", "bn", "bs", "bw", "by", "ca", "cd", 
+  "cf", "ch", "ck", "cl", "cn", "co", "cr", "cy", "cz", "dk", "do", "dz", 
+  "ee", "es", "eu", "fi", "fj", "gn", "gr", "gt", "hk", "hr", "hu", "id", 
+  "ie", "il", "im", "in", "is", "it", "jm", "jp", "kh", "kp", "kr", "kw", 
+  "kz", "la", "lr", "lt", "lu", "ma", "md", "mn", "mx", "my", "nc", "nl", 
+  "no", "np", "nz", "pa", "pe", "ph", "pk", "pl", "ps", "pt", "py", "ro", 
+  "rs", "ru", "se", "sg", "si", "sk", "so", "sr", "sy", "tw", "ua", "ug", 
+  "us", "uy", "va", "vi", "ye", "za"
+];
 
 const ClanSearch = () => {
+  const { t } = useTranslation();
   const [searchResults, setSearchResults] = useState<Clan[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +33,13 @@ const ClanSearch = () => {
   const [localSearchTerm, setLocalSearchTerm] = useState("");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const locales = useMemo(() => 
+    localesList.reduce((acc, loc) => {
+      acc[loc] = t(`locales.${loc}`);
+      return acc;
+    }, {} as { [key: string]: string }),
+  [t]);
 
   const handleSearch = useCallback(async (clanName: string, lang: string) => {
     if (!clanName) return;
@@ -139,22 +54,22 @@ const ClanSearch = () => {
       }
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Falha ao buscar dados. A API pode estar offline.");
+        throw new Error(t("common.fetchError"));
       }
       const results = await response.json() as Clan[];
       setSearchResults(results);
     } catch (err) {
-      setError("Erro ao buscar clãs. Tente novamente.");
+      setError(t("common.searchError"));
       setSearchResults(null);
     } finally {
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, t]);
 
   const debouncedSearch = useMemo(() => {
     return debounce((clanName: string, lang: string) => {
       handleSearch(clanName, lang);
-    }, 500); // 500ms delay
+    }, 500);
   }, [handleSearch]);
 
   useEffect(() => {
@@ -163,7 +78,7 @@ const ClanSearch = () => {
       setQuery(clanNameFromUrl);
       handleSearch(clanNameFromUrl, language);
     }
-  }, []); // Run only on initial load
+  }, []);
 
   useEffect(() => {
     if (query) {
@@ -192,18 +107,18 @@ const ClanSearch = () => {
         <div className="space-y-6">
           <Card className="max-w-2xl mx-auto bg-card/50 backdrop-blur border-accent/20">
             <CardContent className="p-6">
-              <h2 className="text-xl font-semibold text-center mb-4">Buscar Clã</h2>
+              <h2 className="text-xl font-semibold text-center mb-4">{t('clanSearch.search_clan_title')}</h2>
               <SearchForm 
                 onSearch={setQuery} 
                 isLoading={isLoading} 
-                placeholder="Digite o nome do clã..."
-                label="Nome do Clã:"
-                buttonText="Buscar Clã"
+                placeholder={t('clanSearch.search_clan_placeholder')}
+                label={t('clanSearch.clan_name_label')}
+                buttonText={t('clanSearch.search_clan_button')}
               />
             </CardContent>
           </Card>
 
-          {isLoading && <p className="text-center text-muted-foreground text-lg">Buscando clãs...</p>}
+          {isLoading && <p className="text-center text-muted-foreground text-lg">{t('clanSearch.searching_clans')}</p>}
           {error && <p className="text-center text-destructive text-lg">{error}</p>}
 
           {searchResults !== null && (
@@ -212,16 +127,17 @@ const ClanSearch = () => {
                 <div className="relative flex-1 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Filtrar resultados..."
+                    placeholder={t('clanSearch.filter_results')}
                     className="pl-10"
                     value={localSearchTerm}
                     onChange={(e) => setLocalSearchTerm(e.target.value)}
                   />
                 </div>
-                                  <div className="flex flex-col sm:flex-row items-center gap-4">                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-center gap-4">                  
+                  <div className="flex items-center gap-2">
                     <Select value={language} onValueChange={setLanguage}>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Idioma" />
+                        <SelectValue placeholder={t('clanSearch.language_placeholder')} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(locales).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
@@ -232,11 +148,11 @@ const ClanSearch = () => {
                     <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
                     <Select value={sortBy} onValueChange={(value) => setSortBy(value as "xp" | "members")}>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Ordenar por" />
+                        <SelectValue placeholder={t('clanSearch.sort_by_placeholder')} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="xp">Mais XP</SelectItem>
-                        <SelectItem value="members">Mais Membros</SelectItem>
+                        <SelectItem value="xp">{t('clanSearch.sort_by_xp')}</SelectItem>
+                        <SelectItem value="members">{t('clanSearch.sort_by_members')}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -251,15 +167,15 @@ const ClanSearch = () => {
                 ) : (
                   <Card className="p-8 text-center bg-secondary">
                     <Info className="w-12 h-12 mx-auto text-primary mb-4" />
-                    <h3 className="text-xl font-semibold">Nenhum clã corresponde ao filtro</h3>
-                    <p className="text-muted-foreground">Tente limpar o campo "Filtrar resultados".</p>
+                    <h3 className="text-xl font-semibold">{t('clanSearch.no_clan_filter_match_title')}</h3>
+                    <p className="text-muted-foreground">{t('clanSearch.no_clan_filter_match_description')}</p>
                   </Card>
                 )
               ) : (
                 <Card className="p-8 text-center bg-secondary">
                   <Info className="w-12 h-12 mx-auto text-primary mb-4" />
-                  <h3 className="text-xl font-semibold">Nenhum clã encontrado</h3>
-                  <p className="text-muted-foreground">Não encontramos nenhum clã com o nome "{query}".</p>
+                  <h3 className="text-xl font-semibold">{t('clanSearch.no_clan_found_title')}</h3>
+                  <p className="text-muted-foreground">{t('clanSearch.no_clan_found_description', { query })}</p>
                 </Card>
               )}
             </div>
