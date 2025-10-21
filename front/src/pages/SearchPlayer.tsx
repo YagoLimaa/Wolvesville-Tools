@@ -125,7 +125,7 @@ const SearchPlayer = () => {
             {searchResult && playerCount > 0 && (
               playerCount === 1 ? (
                 <div className="flex justify-center animate-in fade-in zoom-in-95 mt-6">
-                  <div className="w-full max-w-lg">
+                  <div className="w-full max-w-4xl">
                     <PlayerCard player={searchResult.players[0]} />
                   </div>
                 </div>
