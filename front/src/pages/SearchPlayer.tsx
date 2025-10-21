@@ -59,8 +59,11 @@ const SearchPlayer = () => {
   };
 
   const handleGoBack = () => {
-    navigate("/");
+    setSearchResult(null);
+    navigate("/search");
   };
+
+  const playerCount = searchResult?.players?.length ?? 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,30 +113,38 @@ const SearchPlayer = () => {
                   <h2 className="text-2xl font-bold text-foreground">
                     {t('searchPlayer.resultsTitle', { query: currentQuery })}
                   </h2>
-                  <p className="text-muted-foreground">
+                  {playerCount > 0 && <p className="text-muted-foreground">
                     {t('searchPlayer.pagination', { currentPage: searchResult.pagination.currentPage, totalPages: searchResult.pagination.totalPages })}
-                  </p>
+                  </p>}
                 </div>
               </div>
             )}
 
             {isLoading && <p className="text-center text-muted-foreground text-lg">{t('searchPlayer.loadingPlayers')}</p>}
 
-            {searchResult && searchResult.players.length > 0 && (
-              <div className="grid md:grid-cols-2 gap-6">
-                {searchResult.players.map((player, index) => (
-                  <div
-                    key={player.id}
-                    className="animate-in fade-in zoom-in-95"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <PlayerCard player={player} />
+            {searchResult && playerCount > 0 && (
+              playerCount === 1 ? (
+                <div className="flex justify-center animate-in fade-in zoom-in-95 mt-6">
+                  <div className="w-full max-w-lg">
+                    <PlayerCard player={searchResult.players[0]} />
                   </div>
-                ))}
-              </div>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {searchResult.players.map((player, index) => (
+                    <div
+                      key={player.id}
+                      className="animate-in fade-in zoom-in-95"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <PlayerCard player={player} />
+                    </div>
+                  ))}
+                </div>
+              )
             )}
 
-            {searchResult && searchResult.players.length === 0 && !isLoading && (
+            {searchResult && playerCount === 0 && !isLoading && (
               <Card className="p-8 text-center bg-secondary">
                 <Info className="w-12 h-12 mx-auto text-primary mb-4" />
                 <h3 className="text-xl font-semibold">{t('searchPlayer.noPlayersFound.title')}</h3>
