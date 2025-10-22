@@ -78,7 +78,7 @@ const ClanSearch = () => {
       setQuery(clanNameFromUrl);
       handleSearch(clanNameFromUrl, language);
     }
-  }, []);
+  }, [searchParams, handleSearch, language]);
 
   useEffect(() => {
     if (query) {
@@ -168,7 +168,7 @@ const ClanSearch = () => {
                   <Card className="p-8 text-center bg-secondary">
                     <Info className="w-12 h-12 mx-auto text-primary mb-4" />
                     <h3 className="text-xl font-semibold">{t('clanSearch.no_clan_filter_match_title')}</h3>
-                    <p className="text-muted-foreground">{t('clanSearch.no_clan_filter_match_description')}</p>
+                    <p  className="text-muted-foreground">{t('clanSearch.no_clan_filter_match_description')}</p>
                   </Card>
                 )
               ) : (

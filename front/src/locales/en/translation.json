@@ -457,5 +457,15 @@
     "vi": "Vietnam",
     "ye": "Yemen",
     "za": "South Africa"
+  },
+  "clanRankings": {
+    "title": "Clan Rankings",
+    "loading": "Fetching rankings...",
+    "fetch_error": "Failed to fetch data. The API might be offline.",
+    "search_error": "Error fetching rankings. Please try again.",
+    "filter_clans": "Filter clans...",
+    "language": "Language",
+    "no_clans_found": "No clans found",
+    "no_clans_found_description": "We couldn't find any clans for the selected filters."
   }
 }

@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { ClanCard, Clan } from "@/components/ClanCard";
 import { Card } from "@/components/ui/card";
@@ -6,120 +7,17 @@ import { Info, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-// Correct list of locales based on game flags
-const locales: { [key: string]: string } = {
-  "all": "Todos",
-  "br": "Brasil",
-  "de": "Alemanha",
-  "fr": "França",
-  "gb": "Reino Unido",
-  "th": "Tailândia",
-  "vn": "Vietnã",
-  "tr": "Turquia",
-  "aq": "Antártida",
-  "ar": "Argentina",
-  "at": "Áustria",
-  "au": "Austrália",
-  "ax": "Ilhas Aland",
-  "az": "Azerbaijão",
-  "be": "Bélgica",
-  "bg": "Bulgária",
-  "bh": "Bahrein",
-  "bm": "Bermudas",
-  "bn": "Brunei",
-  "bs": "Bahamas",
-  "bw": "Botsuana",
-  "by": "Bielorrússia",
-  "ca": "Canadá",
-  "cd": "Congo",
-  "cf": "República Centro-Africana",
-  "ch": "Suíça",
-  "ck": "Ilhas Cook",
-  "cl": "Chile",
-  "cn": "China",
-  "co": "Colômbia",
-  "cr": "Costa Rica",
-  "cy": "Chipre",
-  "cz": "República Tcheca",
-  "dk": "Dinamarca",
-  "do": "República Dominicana",
-  "dz": "Argélia",
-  "ee": "Estônia",
-  "es": "Espanha",
-  "eu": "União Europeia",
-  "fi": "Finlândia",
-  "fj": "Fiji",
-  "gn": "Guiné",
-  "gr": "Grécia",
-  "gt": "Guatemala",
-  "hk": "Hong Kong",
-  "hr": "Croácia",
-  "hu": "Hungria",
-  "id": "Indonésia",
-  "ie": "Irlanda",
-  "il": "Israel",
-  "im": "Ilha de Man",
-  "in": "Índia",
-  "is": "Islândia",
-  "it": "Itália",
-  "jm": "Jamaica",
-  "jp": "Japão",
-  "kh": "Camboja",
-  "kp": "Coreia do Norte",
-  "kr": "Coreia do Sul",
-  "kw": "Kuwait",
-  "kz": "Cazaquistão",
-  "la": "Laos",
-  "lr": "Libéria",
-  "lt": "Lituânia",
-  "lu": "Luxemburgo",
-  "ma": "Marrocos",
-  "md": "Moldávia",
-  "mn": "Mongólia",
-  "mx": "México",
-  "my": "Malásia",
-  "nc": "Nova Caledônia",
-  "nl": "Holanda",
-  "no": "Noruega",
-  "np": "Nepal",
-  "nz": "Nova Zelândia",
-  "pa": "Panamá",
-  "pe": "Peru",
-  "ph": "Filipinas",
-  "pk": "Paquistão",
-  "pl": "Polônia",
-  "ps": "Palestina",
-  "pt": "Portugal",
-  "py": "Paraguai",
-  "ro": "Romênia",
-  "rs": "Sérvia",
-  "ru": "Rússia",
-  "se": "Suécia",
-  "sg": "Singapura",
-  "si": "Eslovênia",
-  "sk": "Eslováquia",
-  "so": "Somália",
-  "sr": "Suriname",
-  "sy": "Síria",
-  "tw": "Taiwan",
-  "ua": "Ucrânia",
-  "ug": "Uganda",
-  "us": "Estados Unidos",
-  "uy": "Uruguai",
-  "va": "Vaticano",
-  "vi": "Vietnã",
-  "ye": "Iêmen",
-  "za": "África do Sul",
-};
-
 const ClanRankings = () => {
+  const { t } = useTranslation();
+  const locales: { [key: string]: string } = t('locales', { returnObjects: true }) as { [key: string]: string };
+
   const [rankings, setRankings] = useState<Clan[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState("all");
   const [localSearchTerm, setLocalSearchTerm] = useState("");
 
-  const fetchRankings = async (lang: string) => {
+  const fetchRankings = useCallback(async (lang: string) => {
     setIsLoading(true);
     setError(null);
 
@@ -130,23 +28,23 @@ const ClanRankings = () => {
       }
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error("Falha ao buscar dados. A API pode estar offline.");
+        throw new Error(t("clanRankings.fetch_error"));
       }
       const results = await response.json() as Clan[];
       // Sort by XP on the frontend
       results.sort((a, b) => b.xp - a.xp);
       setRankings(results);
     } catch (err) {
-      setError("Erro ao buscar rankings. Tente novamente.");
+      setError(t("clanRankings.search_error"));
       setRankings(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     fetchRankings(language);
-  }, [language]);
+  }, [language, fetchRankings]);
 
   const filteredResults = useMemo(() => {
     if (!rankings) return [];
@@ -161,9 +59,9 @@ const ClanRankings = () => {
       <NavigationBar />
       
       <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Ranking de Clãs</h1>
+        <h1 className="text-3xl font-bold text-center mb-8">{t("clanRankings.title")}</h1>
         <div className="space-y-6">
-          {isLoading && <p className="text-center text-muted-foreground text-lg">Buscando rankings...</p>}
+          {isLoading && <p className="text-center text-muted-foreground text-lg">{t("clanRankings.loading")}</p>}
           {error && <p className="text-center text-destructive text-lg">{error}</p>}
 
           {rankings !== null && (
@@ -172,7 +70,7 @@ const ClanRankings = () => {
                 <div className="relative flex-1 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Filtrar clãs..."
+                    placeholder={t("clanRankings.filter_clans")}
                     className="pl-10"
                     value={localSearchTerm}
                     onChange={(e) => setLocalSearchTerm(e.target.value)}
@@ -182,7 +80,7 @@ const ClanRankings = () => {
                   <div className="flex items-center gap-2">
                     <Select value={language} onValueChange={setLanguage}>
                       <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Idioma" />
+                        <SelectValue placeholder={t("clanRankings.language")} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(locales).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
@@ -199,8 +97,8 @@ const ClanRankings = () => {
               ) : (
                 <Card className="p-8 text-center bg-secondary">
                   <Info className="w-12 h-12 mx-auto text-primary mb-4" />
-                  <h3 className="text-xl font-semibold">Nenhum clã encontrado</h3>
-                  <p className="text-muted-foreground">Não encontramos nenhum clã para os filtros selecionados.</p>
+                  <h3 className="text-xl font-semibold">{t("clanRankings.no_clans_found")}</h3>
+                  <p className="text-muted-foreground">{t("clanRankings.no_clans_found_description")}</p>
                 </Card>
               )}
             </div>

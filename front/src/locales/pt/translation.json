@@ -233,6 +233,17 @@
     "combinedItemsLog": "--- [ItemsContext] Lista final de itens combinados: --- {{count}} itens",
     "hookScopeError": "useItems deve ser usado dentro de um ItemsProvider"
   },
+  "clanInfo": {
+    "minLevel": "Nível Mínimo",
+    "language": "Idioma",
+    "creationDate": "Data de Criação",
+    "joinType": "Regras para Entrar",
+    "role": "Cargo",
+    "fetchError": "Não foi possível buscar os dados do clã.",
+    "joinByRequest": "Por Pedido",
+    "open": "Aberto",
+    "closed": "Fechado"
+  },
   "footer": {
     "unofficial_notice": "Site não oficial do wolvesville",
     "api_disclaimer": "feito por Yagod"
@@ -449,5 +460,15 @@
     "vi": "Vietnã",
     "ye": "Iêmen",
     "za": "África do Sul"
+  },
+  "clanRankings": {
+    "title": "Ranking de Clãs",
+    "loading": "Buscando rankings...",
+    "fetch_error": "Falha ao buscar dados. A API pode estar offline.",
+    "search_error": "Erro ao buscar rankings. Tente novamente.",
+    "filter_clans": "Filtrar clãs...",
+    "language": "Idioma",
+    "no_clans_found": "Nenhum clã encontrado",
+    "no_clans_found_description": "Não encontramos nenhum clã para os filtros selecionados."
   }
 }
