@@ -321,15 +321,13 @@ apiRouter.get('/players/highscores', async (req, res) => {
 });
 
 apiRouter.get('/clans/search', async (req, res) => {
-  const { name, language } = req.query;
+  const { name, language, open } = req.query;
 
   try {
     const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
     
     const searchParams = {};
-    if (name) {
-      searchParams.name = name;
-    }
+    if (name) searchParams.name = name;
     if (language && language.toLowerCase() !== 'all') {
       searchParams.language = language;
     }
@@ -338,15 +336,17 @@ apiRouter.get('/clans/search', async (req, res) => {
       params: searchParams, 
       headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' }
     };
+    
     const searchResponse = await axios.get(searchUrl, searchConfig);
-
-    const clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+    let clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+    if (open === 'true') {
+      clansFound = clansFound.filter(clan => clan.joinType === 'PUBLIC');
+    }
     
     res.json(clansFound);
 
   } catch (error) {
     console.error("Erro ao buscar clãs:", error.message);
-    // Passa o erro da API externa através, se possível
     if (error.response) {
       return res.status(error.response.status).json(error.response.data);
     }

@@ -3,9 +3,11 @@ import { useTranslation } from "react-i18next";
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { ClanCard, Clan } from "@/components/ClanCard";
 import { Card } from "@/components/ui/card";
-import { Info, Search } from "lucide-react";
+import { Info, ArrowDownUp, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const ClanRankings = () => {
   const { t } = useTranslation();
@@ -16,6 +18,9 @@ const ClanRankings = () => {
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState("all");
   const [localSearchTerm, setLocalSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"xp" | "members">("xp");
+  const [joinType, setJoinType] = useState("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
   const fetchRankings = useCallback(async (lang: string) => {
     setIsLoading(true);
@@ -31,8 +36,6 @@ const ClanRankings = () => {
         throw new Error(t("clanRankings.fetch_error"));
       }
       const results = await response.json() as Clan[];
-      // Sort by XP on the frontend
-      results.sort((a, b) => b.xp - a.xp);
       setRankings(results);
     } catch (err) {
       setError(t("clanRankings.search_error"));
@@ -46,13 +49,26 @@ const ClanRankings = () => {
     fetchRankings(language);
   }, [language, fetchRankings]);
 
-  const filteredResults = useMemo(() => {
+  const sortedResults = useMemo(() => {
     if (!rankings) return [];
     
-    return rankings.filter(clan => 
+    const filtered = rankings.filter(clan => 
       clan.name.toLowerCase().includes(localSearchTerm.toLowerCase())
+    ).filter(clan =>
+      joinType === 'all' || clan.joinType === joinType
     );
-  }, [rankings, localSearchTerm]);
+
+    return filtered.sort((a, b) => {
+      const aValue = sortBy === 'xp' ? a.xp : a.memberCount;
+      const bValue = sortBy === 'xp' ? b.xp : b.memberCount;
+
+      if (sortOrder === 'asc') {
+        return aValue - bValue;
+      } else {
+        return bValue - aValue;
+      }
+    });
+  }, [rankings, localSearchTerm, joinType, sortBy, sortOrder]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,10 +92,11 @@ const ClanRankings = () => {
                     onChange={(e) => setLocalSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                   <div className="flex items-center gap-2">
+                    <Label htmlFor="language-filter">{t('clanRankings.language')}</Label>
                     <Select value={language} onValueChange={setLanguage}>
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger id="language-filter" className="w-[180px]">
                         <SelectValue placeholder={t("clanRankings.language")} />
                       </SelectTrigger>
                       <SelectContent>
@@ -87,12 +104,41 @@ const ClanRankings = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="sort-by-filter">{t('clanSearch.sort_by_placeholder')}</Label>
+                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as "xp" | "members")}>
+                      <SelectTrigger id="sort-by-filter" className="w-full sm:w-[180px]">
+                        <SelectValue placeholder={t('clanSearch.sort_by_placeholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="xp">{t('clanSearch.sort_by_xp')}</SelectItem>
+                        <SelectItem value="members">{t('clanSearch.sort_by_members')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="join-type-filter">{t('clanSearch.join_type_placeholder')}</Label>
+                    <Select value={joinType} onValueChange={setJoinType}>
+                      <SelectTrigger id="join-type-filter" className="w-full sm:w-[180px]">
+                        <SelectValue placeholder={t('clanSearch.join_type_placeholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('clanSearch.join_type_all')}</SelectItem>
+                        <SelectItem value="JOIN_BY_REQUEST">{t('clanSearch.join_type_request')}</SelectItem>
+                        <SelectItem value="PRIVATE">{t('clanSearch.join_type_private')}</SelectItem>
+                        <SelectItem value="PUBLIC">{t('clanSearch.join_type_public')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}>
+                    <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
+                  </Button>
                 </div>
               </div>
 
-              {filteredResults.length > 0 ? (
+              {sortedResults.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredResults.map((clan) => <ClanCard key={clan.id} clan={clan} />)}
+                  {sortedResults.map((clan) => <ClanCard key={clan.id} clan={clan} />)}
                 </div>
               ) : (
                 <Card className="p-8 text-center bg-secondary">

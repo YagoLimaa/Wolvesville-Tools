@@ -9,6 +9,8 @@ import { Info, ArrowDownUp, Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { debounce } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const localesList = [
   "all", "br", "de", "fr", "gb", "th", "vn", "tr", "aq", "ar", "at", "au", 
@@ -31,8 +33,14 @@ const ClanSearch = () => {
   const [sortBy, setSortBy] = useState<"xp" | "members">("xp");
   const [language, setLanguage] = useState("all");
   const [localSearchTerm, setLocalSearchTerm] = useState("");
+  const [joinType, setJoinType] = useState("all");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const toggleSortOrder = () => {
+    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
 
   const locales = useMemo(() => 
     localesList.reduce((acc, loc) => {
@@ -41,18 +49,20 @@ const ClanSearch = () => {
     }, {} as { [key: string]: string }),
   [t]);
 
-  const handleSearch = useCallback(async (clanName: string, lang: string) => {
+  const handleSearch = useCallback(async (options: { clanName: string; lang: string; }) => {
+    const { clanName, lang } = options;
     if (!clanName) return;
     setIsLoading(true);
     setError(null);
-    navigate(`/clan/search?name=${encodeURIComponent(clanName)}`);
+
+    const params = new URLSearchParams();
+    params.set('name', clanName);
+    if (lang !== 'all') params.set('language', lang.toUpperCase());
+    
+    navigate(`/clan/search?${params.toString()}`);
 
     try {
-      let url = `/api/clans/search?name=${encodeURIComponent(clanName)}`;
-      if (lang !== 'all') {
-        url += `&language=${lang.toUpperCase()}`;
-      }
-      const response = await fetch(url);
+      const response = await fetch(`/api/clans/search?${params.toString()}`);
       if (!response.ok) {
         throw new Error(t("common.fetchError"));
       }
@@ -67,8 +77,8 @@ const ClanSearch = () => {
   }, [navigate, t]);
 
   const debouncedSearch = useMemo(() => {
-    return debounce((clanName: string, lang: string) => {
-      handleSearch(clanName, lang);
+    return debounce((options: Parameters<typeof handleSearch>[0]) => {
+      handleSearch(options);
     }, 500);
   }, [handleSearch]);
 
@@ -76,13 +86,13 @@ const ClanSearch = () => {
     const clanNameFromUrl = searchParams.get("name");
     if (clanNameFromUrl) {
       setQuery(clanNameFromUrl);
-      handleSearch(clanNameFromUrl, language);
+      // The search itself is triggered by the effect below
     }
-  }, [searchParams, handleSearch, language]);
+  }, [searchParams]);
 
   useEffect(() => {
     if (query) {
-      debouncedSearch(query, language);
+      debouncedSearch({ clanName: query, lang: language });
     }
   }, [query, language, debouncedSearch]);
 
@@ -91,13 +101,21 @@ const ClanSearch = () => {
     
     const filtered = searchResults.filter(clan => 
       clan.name.toLowerCase().includes(localSearchTerm.toLowerCase())
+    ).filter(clan => 
+      joinType === 'all' || clan.joinType === joinType
     );
 
     return filtered.sort((a, b) => {
-      if (sortBy === 'xp') return b.xp - a.xp;
-      return b.memberCount - a.memberCount;
+      const aValue = sortBy === 'xp' ? a.xp : a.memberCount;
+      const bValue = sortBy === 'xp' ? b.xp : b.memberCount;
+
+      if (sortOrder === 'asc') {
+        return aValue - bValue;
+      } else {
+        return bValue - aValue;
+      }
     });
-  }, [searchResults, sortBy, localSearchTerm]);
+  }, [searchResults, sortBy, localSearchTerm, joinType, sortOrder]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,10 +151,11 @@ const ClanSearch = () => {
                     onChange={(e) => setLocalSearchTerm(e.target.value)}
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row items-center gap-4">                  
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">                  
                   <div className="flex items-center gap-2">
+                    <Label htmlFor="language-filter">{t('clanSearch.language_placeholder')}</Label>
                     <Select value={language} onValueChange={setLanguage}>
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger id="language-filter" className="w-full sm:w-[180px]">
                         <SelectValue placeholder={t('clanSearch.language_placeholder')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -145,9 +164,9 @@ const ClanSearch = () => {
                     </Select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
+                    <Label htmlFor="sort-by-filter">{t('clanSearch.sort_by_placeholder')}</Label>
                     <Select value={sortBy} onValueChange={(value) => setSortBy(value as "xp" | "members")}>
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger id="sort-by-filter" className="w-full sm:w-[180px]">
                         <SelectValue placeholder={t('clanSearch.sort_by_placeholder')} />
                       </SelectTrigger>
                       <SelectContent>
@@ -156,6 +175,23 @@ const ClanSearch = () => {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="join-type-filter">{t('clanSearch.join_type_placeholder')}</Label>
+                    <Select value={joinType} onValueChange={setJoinType}>
+                      <SelectTrigger id="join-type-filter" className="w-full sm:w-[180px]">
+                        <SelectValue placeholder={t('clanSearch.join_type_placeholder')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t('clanSearch.join_type_all')}</SelectItem>
+                        <SelectItem value="JOIN_BY_REQUEST">{t('clanSearch.join_type_request')}</SelectItem>
+                        <SelectItem value="PRIVATE">{t('clanSearch.join_type_private')}</SelectItem>
+                        <SelectItem value="PUBLIC">{t('clanSearch.join_type_public')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={toggleSortOrder}>
+                    <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
+                  </Button>
                 </div>
               </div>
 

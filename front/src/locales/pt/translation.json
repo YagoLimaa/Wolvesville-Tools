@@ -18,6 +18,7 @@
     "shop": "Loja",
     "shop_description": "Ofertas ativas e itens",
     "updates": "Atualizações",
+    "events": "Eventos",
     "battle_pass": "Passe de Batalha",
     "battle_pass_desc": "Veja as recompensas e desafios da temporada",
     "unofficial": "Não Oficial"
@@ -72,7 +73,8 @@
       "selling": "Vendendo",
       "buying": "Comprando",
       "no_filtered_listings_title": "Nenhum Anúncio Encontrado",
-      "no_filtered_listings_description": "Nenhum anúncio de troca foi encontrado com o filtro atual."  },
+      "no_filtered_listings_description": "Nenhum anúncio de troca foi encontrado com o filtro atual."
+  },
   "battlePass": {
     "fetchError": "Não foi possível buscar os dados do Battle Pass.",
     "coinAlt": "Moeda do Passe",
@@ -355,7 +357,12 @@
     "no_clan_filter_match_title": "Nenhum clã corresponde ao filtro",
     "no_clan_filter_match_description": "Tente limpar o campo \"Filtrar resultados\".",
     "no_clan_found_title": "Nenhum clã encontrado",
-    "no_clan_found_description": "Não encontramos nenhum clã com o nome \"{{query}}\"."
+    "no_clan_found_description": "Não encontramos nenhum clã com o nome \"{{query}}\".",
+    "join_type_placeholder": "Tipo de Entrada",
+    "join_type_all": "Todos",
+    "join_type_request": "Por Pedido",
+    "join_type_private": "Privado",
+    "join_type_public": "Público"
   },
   "locales": {
     "all": "Todos",

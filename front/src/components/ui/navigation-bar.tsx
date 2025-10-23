@@ -2,7 +2,7 @@ import { useState } from "react";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Users, Package, ArrowRight, Menu, X, Megaphone } from "lucide-react";
+import { Users, Package, ArrowRight, Menu, X, CalendarDays, Newspaper } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { SearchInput } from "./search-input";
 import wolfLogo from "@/assets/wolf-logo.png";
@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./
 import { AnnouncementsViewer } from "../AnnouncementsViewer";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ChangelogViewer } from "../ChangelogViewer";
 
 export const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -124,16 +125,29 @@ export const NavigationBar = () => {
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
-              {/* Botão de Anúncios */}
+              {/* Botão de Eventos */}
               <Popover>
                 <PopoverTrigger asChild>
                   <button className={cn(navigationMenuTriggerStyle(), "bg-background/50 hover:bg-accent/80 group")}>
-                    <Megaphone className="w-4 h-4 mr-2" />
-                    {t('navigation.updates')}
+                    <CalendarDays className="w-4 h-4 mr-2" />
+                    {t('navigation.events')}
                   </button> 
                 </PopoverTrigger>
                 <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0">
                   <AnnouncementsViewer />
+                </PopoverContent>
+              </Popover>
+
+              {/* Botão de Updates */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className={cn(navigationMenuTriggerStyle(), "bg-background/50 hover:bg-accent/80 group")}>
+                    <Newspaper className="w-4 h-4 mr-2" />
+                    {t('navigation.updates')}
+                  </button> 
+                </PopoverTrigger>
+                <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0">
+                  <ChangelogViewer />
                 </PopoverContent>
               </Popover>
 
@@ -197,13 +211,23 @@ export const NavigationBar = () => {
                   <Link to="/items/shop" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-muted-foreground">{t('navigation.shop')}</Link>
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="updates">
+              <AccordionItem value="events">
                 <AccordionTrigger className="text-base">
-                  <Megaphone className="w-4 h-4 mr-2" /> {t('navigation.updates')}
+                  <CalendarDays className="w-4 h-4 mr-2" /> {t('navigation.events')}
                 </AccordionTrigger>
                 <AccordionContent>
                   <div className="max-h-[60vh] overflow-y-auto rounded-md border border-border -mx-4">
                     <AnnouncementsViewer />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="updates">
+                <AccordionTrigger className="text-base">
+                  <Newspaper className="w-4 h-4 mr-2" /> {t('navigation.updates')}
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="max-h-[60vh] overflow-y-auto rounded-md border border-border -mx-4">
+                    <ChangelogViewer />
                   </div>
                 </AccordionContent>
               </AccordionItem>
