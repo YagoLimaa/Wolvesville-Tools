@@ -21,6 +21,7 @@ export interface Clan {
   xp: number;
   memberCount: number;
   members: ClanMember[]; 
+  joinType: string;
 }
 
 interface ClanCardProps {

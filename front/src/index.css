@@ -109,9 +109,7 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -119,9 +117,8 @@
   body {
     @apply bg-background text-foreground;
   }
-}
 
-/* Correção para o shift de layout do modal do shadcn/ui */
-body[data-scroll-locked] header {
-  padding-right: var(--removed-body-scroll-bar-size);
+  body[data-radix-scroll-lock] {
+    overflow-y: scroll !important;
+  }
 }
