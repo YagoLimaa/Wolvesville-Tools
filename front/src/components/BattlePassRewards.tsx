@@ -67,7 +67,7 @@ export const BattlePassRewards = ({ season }: BattlePassRewardsProps) => {
   }
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2">
       {season.rewards.map((reward, index) => {
         const level = ("level" in reward && reward.level) ? reward.level : index + 1;
         const { imageUrl, name } = getRewardInfo(reward, itemsById, season.number, t);
@@ -117,7 +117,7 @@ export const BattlePassRewards = ({ season }: BattlePassRewardsProps) => {
                   )}
 
                   {"amount" in reward && reward.amount > 1 && (
-                    <div className="absolute left-1.5 top-1 z-20 text-lg font-extrabold text-white" style={{ textShadow: "1px 1px 3px black" }}>
+                    <div className="absolute left-1.5 top-1 z-20 text-base font-extrabold text-white" style={{ textShadow: "1px 1px 3px black" }}>
                       {reward.amount}x
                     </div>
                   )}
