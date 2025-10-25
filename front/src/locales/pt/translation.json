@@ -131,7 +131,16 @@
     "hideAvatars": "Ocultar Avatares",
     "showAllAvatars": "Ver Todos os Avatares ({{count}})",
     "clickToZoom": "Clique para ampliar",
-    "close": "Fechar"
+    "close": "Fechar",
+    "clickToInspect": "Clique para Inspecionar",
+    "invalidAvatarUrl": "URL de Avatar Inválida",
+    "fetchAvatarError": "Falha ao buscar detalhes do avatar.",
+    "genericAvatarError": "Ocorreu um erro ao inspecionar o avatar.",
+    "avatarInspectorTitle": "Analisador de Avatar",
+    "avatarComposition": "Composição",
+    "fullAvatar": "Avatar Completo",
+    "setDetailsTitle": "Detalhes do Conjunto",
+    "itemBelongsTo": "Este item pertence ao conjunto:"
   },
   "playersHighscores": {
     "fetchError": "Não foi possível buscar os melhores jogadores.",

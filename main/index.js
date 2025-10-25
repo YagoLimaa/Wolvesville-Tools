@@ -475,6 +475,34 @@ apiRouter.get('/items/:category', async (req, res) => {
   }
 });
 
+// Rota para obter o sharedAvatarId
+apiRouter.get('/avatars/sharedAvatarId/:playerId/:slotNumber', async (req, res) => {
+  const { playerId, slotNumber } = req.params;
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/sharedAvatarId/${playerId}/${slotNumber}`;
+    const requestConfig = { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}` } };
+    const response = await axios.get(requestUrl, requestConfig);
+    res.send(response.data);
+  } catch (error) {
+    console.error(`Erro ao buscar sharedAvatarId para o jogador ${playerId}:`, error.message);
+    res.status(500).json({ error: 'Não foi possível buscar o ID do avatar compartilhado.' });
+  }
+});
+
+// Rota para obter os detalhes de um avatar pelo seu sharedAvatarId
+apiRouter.get('/avatars/:sharedAvatarId', async (req, res) => {
+  const { sharedAvatarId } = req.params;
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/${sharedAvatarId}`;
+    const requestConfig = { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' } };
+    const response = await axios.get(requestUrl, requestConfig);
+    res.json(response.data);
+  } catch (error) {
+    console.error(`Erro ao buscar detalhes do avatar ${sharedAvatarId}:`, error.message);
+    res.status(500).json({ error: 'Não foi possível buscar os detalhes do avatar.' });
+  }
+});
+
 app.use('/api', apiRouter);
 
 if (process.env.NODE_ENV !== 'production') {

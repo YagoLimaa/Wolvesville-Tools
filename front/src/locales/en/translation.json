@@ -128,7 +128,16 @@
     "hideAvatars": "Hide Avatars",
     "showAllAvatars": "View All Avatars ({{count}})",
     "clickToZoom": "Click to zoom",
-    "close": "Close"
+    "close": "Close",
+    "clickToInspect": "Click to Inspect",
+    "invalidAvatarUrl": "Invalid Avatar URL",
+    "fetchAvatarError": "Failed to fetch avatar details.",
+    "genericAvatarError": "An error occurred while inspecting the avatar.",
+    "avatarInspectorTitle": "Avatar Inspector",
+    "avatarComposition": "Composition",
+    "fullAvatar": "Full Avatar",
+    "setDetailsTitle": "Set Details",
+    "itemBelongsTo": "This item belongs to the set:"
   },
   "playersHighscores": {
     "fetchError": "Could not fetch top players.",

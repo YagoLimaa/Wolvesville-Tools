@@ -283,6 +283,44 @@ export async function onRequest(context) {
         return jsonResponse(processedItems);
     }
 
+    // Rota para /avatars/sharedAvatarId/:playerId/:slotNumber
+    const sharedIdMatch = path.match(/^\/avatars\/sharedAvatarId\/([^/]+)\/([^/]+)$/);
+    if (sharedIdMatch) {
+        const [, playerId, slotNumber] = sharedIdMatch;
+        const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/sharedAvatarId/${playerId}/${slotNumber}`;
+        try {
+            const response = await axios.get(requestUrl, { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}` } });
+            return new Response(response.data, {
+                status: 200,
+                headers: {
+                    'Content-Type': 'text/plain',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+                },
+            });
+        } catch (error) {
+            console.error(`Erro ao buscar sharedAvatarId para o jogador ${playerId}:`, error.message);
+            return jsonResponse({ error: 'Não foi possível buscar o ID do avatar compartilhado.' }, 500);
+        }
+    }
+
+    // Rota para /avatars/:sharedAvatarId
+    const avatarDetailsMatch = path.match(/^\/avatars\/([^/]+)$/);
+    if (avatarDetailsMatch) {
+        const [, sharedAvatarId] = avatarDetailsMatch;
+        if (sharedAvatarId !== 'sharedAvatarId') {
+            const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/${sharedAvatarId}`;
+            try {
+                const response = await axios.get(requestUrl, requestConfig);
+                return jsonResponse(response.data);
+            } catch (error) {
+                console.error(`Erro ao buscar detalhes do avatar ${sharedAvatarId}:`, error.message);
+                return jsonResponse({ error: 'Não foi possível buscar os detalhes do avatar.' }, 500);
+            }
+        }
+    }
+
     // Se nenhuma rota corresponder
     return jsonResponse({ error: 'Rota não encontrada' }, 404);
 
