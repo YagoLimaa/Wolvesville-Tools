@@ -335,7 +335,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           </GradientButton>
 
           {showAvatars && (
-            <div className="grid grid-cols-3 gap-2 rounded-lg bg-secondary p-2 sm:grid-cols-4 sm:gap-4 sm:p-4">
+            <div className="grid grid-cols-3 gap-2 rounded-lg bg-secondary p-2 md:grid-cols-5 md:gap-4 md:p-4">
               {player.avatars && Array.isArray(player.avatars) && player.avatars.map((avatar, index) => (
                 avatar && avatar.url && (
                   <img
