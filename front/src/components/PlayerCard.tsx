@@ -45,7 +45,11 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
           }
           const sharedAvatarId = await sharedIdResponse.text();
 
-          
+          console.log("--- Avatar Inspector Debug ---");
+          console.log("Clicked Avatar Index:", avatar.index);
+          console.log("Player ID:", playerId);
+          console.log("Fetched sharedAvatarId:", sharedAvatarId);
+
           if (!sharedAvatarId) {
             throw new Error("Invalid shared avatar ID received");
           }
@@ -142,8 +146,8 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                 </div>
               </div>
               <div className="order-1 md:order-2 md:w-1/3">
-                <h4 className="font-semibold mb-4">{t('playerCard.fullAvatar')}</h4>
-                {avatar && <img src={avatar.url} alt="Full Avatar" className="rounded-lg w-full" />}
+                <h4 className="font-semibold mb-4 text-center">{t('playerCard.fullAvatar')}</h4>
+                {avatar && <img src={avatar.url} alt="Full Avatar" className="rounded-lg mx-auto md:w-full" />}
               </div>
             </div>
           )}
@@ -157,7 +161,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
               </DialogHeader>
               <div className="flex flex-col items-center text-center gap-4 mt-4">
                 <p className="text-sm text-muted-foreground">{t('playerCard.itemBelongsTo')}</p>
-                <img src={parentSet.imageUrl} alt={parentSet.name} className="w-90 h-64 sm:w-90 sm:h-70 object-contain rounded-lg border p-2"/>
+                <img src={parentSet.imageUrl} alt={parentSet.name} className="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-lg border p-2"/>
                 <p className="font-bold text-xl">{parentSet.name}</p>
               </div>
             </DialogContent>
@@ -338,7 +342,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                     key={index}
                     src={avatar.url}
                     alt="Avatar"
-                    className="aspect-square w-full rounded-lg border border-border object-cover transition-colors hover:border-primary"
+                    className="w-full aspect-[123/128] rounded-lg border border-border object-cover transition-colors hover:border-primary"
                     onClick={() => setInspectingAvatar({ url: avatar.url, index })}
                     title={t('playerCard.clickToInspect')}
                   />
