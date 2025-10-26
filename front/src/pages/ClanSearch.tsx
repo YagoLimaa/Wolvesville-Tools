@@ -5,12 +5,9 @@ import { NavigationBar } from "@/components/ui/navigation-bar";
 import { SearchForm } from "@/components/SearchForm";
 import { ClanCard, Clan } from "@/components/ClanCard";
 import { Card, CardContent } from "@/components/ui/card";
-import { Info, ArrowDownUp, Search } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Info } from "lucide-react";
 import { debounce } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { ClanFilters } from "@/components/ClanFilters";
 
 const localesList = [
   "all", "br", "de", "fr", "gb", "th", "vn", "tr", "aq", "ar", "at", "au", 
@@ -141,59 +138,19 @@ const ClanSearch = () => {
 
           {searchResults !== null && (
             <div>
-              <div className="flex flex-wrap justify-between items-center gap-4 mb-4 p-4 bg-card/50 rounded-lg border border-border">
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t('clanSearch.filter_results')}
-                    className="pl-10"
-                    value={localSearchTerm}
-                    onChange={(e) => setLocalSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">                  
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="language-filter">{t('clanSearch.language_placeholder')}</Label>
-                    <Select value={language} onValueChange={setLanguage}>
-                      <SelectTrigger id="language-filter" className="w-full sm:w-[180px]">
-                        <SelectValue placeholder={t('clanSearch.language_placeholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(locales).map(([code, name]) => <SelectItem key={code} value={code}>{name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="sort-by-filter">{t('clanSearch.sort_by_placeholder')}</Label>
-                    <Select value={sortBy} onValueChange={(value) => setSortBy(value as "xp" | "members")}>
-                      <SelectTrigger id="sort-by-filter" className="w-full sm:w-[180px]">
-                        <SelectValue placeholder={t('clanSearch.sort_by_placeholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="xp">{t('clanSearch.sort_by_xp')}</SelectItem>
-                        <SelectItem value="members">{t('clanSearch.sort_by_members')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="join-type-filter">{t('clanSearch.join_type_placeholder')}</Label>
-                    <Select value={joinType} onValueChange={setJoinType}>
-                      <SelectTrigger id="join-type-filter" className="w-full sm:w-[180px]">
-                        <SelectValue placeholder={t('clanSearch.join_type_placeholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">{t('clanSearch.join_type_all')}</SelectItem>
-                        <SelectItem value="JOIN_BY_REQUEST">{t('clanSearch.join_type_request')}</SelectItem>
-                        <SelectItem value="PRIVATE">{t('clanSearch.join_type_private')}</SelectItem>
-                        <SelectItem value="PUBLIC">{t('clanSearch.join_type_public')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={toggleSortOrder}>
-                    <ArrowDownUp className="w-4 h-4 text-muted-foreground" />
-                  </Button>
-                </div>
-              </div>
+              <ClanFilters
+                localSearchTerm={localSearchTerm}
+                setLocalSearchTerm={setLocalSearchTerm}
+                language={language}
+                setLanguage={setLanguage}
+                locales={locales}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                joinType={joinType}
+                setJoinType={setJoinType}
+                sortOrder={sortOrder}
+                toggleSortOrder={toggleSortOrder}
+              />
 
               {searchResults.length > 0 ? (
                 sortedResults.length > 0 ? (
