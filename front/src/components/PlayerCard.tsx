@@ -34,6 +34,11 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
   const getInspectorImageUrl = (item: Item) => {
     if (item.name && item.name.includes('Golden Wheel')) {
       return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
+    } else if (item.name && item.name.includes('Wheel Of Fortune')) {
+      return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
+    } else if (item.name && item.name.includes('Daily Reward')) {
+      // Adicionado conforme sua solicitação
+      return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
     // Per user request, the inspector list should show the detailed image
     return item.imageUrl;
@@ -42,6 +47,11 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
   const getPopupImageUrl = (item: Item) => {
     if (item.name && item.name.includes('Golden Wheel')) {
       return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
+    } else if (item.name && item.name.includes('Wheel Of Fortune')) {
+      return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
+    } else if (item.name && item.name.includes('Daily Reward')) {
+      // Adicionado conforme sua solicitação
+      return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
     // For BP items, show the icon in the popup
     if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
