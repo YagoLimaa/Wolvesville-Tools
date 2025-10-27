@@ -63,6 +63,9 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
         return `BP${bpNumber} - ${item.name}`;
       }
     }
+    if (item.name && item.name.includes('Golden Wheel')) {
+      return 'Rose Wheel';
+    }
     return item.name;
   };
   // --- END HELPER FUNCTIONS ---
