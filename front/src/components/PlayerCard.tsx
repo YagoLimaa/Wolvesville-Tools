@@ -30,6 +30,43 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
   const [inspectorError, setInspectorError] = useState<string | null>(null);
   const [selectedItemForSet, setSelectedItemForSet] = useState<Item | null>(null);
 
+  // --- HELPER FUNCTIONS ---
+  const getInspectorImageUrl = (item: Item) => {
+    if (item.name && item.name.includes('Golden Wheel')) {
+      return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
+    }
+    // Per user request, the inspector list should show the detailed image
+    return item.imageUrl;
+  };
+
+  const getPopupImageUrl = (item: Item) => {
+    if (item.name && item.name.includes('Golden Wheel')) {
+      return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
+    }
+    // For BP items, show the icon in the popup
+    if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
+      const match = item.imageUrl.match(/\/bp(\d+)/);
+      if (match) {
+        const bpNumber = match[1];
+        return `https://cdn.wolvesville.com/battlePass/icons/bp${bpNumber}.png`;
+      }
+    }
+    return item.imageUrl;
+  };
+
+  const getPopupTitle = (item: Item) => {
+    // For BP items, show "BP<number> - <name>" in the popup
+    if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
+      const match = item.imageUrl.match(/\/bp(\d+)/);
+      if (match) {
+        const bpNumber = match[1];
+        return `BP${bpNumber} - ${item.name}`;
+      }
+    }
+    return item.name;
+  };
+  // --- END HELPER FUNCTIONS ---
+
   useEffect(() => {
     if (isOpen && avatar) {
       const fetchAvatarItems = async () => {
@@ -38,32 +75,17 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
         setInspectorData([]);
 
         try {
-          // Step 1: Get sharedAvatarId
           const sharedIdResponse = await fetch(`/api/avatars/sharedAvatarId/${playerId}/${avatar.index}`);
-          if (!sharedIdResponse.ok) {
-            throw new Error("Failed to fetch shared avatar ID");
-          }
+          if (!sharedIdResponse.ok) throw new Error("Failed to fetch shared avatar ID");
           const sharedAvatarId = await sharedIdResponse.text();
 
-          console.log("--- Avatar Inspector Debug ---");
-          console.log("Clicked Avatar Index:", avatar.index);
-          console.log("Player ID:", playerId);
-          console.log("Fetched sharedAvatarId:", sharedAvatarId);
+          if (!sharedAvatarId) throw new Error("Invalid shared avatar ID received");
 
-          if (!sharedAvatarId) {
-            throw new Error("Invalid shared avatar ID received");
-          }
-
-          // Step 2: Get avatar items using sharedAvatarId
           const response = await fetch(`/api/avatars/${sharedAvatarId}`);
-          if (!response.ok) {
-            throw new Error(t('playerCard.fetchAvatarError'));
-          }
+          if (!response.ok) throw new Error(t('playerCard.fetchAvatarError'));
           const data = await response.json();
           
           const itemIds = Object.values(data.items).filter(id => typeof id === 'string') as string[];
-          console.log("Fetched Item IDs:", itemIds);
-
           const items = itemIds.map(id => itemsById.get(id)).filter((item): item is Item => !!item);
           setInspectorData(items);
 
@@ -84,14 +106,10 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
 
   const findParentSet = (item: Item): Item | null => {
     if (!allItems) return null;
-
-    // 1. Direct parentSetId
     if (item.parentSetId) {
       const parent = itemsById.get(item.parentSetId);
       if (parent) return parent;
     }
-
-    // 2. Reverse search
     const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars'];
     const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
 
@@ -104,7 +122,6 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
       );
       if (parent) return parent;
     }
-
     return null;
   };
 
@@ -137,7 +154,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                       onClick={() => findParentSet(item) && setSelectedItemForSet(item)}
                     >
                       <CardContent className="p-2 flex flex-col items-center text-center">
-                        <img src={item.imageUrl} alt={item.name} className="w-12 h-12 sm:w-20 sm:h-20 object-contain" />
+                        <img src={getInspectorImageUrl(item)} alt={item.name} className="w-12 h-12 sm:w-20 sm:h-20 object-contain" />
                         <p className="text-xs mt-2 font-semibold leading-tight">{item.name || item.id}</p>
                         {item.rarity && <Badge variant="secondary" className="mt-1 text-xs">{t(`itemsSkins.${item.rarity}`)}</Badge>}
                       </CardContent>
@@ -146,7 +163,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                 </div>
               </div>
               <div className="order-1 md:order-2 md:w-1/3">
-                <h4 className="font-semibold mb-4 text-center">{t('playerCard.fullAvatar')}</h4>
+                <h4 className="font-semibold mb-4 text-center">Avatar Completo</h4>
                 {avatar && <img src={avatar.url} alt="Full Avatar" className="rounded-lg mx-auto md:w-full" />}
               </div>
             </div>
@@ -161,8 +178,8 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
               </DialogHeader>
               <div className="flex flex-col items-center text-center gap-4 mt-4">
                 <p className="text-sm text-muted-foreground">{t('playerCard.itemBelongsTo')}</p>
-                <img src={parentSet.imageUrl} alt={parentSet.name} className="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-lg border p-2"/>
-                <p className="font-bold text-xl">{parentSet.name}</p>
+                <img src={getPopupImageUrl(parentSet)} alt={parentSet.name} className="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-lg border p-2"/>
+                <p className="font-bold text-xl">{getPopupTitle(parentSet)}</p>
               </div>
             </DialogContent>
           )}
