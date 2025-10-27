@@ -9,7 +9,6 @@ import { useItems, Item } from "./contexts/ItemsContext";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-// Helper function to extract sharedAvatarId from URL
 const getSharedAvatarIdFromUrl = (url: string): string | null => {
   const match = url.match(/\/([a-f0-9-]+)\.png/);
   return match ? match[1] : null;
@@ -30,17 +29,14 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
   const [inspectorError, setInspectorError] = useState<string | null>(null);
   const [selectedItemForSet, setSelectedItemForSet] = useState<Item | null>(null);
 
-  // --- HELPER FUNCTIONS ---
   const getInspectorImageUrl = (item: Item) => {
     if (item.name && item.name.includes('Golden Wheel')) {
       return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
     } else if (item.name && item.name.includes('Wheel Of Fortune')) {
       return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
     } else if (item.name && item.name.includes('Daily Reward')) {
-      // Adicionado conforme sua solicitação
       return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
-    // Per user request, the inspector list should show the detailed image
     return item.imageUrl;
   };
 
@@ -50,10 +46,8 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
     } else if (item.name && item.name.includes('Wheel Of Fortune')) {
       return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
     } else if (item.name && item.name.includes('Daily Reward')) {
-      // Adicionado conforme sua solicitação
       return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
-    // For BP items, show the icon in the popup
     if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
       const match = item.imageUrl.match(/\/bp(\d+)/);
       if (match) {
@@ -65,7 +59,6 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
   };
 
   const getPopupTitle = (item: Item) => {
-    // For BP items, show "BP<number> - <name>" in the popup
     if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
       const match = item.imageUrl.match(/\/bp(\d+)/);
       if (match) {
@@ -78,7 +71,6 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
     }
     return item.name;
   };
-  // --- END HELPER FUNCTIONS ---
 
   useEffect(() => {
     if (isOpen && avatar) {
