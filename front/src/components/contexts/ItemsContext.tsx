@@ -78,8 +78,6 @@ const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined
 import type { TFunction } from 'i18next';
 
 const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
-  // Busca todas as categorias, incluindo 'tags' e 'advancedRoleCardOffers'
-  // 'avatarItemSets' é processado por último para ter prioridade no mapa de IDs.
   const categories = [...validCategories, 'tags', 'advancedRoleCardOffers'];
 
   const promises = categories.map(async (category) => {
