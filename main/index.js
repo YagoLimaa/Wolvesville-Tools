@@ -72,7 +72,7 @@ apiRouter.get('/search', async (req, res) => {
     let allPlayers;
     if (Array.isArray(response.data)) {
       allPlayers = response.data;
-    } else if (response.data && typeof response.data === 'object' && Object.keys(response.data).length > 0) {
+    } else if (response.data && typeof response.data === 'object' && response.data.id) {
       allPlayers = [response.data];
     } else {
       allPlayers = [];

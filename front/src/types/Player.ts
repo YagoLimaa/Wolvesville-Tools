@@ -21,10 +21,19 @@ export interface Player {
     villageWinCount: number;
     werewolfWinCount: number;
     totalPlayTimeInMinutes: number;
+    achievements: Achievement[];
   };
   receivedRosesCount: number;
   sentRosesCount: number;
   personalMessage?: string;
+}
+
+export interface Achievement {
+  roleId: string;
+  level: number;
+  points: number;
+  pointsNextLevel: number;
+  category: string;
 }
 
 export interface SearchResult {

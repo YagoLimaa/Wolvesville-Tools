@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Player } from "@/types/Player";
 import { useTranslation } from "react-i18next";
-import { Users, Trophy, Clock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Users, Trophy, Clock, Eye, EyeOff, Loader2, Star } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useRoles, Role } from "./contexts/RolesContext";
+import { Progress } from "@/components/ui/progress";
 
 const getSharedAvatarIdFromUrl = (url: string): string | null => {
   const match = url.match(/\/([a-f0-9-]+)\.png/);
@@ -195,6 +197,64 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
   );
 };
 
+interface AchievementsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  achievements: Player['gameStats']['achievements'];
+  rolesById: Map<string, Role>;
+}
+
+const AchievementsModal = ({ isOpen, onClose, achievements, rolesById }: AchievementsModalProps) => {
+  const { t } = useTranslation();
+
+  if (!isOpen) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-h-[85vh] w-[90vw] sm:w-full sm:max-w-2xl overflow-y-auto custom-scrollbar">
+        <DialogHeader>
+          <DialogTitle>{t('playerCard.achievements')}</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 mt-4">
+          {[...achievements].sort((a, b) => b.level - a.level).map((achievement) => {
+            const role = rolesById.get(achievement.roleId);
+            if (!role) return null;
+            const progress = (achievement.points / achievement.pointsNextLevel) * 100;
+            const isMaxLevel = achievement.level === 9;
+
+            const getProgressColor = (pointsNextLevel: number, level: number) => {
+                if (level === 9) return 'bg-yellow-400';
+                if (pointsNextLevel <= 150) return 'bg-green-500';
+                if (pointsNextLevel <= 350) return 'bg-yellow-500';
+                return 'bg-gray-500';
+            };
+
+            return (
+              <div key={achievement.roleId} className={`flex items-center gap-2 md:gap-4 p-2 md:p-3 rounded-lg bg-background border ${isMaxLevel ? 'border-yellow-400 shadow-lg shadow-yellow-400/20' : 'border-transparent'}`}>
+                <img src={role.imageUrl} alt={t(`roles.${role.name}`)} className="w-12 h-12 md:w-16 md:h-16 rounded-md" />
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-foreground text-base md:text-lg">{t(`roles.${role.name}`)}</p>
+                    <p className={`text-base md:text-lg font-bold ${isMaxLevel ? 'text-yellow-400' : 'text-wolf-cyan'}`}>Lvl {achievement.level}</p>
+                  </div>
+                  {!isMaxLevel ? (
+                    <>
+                      <Progress value={progress} className="h-2 mt-2" indicatorClassName={getProgressColor(achievement.pointsNextLevel, achievement.level)} />
+                      <p className="text-xs text-muted-foreground mt-1 text-right">{achievement.points} / {achievement.pointsNextLevel}</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-yellow-400 mt-1 text-right font-medium">{t('playerCard.maxLevel')}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 interface PlayerCardProps {
   player: Player;
 }
@@ -202,8 +262,10 @@ interface PlayerCardProps {
 export const PlayerCard = ({ player }: PlayerCardProps) => {
   const { t } = useTranslation();
   const [showAvatars, setShowAvatars] = useState(false);
+  const [isAchievementsModalOpen, setIsAchievementsModalOpen] = useState(false);
   const [inspectingAvatar, setInspectingAvatar] = useState<{ url: string; index: number } | null>(null);
   const { itemsById } = useItems();
+  const { rolesById } = useRoles();
 
   const getBadgeImage = (badgeId: string) => {
     const badgeItem = itemsById.get(badgeId);
@@ -330,6 +392,16 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
             </div>
           )}
 
+          <div className="bg-secondary rounded-lg p-4 cursor-pointer hover:bg-secondary/90" onClick={() => setIsAchievementsModalOpen(true)}>
+            <div className="flex justify-between items-center">
+              <h4 className="text-lg font-semibold text-wolf-cyan">
+                <Star className="inline w-5 h-5 mr-2" />
+                {t('playerCard.achievements')}
+              </h4>
+              <span className="text-sm text-muted-foreground">{t('playerCard.clickToSee')}</span>
+            </div>
+          </div>
+
           <div className="bg-secondary rounded-lg p-4">
             <p className="text-muted-foreground italic text-center">
               {player.personalMessage
@@ -380,6 +452,13 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
         onClose={() => setInspectingAvatar(null)}
         avatar={inspectingAvatar}
         playerId={player.id}
+      />
+
+      <AchievementsModal
+        isOpen={isAchievementsModalOpen}
+        onClose={() => setIsAchievementsModalOpen(false)}
+        achievements={player.gameStats.achievements}
+        rolesById={rolesById}
       />
     </>
   );

@@ -47,7 +47,14 @@ export async function onRequest(context) {
       const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/search`;
       const response = await axios.get(requestUrl, { ...requestConfig, params: { username } });
 
-      let allPlayers = Array.isArray(response.data) ? response.data : (response.data ? [response.data] : []);
+      let allPlayers;
+      if (Array.isArray(response.data)) {
+        allPlayers = response.data;
+      } else if (response.data && typeof response.data === 'object' && response.data.id) {
+        allPlayers = [response.data];
+      } else {
+        allPlayers = [];
+      }
 
       for (const player of allPlayers) {
         if (player.clanId) {
