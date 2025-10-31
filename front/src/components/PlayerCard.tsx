@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Player } from "@/types/Player";
 import { useTranslation } from "react-i18next";
-import { Users, Trophy, Clock, Eye, EyeOff, Loader2, Star } from "lucide-react";
+import { Users, Trophy, Clock, Eye, EyeOff, Loader2, Star, Info } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -431,20 +431,32 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           </GradientButton>
 
           {showAvatars && (
-            <div className="grid grid-cols-3 gap-2 rounded-lg bg-secondary p-2 md:grid-cols-5 md:gap-4 md:p-4">
-              {player.avatars && Array.isArray(player.avatars) && player.avatars.map((avatar, index) => (
-                avatar && avatar.url && (
-                  <img
-                    key={index}
-                    src={avatar.url}
-                    alt="Avatar"
-                    className="w-full aspect-[123/128] rounded-lg border border-border object-cover transition-colors hover:border-primary"
-                    onClick={() => setInspectingAvatar({ url: avatar.url, index })}
-                    title={t('playerCard.clickToInspect')}
-                  />
-                )
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-3 gap-2 rounded-lg bg-secondary p-2 md:grid-cols-5 md:gap-4 md:p-4">
+                {player.avatars && Array.isArray(player.avatars) && player.avatars.map((avatar, index) => (
+                  avatar && avatar.url && (
+                    <div
+                      key={index}
+                      className="relative group cursor-pointer"
+                      onClick={() => setInspectingAvatar({ url: avatar.url, index })}
+                      title={t('playerCard.clickToInspect')}
+                    >
+                      <img
+                        src={avatar.url}
+                        alt="Avatar"
+                        className="w-full aspect-[123/128] rounded-lg border border-border object-cover transition-colors group-hover:border-primary"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity rounded-lg">
+                        <Info className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    </div>
+                  )
+                ))}
+              </div>
+              <p className="text-center text-sm text-muted-foreground mt-3">
+                {t('playerCard.clickToInspectDescription')}
+              </p>
+            </>
           )}
         </CardContent>
       </Card>

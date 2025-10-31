@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Users, Package, ArrowRight, Menu, X, CalendarDays, Newspaper } from "lucide-react";
+import { Users, Package, ArrowRight, Menu, X, CalendarDays, Newspaper, HelpCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { SearchInput } from "./search-input";
 import wolfLogo from "@/assets/wolf-logo.png";
@@ -11,6 +11,8 @@ import { AnnouncementsViewer } from "../AnnouncementsViewer";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ChangelogViewer } from "../ChangelogViewer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 export const NavigationBar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -53,6 +55,7 @@ export const NavigationBar = () => {
             
             {/* Navigation Menu */}
             <LanguageSwitcher />
+            <HelpDialog />
             <NavigationMenu>
               <NavigationMenuList className="gap-2">
               <NavigationMenuItem>
@@ -157,6 +160,7 @@ export const NavigationBar = () => {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
             <LanguageSwitcher />
+            <HelpDialog />
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} aria-label="Abrir menu">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -238,3 +242,36 @@ export const NavigationBar = () => {
     </header>
   );
 };
+
+const HelpDialog = () => {
+  const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="secondary" aria-label={t('navigation.help.button')}>
+          <HelpCircle className="h-5 w-5" />
+          <span className="hidden sm:inline sm:ml-2">{t('navigation.help.button')}</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="fixed left-[50%] top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-sm">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <HelpCircle className="w-6 h-6" /> {t('navigation.help.title')}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6 py-4 text-sm text-muted-foreground">
+          <div>
+            <h4 className="font-semibold text-foreground mb-2 text-base">{t('navigation.help.feature1.title')}</h4>
+            <p className="leading-relaxed break-words">{t('navigation.help.feature1.description')}</p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-foreground mb-2 text-base">{t('navigation.help.feature2.title')}</h4>
+            <p className="leading-relaxed break-words">{t('navigation.help.feature2.description')}</p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}

@@ -4,24 +4,36 @@
     "home_description": "Sua central completa para Wolvesville com tudo que você precisa: busca de jogadores, estatísticas, rotações, battle pass e muito mais!",
     "search_placeholder": "Buscar jogador...",
     "search_player": "Buscar Jogador",
-    "search_player_desc": "Encontre jogadores e veja suas estatísticas",
+    "search_player_desc": "Encontre jogadores pelo nome e veja seus status, clã e skins.",
     "clan": "Clã",
     "search_clan": "Buscar Clã",
     "search_clan_description": "Encontre informações sobre clãs",
     "clan_rankings": "Rankings de Clãs",
-    "clan_rankings_description": "Veja os melhores clãs",
+    "clan_rankings_description": "Navegue pelos rankings de clãs e veja os melhores.",
     "trades": "Trocas",
     "trades_description": "Anuncie e encontre trocas",
     "items": "Itens",
     "skins_and_avatars": "Skins & Avatares",
-    "skins_and_avatars_description": "Todas as skins disponíveis",
+    "skins_and_avatars_description": "Explore todos os itens, skins e avatares disponíveis no jogo.",
     "shop": "Loja",
-    "shop_description": "Ofertas ativas e itens",
+    "shop_description": "Veja as ofertas ativas na loja e os itens disponíveis.",
     "updates": "Atualizações",
     "events": "Eventos",
     "battle_pass": "Passe de Batalha",
     "battle_pass_desc": "Veja as recompensas e desafios da temporada",
-    "unofficial": "Não Oficial"
+    "unofficial": "Não Oficial",
+    "help": {
+      "button": "Ajuda",
+      "title": "Ajuda Rápida",
+      "feature1": {
+        "title": "Inspetor de Avatar",
+        "description": "Ao pesquisar por um jogador, você pode clicar em qualquer um dos avatares dele para ver todos os itens que o compõem, incluindo sua origem (evento, passe de batalha, loja, etc.)."
+      },
+      "feature2": {
+        "title": "Explorador de Itens",
+        "description": "Na seção 'Skins & Avatares', você pode navegar, pesquisar e filtrar todos os itens disponíveis no jogo, ver seus detalhes e como obtê-los."
+      }
+    }
   },
   "pagination": {
     "previous": "Anterior",
@@ -132,7 +144,8 @@
     "showAllAvatars": "Ver Todos os Avatares ({{count}})",
     "clickToZoom": "Clique para ampliar",
     "close": "Fechar",
-    "clickToInspect": "Clique para Inspecionar",
+    "clickToInspect": "Inspecionar",
+    "clickToInspectDescription": "Clique em um avatar para ver os itens que o compõem e sua origem.",
     "invalidAvatarUrl": "URL de Avatar Inválida",
     "fetchAvatarError": "Falha ao buscar detalhes do avatar.",
     "genericAvatarError": "Ocorreu um erro ao inspecionar o avatar.",

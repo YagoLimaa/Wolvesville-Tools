@@ -4,24 +4,36 @@
     "home_description": "Your complete hub for Wolvesville with everything you need: player search, stats, rotations, battle pass, and much more!",
     "search_placeholder": "Search player...",
     "search_player": "Search Player",
-    "search_player_desc": "Find players and view their stats",
+    "search_player_desc": "Find players by name and view their stats, clan, and skins.",
     "clan": "Clan",
     "search_clan": "Search Clan",
     "search_clan_description": "Find information about clans",
     "clan_rankings": "Clan Rankings",
-    "clan_rankings_description": "See the best clans",
+    "clan_rankings_description": "Browse clan rankings and see the top clans.",
     "trades": "Trades",
     "trades_description": "Announce and find trades",
     "items": "Items",
     "skins_and_avatars": "Skins & Avatars",
-    "skins_and_avatars_description": "All available skins",
+    "skins_and_avatars_description": "Explore all available items, skins, and avatars in the game.",
     "shop": "Shop",
-    "shop_description": "Active offers and items",
+    "shop_description": "Check out active offers in the shop and available items.",
     "updates": "Updates",
     "events": "Events",
     "battle_pass": "Battle Pass",
     "battle_pass_desc": "View season rewards and challenges",
-    "unofficial": "Unofficial"
+    "unofficial": "Unofficial",
+    "help": {
+      "button": "Help",
+      "title": "Quick Help",
+      "feature1": {
+        "title": "Avatar Inspector",
+        "description": "When searching for a player, you can click on any of their avatars to see all the items that make it up, including its origin (event, battle pass, shop, etc.)."
+      },
+      "feature2": {
+        "title": "Item Explorer",
+        "description": "In the 'Skins & Avatars' section, you can browse, search, and filter all items available in the game, view their details, and see how to obtain them."
+      }
+    }
   },
   "pagination": {
     "previous": "Previous",
@@ -129,7 +141,8 @@
     "showAllAvatars": "View All Avatars ({{count}})",
     "clickToZoom": "Click to zoom",
     "close": "Close",
-    "clickToInspect": "Click to Inspect",
+    "clickToInspect": "Inspect",
+    "clickToInspectDescription": "Click an avatar to see its component items and origin.",
     "invalidAvatarUrl": "Invalid Avatar URL",
     "fetchAvatarError": "Failed to fetch avatar details.",
     "genericAvatarError": "An error occurred while inspecting the avatar.",

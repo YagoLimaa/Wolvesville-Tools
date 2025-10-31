@@ -117,10 +117,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  body[data-radix-scroll-lock] {
-    overflow-y: scroll !important;
-  }
 }
 
 @layer utilities {
