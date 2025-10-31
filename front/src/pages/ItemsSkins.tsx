@@ -13,6 +13,7 @@ import { Search, AlertTriangle, Gem, Filter } from "lucide-react";
 import { PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomFontAwesomeIcon } from "@/components/ui/font-awesome-icon";
+import Lottie from "lottie-react";
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
 interface ContainedItem {
@@ -37,21 +38,33 @@ const rarityColors = {
   legendary: "border-yellow-500/50",
 };
 
-const getNameFromUrl = (url: string, t: (key: string) => string): string => {
-  try {
-    const filename = url.split('/').pop()?.split('.')[0] ?? '';
-    // Remove prefixos e sufixos comuns e substitui hífens/sublinhados por espaços
-    const cleanedName = filename
-      .replace(/bp\d+-/, '')
-      .replace(/_store|@\dx/g, '')
-      .replace(/[-_]/g, ' ');
-    return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
-  } catch {
-    return t("common.item");
-  }
+const ITEMS_PER_PAGE = 50;
+
+const AnimatedEmoji = ({ urlAnimation }: { urlAnimation: string }) => {
+  const { data: animationData, isLoading } = useQuery({
+    queryKey: ['emojiAnimation', urlAnimation],
+    queryFn: async () => {
+      try {
+        const response = await fetch(urlAnimation);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch animation: ${response.statusText}`);
+        }
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching or parsing Lottie animation:', error);
+        throw error; // Re-throw to let react-query handle the error state
+      }
+    },
+    staleTime: Infinity, // As animações são estáticas
+  });
+
+  if (isLoading) return <Skeleton className="w-full h-full" />;
+  if (!animationData) return null;
+
+  return <Lottie animationData={animationData} loop={true} className="w-full h-full" />;
 };
 
-const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: string) => void; }) => {
+const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError: (id: string) => void; isHovered: boolean; }) => {
   const [imageSrc, setImageSrc] = React.useState(item.imageUrl || '');
   const [hasError, setHasError] = React.useState(false);
 
@@ -59,6 +72,11 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
     setImageSrc(item.imageUrl || '');
     setHasError(false);
   }, [item.imageUrl]);
+
+  // Caso especial para emojis com animação
+  if (isHovered && item.category === 'emojis' && item.urlAnimation) {
+    return <AnimatedEmoji urlAnimation={item.urlAnimation} />;
+  }
 
   // Caso especial para profileIcons que são ícones do FontAwesome
   if (item.category === 'profileIcons' && item.name?.startsWith('font-awesome-')) {
@@ -108,10 +126,33 @@ const ItemImage = ({ item, onImageError }: { item: Item; onImageError: (id: stri
   );
 };
 
-const ITEMS_PER_PAGE = 50;
-
 const ItemsSkins = () => {
   const { t } = useTranslation();
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [categoryFilter, setCategoryFilter] = React.useState("avatarItems");
+  const [rarityFilter, setRarityFilter] = React.useState("all");
+  const [genderFilter, setGenderFilter] = React.useState("all");
+  const [typeFilter, setTypeFilter] = React.useState("all");
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [brokenImageIds, setBrokenImageIds] = React.useState<Set<string>>(new Set());
+  const [selectedCollection, setSelectedCollection] = React.useState<Item | null>(null);
+  const [hoveredItemId, setHoveredItemId] = React.useState<string | null>(null);
+
+  const { allItems, isLoading, isError } = useItems();
+
+  const getNameFromUrl = (url: string): string => {
+    try {
+      const filename = url.split('/').pop()?.split('.')[0] ?? '';
+      // Remove prefixos e sufixos comuns e substitui hífens/sublinhados por espaços
+      const cleanedName = filename
+        .replace(/bp\d+-/, '')
+        .replace(/_store|@\dx/g, '')
+        .replace(/[-_]/g, ' ');
+      return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
+    } catch {
+      return t("common.item");
+    }
+  };
 
   const categoryDisplayNames: { [key: string]: string } = {
     avatarItemCollections: t('itemsSkins.categories.avatarItemCollections'),
@@ -129,16 +170,6 @@ const ItemsSkins = () => {
     roleIcons: t('itemsSkins.categories.roleIcons'),
     roseSkins: t('itemsSkins.categories.roseSkins'),
   };
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [categoryFilter, setCategoryFilter] = React.useState("avatarItems");
-  const [rarityFilter, setRarityFilter] = React.useState("all");
-  const [genderFilter, setGenderFilter] = React.useState("all");
-  const [typeFilter, setTypeFilter] = React.useState("all");
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [brokenImageIds, setBrokenImageIds] = React.useState<Set<string>>(new Set());
-  const [selectedCollection, setSelectedCollection] = React.useState<Item | null>(null);
-
-  const { allItems, isLoading, isError } = useItems();
 
   const handleImageError = React.useCallback((itemId: string) => {
     setBrokenImageIds(prev => {
@@ -207,7 +238,7 @@ const ItemsSkins = () => {
   }, [allItems]);
 
   // Categorias que abrem popup
-  const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars'];
+  const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'emojiCollections'];
 
   const collectionPieces = React.useMemo(() => {
     if (!selectedCollection || !allItems) return [];
@@ -216,6 +247,8 @@ const ItemsSkins = () => {
 
     if (selectedCollection.avatarItemIds) { // Para avatarItemSets e avatarItemCollections
       pieceIdentifiers = selectedCollection.avatarItemIds.map(id => ({ id, type: 'avatarItems' }));
+    } else if (selectedCollection.emojiIds) { // Para emojiCollections
+      pieceIdentifiers = selectedCollection.emojiIds.map(id => ({ id, type: 'emojis' }));
     } else if (selectedCollection.rewards) { // Para calendars
       pieceIdentifiers = selectedCollection.rewards.map(reward => ({
         id: reward.avatarItemId || reward.loadingScreenId || reward.emojiId || '',
@@ -260,7 +293,12 @@ const ItemsSkins = () => {
       if (parentSet) setSelectedCollection(parentSet);
     } else if (reverseSearchableCategories.includes(item.category) && allItems) {
       const parentSet = allItems.find(
-        set => (collectionCategories.includes(set.category)) && (set.avatarItemIds?.includes(item.id) || set.rewards?.some(r => r.avatarItemId === item.id || r.emojiId === item.id) || set.items?.some(i => i.avatarItemId === item.id))
+        set => (collectionCategories.includes(set.category)) && 
+               (set.avatarItemIds?.includes(item.id) || 
+                set.rewards?.some(r => r.avatarItemId === item.id || r.emojiId === item.id) || 
+                set.items?.some(i => i.avatarItemId === item.id) ||
+                set.emojiIds?.includes(item.id)
+               )
       );
       if (parentSet) setSelectedCollection(parentSet);
     }
@@ -272,8 +310,8 @@ const ItemsSkins = () => {
 
       <main className="container mx-auto px-4 py-8 mt-[84px]">
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
-          <aside className="lg:col-span-1 mb-8 lg:mb-0">
-            <Card className="bg-card/50 backdrop-blur border-accent/20 lg:sticky lg:top-24">
+          <aside className="lg:col-span-1 mb-8 lg:mb-0 lg:flex lg:flex-col lg:justify-center">
+            <Card className="bg-card/50 backdrop-blur border-accent/20 w-full">
               <CardContent className="p-4">
                 <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <Filter className="w-5 h-5 text-primary" />
@@ -392,14 +430,16 @@ const ItemsSkins = () => {
                   <button
                     key={item.id}
                     onClick={() => handleItemClick(item)}
+                    onMouseEnter={() => setHoveredItemId(item.id)}
+                    onMouseLeave={() => setHoveredItemId(null)}
                     className={`group relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 transition-all hover:scale-105 hover:shadow-glow-primary text-left w-full
                       ${item.rarity ? rarityColors[item.rarity] : 'border-border'}
                       ${collectionCategories.includes(item.category) || item.parentSetId || reverseSearchableCategories.includes(item.category) ? 'cursor-pointer' : 'cursor-default'}
                     `}
                   >
-                    <ItemImage item={item} onImageError={handleImageError} />
+                    <ItemImage item={item} onImageError={handleImageError} isHovered={hoveredItemId === item.id} />
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-md">
-                      <p className="text-xs font-semibold text-white truncate">{item.name || getNameFromUrl(item.imageUrl, t)}</p>
+                      <p className="text-xs font-semibold text-white truncate">{item.name || getNameFromUrl(item.imageUrl)}</p>
                     </div>
                   </button>
                 ))}
@@ -428,14 +468,14 @@ const ItemsSkins = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <CardContent className="p-6">
-              <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl, t)}</h3>
+              <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
               {collectionPieces.length > 0 ? (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                   {collectionPieces.map(piece => (
                     <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity!] || 'border-gray-600/50'}`}>
-                      <ItemImage item={piece} onImageError={handleImageError} />
+                      <ItemImage item={piece} onImageError={handleImageError} isHovered={hoveredItemId === piece.id} />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-center">
-                        <p className="text-xs font-semibold text-white truncate">{piece.name || getNameFromUrl(piece.imageUrl, t)}</p>
+                        <p className="text-xs font-semibold text-white truncate">{piece.name || getNameFromUrl(piece.imageUrl)}</p>
                       </div>
                     </div>
                   ))}

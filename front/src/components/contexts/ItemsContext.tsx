@@ -41,6 +41,8 @@ export interface Item {
   rewards?: ContainedItem[];
   items?: ContainedItem[] | { roleIconId: string }[];
   avatarItemSetId?: string;
+  urlAnimation?: string;
+  emojiIds?: string[];
   avatarItemSets?: (
     | {
         id: string;
