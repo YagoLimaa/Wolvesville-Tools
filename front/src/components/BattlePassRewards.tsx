@@ -10,7 +10,7 @@ interface BattlePassRewardsProps {
 }
 
 const getRewardInfo = (reward: BattlePassReward, itemsById: Map<string, Item>, seasonNumber: number, t: (key: string) => string): { imageUrl: string, name: string } => {
-  const placeholder = { imageUrl: "https://via.placeholder.com/100", name: "Item Desconhecido" };
+  const placeholder = { imageUrl: "data:image/svg+xml;charset=UTF-8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"white\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-help-circle\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3\"></path><line x1=\"12\" y1=\"17\" x2=\"12.01\" y2=\"17\"></line></svg>", name: "Item Desconhecido" };
 
   if (!('type' in reward)) {
     return placeholder;
@@ -34,6 +34,11 @@ const getRewardInfo = (reward: BattlePassReward, itemsById: Map<string, Item>, s
       itemId = reward.loadingScreenId;
       break;
     case "ROSE_PACKAGE":
+      if (reward.rosePackageId === 'U0s') {
+        return { imageUrl: "https://www.wolvesville.com/static/media/rose_large_sticker_server.985a27229b8e6ccdc63e.png", name: t('common.server_rose') };
+      } else if (reward.rosePackageId === 'mkQ') {
+        return { imageUrl: "https://www.wolvesville.com/static/media/rose_inventory_single.eb6af861d48bff85f73a.png", name: t('common.single_rose') };
+      }
       return { imageUrl: "https://www.wolvesville.com/static/media/rose_inventory_single.eb6af861d48bff85f73a.png", name: t('common.roses') };
     case "GEM":
       return { imageUrl: "https://www.wolvesville.com/static/media/gem.439d7650def0b35d6a66.png", name: t('common.gems') };

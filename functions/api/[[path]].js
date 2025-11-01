@@ -141,9 +141,66 @@ export async function onRequest(context) {
     }
 
     if (path === '/battlePass/season') {
-        const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
-        const response = await axios.get(requestUrl, requestConfig);
-        return jsonResponse(response.data);
+      const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
+      const response = await axios.get(requestUrl, requestConfig);
+      const seasonData = response.data;
+
+      const currencyTotals = {
+        GOLD: 0,
+        SINGLE_ROSE: 0,
+        SERVER_ROSE: 0,
+        BATTLE_PASS_COIN: 0,
+        GEM: 0,
+      };
+
+      seasonData.rewards.forEach(reward => {
+        if (reward.type === 'GOLD') {
+          currencyTotals.GOLD += reward.amount;
+        } else if (reward.type === 'BATTLE_PASS_COIN') {
+          currencyTotals.BATTLE_PASS_COIN += reward.amount;
+        } else if (reward.type === 'GEM') {
+          currencyTotals.GEM += reward.amount;
+        } else if (reward.type === 'ROSE_PACKAGE') {
+          if (reward.rosePackageId === 'U0s') { // SERVER_ROSE
+            currencyTotals.SERVER_ROSE += reward.amount;
+          } else if (reward.rosePackageId === 'mkQ') { // SINGLE_ROSE
+            currencyTotals.SINGLE_ROSE += reward.amount;
+          }
+        }
+      });
+
+      // Fetch rose icons
+      const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roses`;
+      const rosesResponse = await axios.get(rosesUrl, requestConfig);
+      const roses = rosesResponse.data;
+
+      const currencyIcons = {
+        GOLD: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png",
+        GEM: "https://www.wolvesville.com/static/media/gem.439d7650def0b35d6a66.png",
+        BATTLE_PASS_COIN: `https://cdn2.wolvesville.com/battlePass/coins/bp${seasonData.number}_single@2x.png`,
+        ROSES: {
+          SERVER_ROSE: "https://www.wolvesville.com/static/media/rose_large_sticker_server.985a27229b8e6ccdc63e.png",
+          SINGLE_ROSE: "https://www.wolvesville.com/static/media/rose_inventory_single.eb6af861d48bff85f73a.png"
+        },
+      };
+
+      if (Array.isArray(roses)) {
+        for (const rose of roses) {
+          if (rose.id === 'U0s') { // SERVER_ROSE
+            currencyIcons.ROSES.SERVER_ROSE = rose.imageUrl;
+          } else if (rose.id === 'mkQ') { // SINGLE_ROSE
+            currencyIcons.ROSES.SINGLE_ROSE = rose.imageUrl;
+          }
+        }
+      }
+
+      const responseData = {
+        ...seasonData,
+        currencyTotals,
+        currencyIcons,
+      };
+
+      return jsonResponse(responseData);
     }
 
     if (path === '/battlePass/shop') {
@@ -251,7 +308,7 @@ export async function onRequest(context) {
     const itemsMatch = path.match(/^\/items\/([^/]+)$/);
     if (itemsMatch) {
         const category = itemsMatch[1];
-        const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins', 'advancedRoleCardOffers'];
+        const validCategories = ['avatarItems', 'bodyPaints', 'avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'tags', 'profileIcons', 'profileIconBorders', 'emojis', 'emojiCollections', 'backgrounds', 'loadingScreens', 'roleIcons', 'advancedRoleCardOffers', 'baseRoleCardOffers', 'roseSkins', 'roses', 'advancedRoleCardOffers'];
 
         if (!validCategories.includes(category)) {
             return jsonResponse({ error: 'Categoria de item inválida.' }, 400);

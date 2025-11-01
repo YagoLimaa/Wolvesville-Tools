@@ -47,6 +47,8 @@
     "gold": "Ouro",
     "gems": "Gemas",
     "roses": "Rosas",
+    "single_rose": "Rosa Individual",
+    "server_rose": "Rosa do Servidor",
     "delete": "Apagar",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
@@ -115,7 +117,9 @@
       "title": "Battle Pass - Temporada Atual",
       "season": "Temporada {{seasonNumber}}",
       "endsIn": "Termina em {{daysLeft}} dias",
-      "endingToday": "Terminando hoje"
+      "endingToday": "Terminando hoje",
+      "totalRewards": "Recompensas Totais",
+      "passCost": "Valor do passe"
     }
   },
   "clanCard": {
@@ -171,7 +175,8 @@
       "Ranked League Silver": "Liga Ranqueada: Prata",
       "Ranked League Gold": "Liga Ranqueada: Ouro",
       "Advanced": "Avançado",
-      "Assassins convention": "Convenção de Assassinos"
+      "Assassins convention": "Convenção de Assassinos",
+      "All random": "Tudo Aleatório"
     }
   },
   "shop": {
