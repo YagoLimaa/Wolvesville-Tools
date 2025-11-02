@@ -170,7 +170,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                 </div>
               </div>
               <div className="order-1 md:order-2 md:w-1/3">
-                <h4 className="font-semibold mb-4 text-center">Avatar Completo</h4>
+                <h4 className="font-semibold mb-4 text-center">{t('playerCard.fullAvatar')}</h4>
                 {avatar && <img src={avatar.url} alt="Full Avatar" className="rounded-lg mx-auto md:w-full" />}
               </div>
             </div>
