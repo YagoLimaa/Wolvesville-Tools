@@ -24,15 +24,26 @@
     "unofficial": "Unofficial",
     "help": {
       "button": "Help",
-      "title": "Quick Help",
+      "title": "Help",
       "feature1": {
-        "title": "Avatar Inspector",
-        "description": "When searching for a player, you can click on any of their avatars to see all the items that make it up, including its origin (event, battle pass, shop, etc.)."
+        "title": "For questions or help, find me on Discord at `yagod` or in-game as `Yagod`.",
+        "description": ""
       },
       "feature2": {
-        "title": "Item Explorer",
-        "description": "In the 'Skins & Avatars' section, you can browse, search, and filter all items available in the game, view their details, and see how to obtain them."
+        "title": "",
+        "description": ""
       }
+    }
+  },
+  "welcomeDialog": {
+    "title": "Welcome to your Wolvesville Hub",
+    "feature1": {
+      "title": "🕵️‍♂️ Avatar Inspector",
+      "description": "When searching for a player, you can click on any of their avatars to see all the items that make it up, including its origin (event, battle pass, shop, etc.)."
+    },
+    "feature2": {
+      "title": "🎒 Item Explorer",
+      "description": "In the 'Skins & Avatars' section, you can browse, search, and filter all items available in the game, view their details, and see how to obtain them."
     }
   },
   "pagination": {

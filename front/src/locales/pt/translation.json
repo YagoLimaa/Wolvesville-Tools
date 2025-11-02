@@ -24,15 +24,26 @@
     "unofficial": "Não Oficial",
     "help": {
       "button": "Ajuda",
-      "title": "Ajuda Rápida",
+      "title": "Ajuda",
       "feature1": {
-        "title": "Inspetor de Avatar",
-        "description": "Ao pesquisar por um jogador, você pode clicar em qualquer um dos avatares dele para ver todos os itens que o compõem, incluindo sua origem (evento, passe de batalha, loja, etc.)."
+        "title": "Para dúvidas ou ajuda, me chame no Discord `yagod` ou no jogo `Yagod`.",
+        "description": ""
       },
       "feature2": {
-        "title": "Explorador de Itens",
-        "description": "Na seção 'Skins & Avatares', você pode navegar, pesquisar e filtrar todos os itens disponíveis no jogo, ver seus detalhes e como obtê-los."
+        "title": "",
+        "description": ""
       }
+    }
+  },
+  "welcomeDialog": {
+    "title": "Bem-vindo ao seu Hub de Wolvesville",
+    "feature1": {
+      "title": "🕵️‍♂️ Inspetor de Avatar",
+      "description": "Ao pesquisar por um jogador, você pode clicar em qualquer um dos avatares dele para ver todos os itens que o compõem, incluindo sua origem (evento, passe de batalha, loja, etc.)."
+    },
+    "feature2": {
+      "title": "🎒 Explorador de Itens",
+      "description": "Na seção 'Skins & Avatares', você pode navegar, pesquisar e filtrar todos os itens disponíveis no jogo, ver seus detalhes e como obtê-los."
     }
   },
   "pagination": {

@@ -389,7 +389,7 @@ export async function onRequest(context) {
     return jsonResponse({ error: 'Rota não encontrada' }, 404);
 
   } catch (error) {
-    console.error("Erro na API da Cloudflare Function:", error.message);
+    console.error("Erro na API da Cloudflare Function:", error);
     if (error.response) {
         return jsonResponse(error.response.data, error.response.status);
     }

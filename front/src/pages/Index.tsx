@@ -1,3 +1,4 @@
+import { WelcomeDialog } from "@/components/ui/WelcomeDialog";
 import { Link } from "react-router-dom";
 import { BattlePassChallenges } from "@/components/BattlePassChallenges";
 import { BattlePassSeason } from "@/components/BattlePassSeason";
@@ -23,6 +24,7 @@ const Index = () => {
 
       <main className="container mx-auto px-4 py-8 space-y-12">
         <div className="text-center space-y-4 py-12">
+          <WelcomeDialog />
           <h1 className="text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent animate-fade-in-down">
             {t("navigation.home_title")}
           </h1>
