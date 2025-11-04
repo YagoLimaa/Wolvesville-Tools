@@ -1,6 +1,6 @@
-# Welcome to the Wolvesville Tools!
+# Welcome to [Wolvesville Tools](https://wolvesville-tools.pages.dev)!
 
-## Discover, Connect, and Conquer in Your Favorite Game!
+## Discover, Connect, and Conquer in Wolvesville!
 
 Wolvesville Tools is your ultimate companion for Wolvesville. Dive deep into the world of Wolvesville with our comprehensive platform designed to enhance your gaming experience. Whether you're a seasoned veteran or a new recruit, we have everything you need to stay ahead of the curve!
 
@@ -11,7 +11,7 @@ Wolvesville Tools is your ultimate companion for Wolvesville. Dive deep into the
 - **Item & Skin Marketplace**: Browse and discover the latest items and skins available in the game's shop, including active offers and battle pass rewards.
 - **Battle Pass Tracker**: Stay on top of your Battle Pass progress with detailed views of challenges, rewards, and seasonal content.
 - **Game Updates & Announcements**: Keep up-to-date with the latest news, changelogs, and announcements directly from the game.
-- **Role Rotations**: (If applicable to the game) Stay informed about current role rotations and optimize your gameplay.
+- **Role Rotations**:  Stay informed about current role rotations and optimize your gameplay.
 
 ## Technologies Powering Our Platform:
 
