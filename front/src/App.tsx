@@ -15,16 +15,10 @@ import ClanInfo from "./pages/ClanInfo";
 import NotFound from "./pages/NotFound";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Footer } from "./components/ui/Footer";
-import { useEffect } from "react";
-import mixpanel from "mixpanel-browser";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  useEffect(() => {
-    mixpanel.track("Site Visited");
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <RolesProvider>
