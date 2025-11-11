@@ -98,7 +98,8 @@ export async function onRequest(context) {
 
     if (path === '/roleRotations') {
       const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
-      const rotationsFromApi = Array.isArray(await response.json()) ? await response.json() : [];
+      const responseData = await response.json();
+      const rotationsFromApi = Array.isArray(responseData) ? responseData : [];
 
       const extractRoles = (data) => {
         if (!data) return [];
@@ -267,7 +268,7 @@ export async function onRequest(context) {
       // Fetch rose icons
       const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roses`;
       const rosesResponse = await fetch(rosesUrl, requestConfig);
-      const roses = Array.isArray(await rosesResponse.json()) ? await rosesResponse.json() : [];
+      const roses = await rosesResponse.json();
 
       const currencyIcons = {
         GOLD: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png",
@@ -327,7 +328,7 @@ export async function onRequest(context) {
         const responseData = await response.json();
 
         const allPlayersFromApi = responseData.allTime || [];
-        const highscorePlayers = Array.isArray(allPlayersFromApi) ? allPlayersFromApi.slice(0, limit) : [];
+        const highscorePlayers = allPlayersFromApi.slice(0, limit);
 
         const playerDetailPromises = highscorePlayers.map(player => {
             const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
@@ -353,7 +354,8 @@ export async function onRequest(context) {
         if (language && language.toLowerCase() !== 'all') searchUrl.searchParams.append('language', language);
 
         const searchResponse = await fetch(searchUrl.toString(), requestConfig);
-        const clansFound = Array.isArray(await searchResponse.json()) ? await searchResponse.json() : [];
+        const responseData = await searchResponse.json();
+        const clansFound = Array.isArray(responseData) ? responseData : [];
         return jsonResponse(clansFound);
     }
 
@@ -370,7 +372,7 @@ export async function onRequest(context) {
         ]);
 
         const infoData = await infoResponse.json();
-        const membersData = Array.isArray(await membersResponse.json()) ? await membersResponse.json() : [];
+        const membersData = await membersResponse.json();
 
         if (!infoData || !infoData.id) {
             return jsonResponse({ error: `Clan with ID ${id} not found.` }, 404);
@@ -425,7 +427,7 @@ export async function onRequest(context) {
         const response = await fetch(requestUrl, requestConfig);
         const responseData = await response.json();
 
-        const itemsArray = Array.isArray(responseData) ? responseData : (responseData.list ? Object.values(responseData.list) : (responseData ? Object.values(responseData) : []));
+        const itemsArray = Array.isArray(responseData) ? responseData : (responseData.list ? Object.values(responseData.list) : Object.values(responseData));
 
         const getNameFromUrl = (url) => {
             if (!url || typeof url !== 'string') return "Item";
