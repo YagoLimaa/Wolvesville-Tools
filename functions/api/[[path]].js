@@ -1,4 +1,4 @@
-import axios from 'axios';
+
 
 // Helper para criar respostas JSON com cabeçalhos CORS
 function jsonResponse(data, status = 200) {
@@ -44,14 +44,19 @@ export async function onRequest(context) {
       const page = parseInt(searchParams.get('page')) || 1;
       const resultsPerPage = 5;
 
-      const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/search`;
-      const response = await axios.get(requestUrl, { ...requestConfig, params: { username } });
+      const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/players/search`);
+      if (username) {
+        requestUrl.searchParams.append('username', username);
+      }
+      
+      const response = await fetch(requestUrl.toString(), requestConfig);
+      const responseData = await response.json();
 
       let allPlayers;
-      if (Array.isArray(response.data)) {
-        allPlayers = response.data;
-      } else if (response.data && typeof response.data === 'object' && response.data.id) {
-        allPlayers = [response.data];
+      if (Array.isArray(responseData)) {
+        allPlayers = responseData;
+      } else if (responseData && typeof responseData === 'object' && responseData.id) {
+        allPlayers = [responseData];
       } else {
         allPlayers = [];
       }
@@ -60,8 +65,9 @@ export async function onRequest(context) {
         if (player.clanId) {
           try {
             const clanUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${player.clanId}/info`;
-            const clanResponse = await axios.get(clanUrl, requestConfig);
-            player.clan = { id: player.clanId, name: clanResponse.data.name };
+            const clanResponse = await fetch(clanUrl, requestConfig);
+            const clanData = await clanResponse.json();
+            player.clan = { id: player.clanId, name: clanData.name };
           } catch (clanError) {
             console.error(`Erro ao buscar detalhes do clã ${player.clanId}:`, clanError.message);
             player.clan = null;
@@ -90,10 +96,9 @@ export async function onRequest(context) {
       });
     }
 
-    // Rota para rotação de papéis
     if (path === '/roleRotations') {
-      const response = await axios.get(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
-      const rotationsFromApi = Array.isArray(response.data) ? response.data : [];
+      const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
+      const rotationsFromApi = Array.isArray(await response.json()) ? await response.json() : [];
 
       const extractRoles = (data) => {
         if (!data) return [];
@@ -218,20 +223,22 @@ export async function onRequest(context) {
 
     if (path === '/roles') {
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
-        const response = await axios.get(requestUrl, requestConfig);
-        return jsonResponse(response.data);
+        const response = await fetch(requestUrl, requestConfig);
+        const responseData = await response.json();
+        return jsonResponse(responseData);
     }
 
     if (path === '/shop/activeOffers') {
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/shop/activeOffers`;
-        const response = await axios.get(requestUrl, requestConfig);
-        return jsonResponse(response.data);
+        const response = await fetch(requestUrl, requestConfig);
+        const responseData = await response.json();
+        return jsonResponse(responseData);
     }
 
     if (path === '/battlePass/season') {
       const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
-      const response = await axios.get(requestUrl, requestConfig);
-      const seasonData = response.data;
+      const response = await fetch(requestUrl, requestConfig);
+      const seasonData = await response.json();
 
       const currencyTotals = {
         GOLD: 0,
@@ -259,8 +266,8 @@ export async function onRequest(context) {
 
       // Fetch rose icons
       const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roses`;
-      const rosesResponse = await axios.get(rosesUrl, requestConfig);
-      const roses = rosesResponse.data;
+      const rosesResponse = await fetch(rosesUrl, requestConfig);
+      const roses = Array.isArray(await rosesResponse.json()) ? await rosesResponse.json() : [];
 
       const currencyIcons = {
         GOLD: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png",
@@ -293,31 +300,40 @@ export async function onRequest(context) {
 
     if (path === '/battlePass/shop') {
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
-        const response = await axios.get(requestUrl, requestConfig);
-        return jsonResponse(response.data);
+        const response = await fetch(requestUrl, requestConfig);
+        const responseData = await response.json();
+        return jsonResponse(responseData);
     }
 
     if (path === '/battlePass/challenges') {
         const locale = searchParams.get('locale') || 'en';
-        const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`;
-        const response = await axios.get(requestUrl, { ...requestConfig, params: { locale } });
-        return jsonResponse(response.data);
+        const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`);
+        requestUrl.searchParams.append('locale', locale);
+        
+        const response = await fetch(requestUrl.toString(), requestConfig);
+        const responseData = await response.json();
+        return jsonResponse(responseData);
     }
 
     if (path === '/players/highscores') {
         const type = 'oldRank';
         const limit = parseInt(searchParams.get('limit')) || 10;
 
-        const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/highscores`;
-        const response = await axios.get(requestUrl, { ...requestConfig, params: { type, limit } });
+        const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/players/highscores`);
+        requestUrl.searchParams.append('type', type);
+        requestUrl.searchParams.append('limit', limit);
 
-        const allPlayersFromApi = response.data.allTime || [];
-        const highscorePlayers = allPlayersFromApi.slice(0, limit);
+        const response = await fetch(requestUrl.toString(), requestConfig);
+        const responseData = await response.json();
+
+        const allPlayersFromApi = responseData.allTime || [];
+        const highscorePlayers = Array.isArray(allPlayersFromApi) ? allPlayersFromApi.slice(0, limit) : [];
 
         const playerDetailPromises = highscorePlayers.map(player => {
             const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
-            return axios.get(playerDetailsUrl, requestConfig)
-                .then(detailsResponse => ({ ...player, ...detailsResponse.data }))
+            return fetch(playerDetailsUrl, requestConfig)
+                .then(detailsResponse => detailsResponse.json())
+                .then(detailsData => ({ ...player, ...detailsData }))
                 .catch(detailsError => {
                     console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
                     return player;
@@ -331,14 +347,13 @@ export async function onRequest(context) {
     if (path === '/clans/search') {
         const name = searchParams.get('name');
         const language = searchParams.get('language');
-        const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
+        const searchUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/clans/search`);
 
-        const searchParamsData = {};
-        if (name) searchParamsData.name = name;
-        if (language && language.toLowerCase() !== 'all') searchParamsData.language = language;
+        if (name) searchUrl.searchParams.append('name', name);
+        if (language && language.toLowerCase() !== 'all') searchUrl.searchParams.append('language', language);
 
-        const searchResponse = await axios.get(searchUrl, { ...requestConfig, params: searchParamsData });
-        const clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+        const searchResponse = await fetch(searchUrl.toString(), requestConfig);
+        const clansFound = Array.isArray(await searchResponse.json()) ? await searchResponse.json() : [];
         return jsonResponse(clansFound);
     }
 
@@ -350,19 +365,22 @@ export async function onRequest(context) {
         const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/members/detailed`;
 
         const [infoResponse, membersResponse] = await Promise.all([
-            axios.get(infoUrl, requestConfig),
-            axios.get(membersUrl, requestConfig)
+            fetch(infoUrl, requestConfig),
+            fetch(membersUrl, requestConfig)
         ]);
 
-        if (!infoResponse.data || !infoResponse.data.id) {
+        const infoData = await infoResponse.json();
+        const membersData = Array.isArray(await membersResponse.json()) ? await membersResponse.json() : [];
+
+        if (!infoData || !infoData.id) {
             return jsonResponse({ error: `Clan with ID ${id} not found.` }, 404);
         }
 
-        const membersWithDetailsPromises = membersResponse.data.map(async (member) => {
+        const membersWithDetailsPromises = membersData.map(async (member) => {
             try {
                 const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
-                const playerDetailsResponse = await axios.get(playerDetailsUrl, requestConfig);
-                const playerDetails = playerDetailsResponse.data;
+                const playerDetailsResponse = await fetch(playerDetailsUrl, requestConfig);
+                const playerDetails = await playerDetailsResponse.json();
                 return {
                     id: member.id,
                     username: playerDetails.username || member.username,
@@ -379,7 +397,7 @@ export async function onRequest(context) {
         const detailedMembers = await Promise.all(membersWithDetailsPromises);
 
         const combinedData = {
-            ...infoResponse.data,
+            ...infoData,
             members: detailedMembers,
         };
 
@@ -388,8 +406,9 @@ export async function onRequest(context) {
 
     if (path === '/announcements') {
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/announcements`;
-        const response = await axios.get(requestUrl, requestConfig);
-        return jsonResponse(response.data);
+        const response = await fetch(requestUrl, requestConfig);
+        const responseData = await response.json();
+        return jsonResponse(responseData);
     }
 
     // Rota para /items/:category
@@ -403,9 +422,10 @@ export async function onRequest(context) {
         }
 
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/${category}`;
-        const response = await axios.get(requestUrl, requestConfig);
+        const response = await fetch(requestUrl, requestConfig);
+        const responseData = await response.json();
 
-        const itemsArray = Array.isArray(response.data) ? response.data : (response.data.list ? Object.values(response.data.list) : Object.values(response.data));
+        const itemsArray = Array.isArray(responseData) ? responseData : (responseData.list ? Object.values(responseData.list) : (responseData ? Object.values(responseData) : []));
 
         const getNameFromUrl = (url) => {
             if (!url || typeof url !== 'string') return "Item";
@@ -441,8 +461,9 @@ export async function onRequest(context) {
         const [, playerId, slotNumber] = sharedIdMatch;
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/sharedAvatarId/${playerId}/${slotNumber}`;
         try {
-            const response = await axios.get(requestUrl, { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}` } });
-            return new Response(response.data, {
+            const response = await fetch(requestUrl, { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}` } });
+            const responseData = await response.text();
+            return new Response(responseData, {
                 status: 200,
                 headers: {
                     'Content-Type': 'text/plain',
@@ -464,8 +485,9 @@ export async function onRequest(context) {
         if (sharedAvatarId !== 'sharedAvatarId') {
             const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/${sharedAvatarId}`;
             try {
-                const response = await axios.get(requestUrl, requestConfig);
-                return jsonResponse(response.data);
+                const response = await fetch(requestUrl, requestConfig);
+                const responseData = await response.json();
+                return jsonResponse(responseData);
             } catch (error) {
                 console.error(`Erro ao buscar detalhes do avatar ${sharedAvatarId}:`, error.message);
                 return jsonResponse({ error: 'Não foi possível buscar os detalhes do avatar.' }, 500);
@@ -478,9 +500,6 @@ export async function onRequest(context) {
 
   } catch (error) {
     console.error("Erro na API da Cloudflare Function:", error);
-    if (error.response) {
-        return jsonResponse(error.response.data, error.response.status);
-    }
     return jsonResponse({ error: 'Erro interno do servidor.' }, 500);
   }
 }
