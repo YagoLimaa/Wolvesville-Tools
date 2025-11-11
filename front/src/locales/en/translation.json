@@ -176,6 +176,7 @@
   "roleRotations": {
     "fetchError": "Could not fetch role rotations.",
     "title": "Weekly Rotations",
+    "setup": "Setup ({{chance}}% chance)",
     "gameModes": {
       "Quick": "Quick Game",
       "Sandbox": "Sandbox",

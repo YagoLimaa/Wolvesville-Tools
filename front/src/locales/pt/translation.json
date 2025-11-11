@@ -180,6 +180,7 @@
   "roleRotations": {
     "fetchError": "Não foi possível buscar a rotação de roles.",
     "title": "Rotações da Semana",
+    "setup": "Configuração ({{chance}}% de chance)",
     "gameModes": {
       "Quick": "Jogo Rápido",
       "Sandbox": "Sandbox",
