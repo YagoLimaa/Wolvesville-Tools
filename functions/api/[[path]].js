@@ -212,22 +212,8 @@ export async function onRequest(context) {
         return indexA - indexB;
       });
 
-      // Apply the probability filtering for sandbox setups
-      const finalRotations = sortedRotations.map(rotation => {
-        if (rotation.gameMode === 'sandbox' && rotation.setups) {
-          rotation.setups = rotation.setups.map(setup => {
-            // Remove setup probability if it's not 50%
-            if (setup.probability !== undefined && setup.probability !== 50) {
-              delete setup.probability;
-            }
-            return setup;
-          });
-        }
-        return rotation;
-      });
-
       // Use jsonResponse directly as it already handles CORS
-      return jsonResponse(finalRotations);
+      return jsonResponse(sortedRotations);
     }
 
     if (path === '/roles') {
