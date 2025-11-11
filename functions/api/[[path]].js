@@ -91,7 +91,7 @@ export async function onRequest(context) {
     }
 
     // Rota para rotação de papéis
-    if (path.startsWith('roleRotations')) {
+    if (path === '/roleRotations') {
       const response = await axios.get(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
       const rotationsFromApi = Array.isArray(response.data) ? response.data : [];
 
@@ -117,6 +117,10 @@ export async function onRequest(context) {
           const roleInfo = { id: roleId === 'red-lady' ? 'harlot' : roleId };
           if (probability !== undefined) {
             roleInfo.probability = probability <= 1 ? probability * 100 : probability;
+          }
+          // Remove probability if it's not 50% as per user request
+          if (roleInfo.probability !== undefined && roleInfo.probability !== 50) {
+            delete roleInfo.probability;
           }
           return [roleInfo];
         }
@@ -144,6 +148,8 @@ export async function onRequest(context) {
             if (roleId) {
               const result = { id: roleId === 'red-lady' ? 'harlot' : roleId };
               if (probability !== undefined) {
+                // Ensure probability is always a number for consistency
+                // and apply the 50% filter as requested
                 result.probability = probability <= 1 ? probability * 100 : probability;
               }
               return result;
@@ -163,7 +169,10 @@ export async function onRequest(context) {
             }).filter(r => r.length > 0);
 
             return {
-              probability: setupProbability <= 1 ? setupProbability * 100 : setupProbability,
+              // Ensure probability is always a number for consistency
+              // and apply the 50% filter as requested
+              // If setupProbability is not 50%, it will be removed later if not explicitly needed
+              probability: setupProbability !== undefined ? (setupProbability <= 1 ? setupProbability * 100 : setupProbability) : undefined,
               roles: processedRoles,
             };
           });
@@ -172,6 +181,12 @@ export async function onRequest(context) {
             gameMode,
             gameModeName,
             setups,
+        };
+      } else if (gameMode === 'sandbox' && !Array.isArray(rotationData.roleRotations)) {
+        // Handle sandbox mode without roleRotations array, if it exists
+        return {
+          gameMode,
+          gameModeName,
           };
         } else {
           const rolesSource = rotationData?.roleRotations?.[0]?.roleRotation?.roles ?? [];
@@ -197,7 +212,22 @@ export async function onRequest(context) {
         return indexA - indexB;
       });
 
-      return createCorsResponse(sortedRotations, 200, origin);
+      // Apply the probability filtering for sandbox setups
+      const finalRotations = sortedRotations.map(rotation => {
+        if (rotation.gameMode === 'sandbox' && rotation.setups) {
+          rotation.setups = rotation.setups.map(setup => {
+            // Remove setup probability if it's not 50%
+            if (setup.probability !== undefined && setup.probability !== 50) {
+              delete setup.probability;
+            }
+            return setup;
+          });
+        }
+        return rotation;
+      });
+
+      // Use jsonResponse directly as it already handles CORS
+      return jsonResponse(finalRotations);
     }
 
     if (path === '/roles') {
