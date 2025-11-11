@@ -129,7 +129,7 @@ export async function onRequest(context) {
 
       const formattedRotations = rotationsFromApi.map(rotationData => {
         const gameMode = rotationData?.gameMode ?? '';
-        const gameModeName = rotationData?.gameModeName || gameMode.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const gameModeName = (rotationData?.gameModeName || gameMode.replace(/-/g, ' ')).replace(/\b\w/g, l => l.toUpperCase());
 
         if (gameMode === 'sandbox' && Array.isArray(rotationData.roleRotations)) {
           const processRole = (roleData) => {
