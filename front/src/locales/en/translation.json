@@ -37,6 +37,7 @@
   },
   "welcomeDialog": {
     "title": "Welcome to your Wolvesville Hub",
+    "description": "Explore the new features and resources we have prepared for you:",
     "feature1": {
       "title": "🕵️‍♂️ Avatar Inspector",
       "description": "When searching for a player, you can click on any of their avatars to see all the items that make it up, including its origin (event, battle pass, shop, etc.)."
@@ -44,6 +45,14 @@
     "feature2": {
       "title": "🎒 Item Explorer",
       "description": "In the 'Skins & Avatars' section, you can browse, search, and filter all items available in the game, view their details, and see how to obtain them."
+    },
+    "feature3": {
+      "title": "🎉 Community Events",
+      "description": "Stay up to date with the latest community events and participate to win exclusive rewards."
+    },
+    "feature4": {
+      "title": "💡 Feedback and Suggestions",
+      "description": "Have an idea to improve the site? Share your feedback and suggestions with us."
     }
   },
   "pagination": {
@@ -178,14 +187,15 @@
     "title": "Weekly Rotations",
     "setup": "Setup ({{chance}}% chance)",
     "gameModes": {
-      "Quick": "Quick Game",
-      "Sandbox": "Sandbox",
-      "Ranked League Silver": "Ranked League: Silver",
-      "Ranked League Gold": "Ranked League: Gold",
-      "Advanced": "Advanced",
-      "Assassins convention": "Assassins convention",
-      "All random": "All Random",
-      "Grid Wars": "Grid Wars"
+      "quick": "Quick Game",
+      "sandbox": "Sandbox",
+      "ranked-league-silver": "Ranked League: Silver",
+      "ranked-league-gold": "Ranked League: Gold",
+      "advanced": "Advanced",
+      "assassins-convention": "Assassins convention",
+      "all-random": "All Random",
+      "grid-wars": "Grid Wars",
+      "crazy-fun": "Random Categories"
     }
   },
   "shop": {

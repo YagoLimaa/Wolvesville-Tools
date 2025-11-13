@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,7 +82,7 @@ const useCountdownToNextWednesday = () => {
 // --- Componentes de UI ---
 
 const RoleIcon = ({ role, showProbability }: { role: Role & { probability?: number }, showProbability: boolean }) => (
-  <div key={role.id} className="group relative">
+  <div className="group relative">
     <img
       src={role.imageUrl}
       alt={role.name}
@@ -110,6 +110,29 @@ export const RoleRotations = () => {
   const timeLeft = useCountdownToNextWednesday();
   const { rolesById, isLoading: isLoadingRoles } = useRoles();
 
+  const processedRotations = useMemo(() => {
+    if (!rotations) return [];
+
+    const rotationMap = new Map<string, GameModeRotation>();
+
+    for (const rotation of rotations) {
+      const existing = rotationMap.get(rotation.gameMode);
+      if (existing) {
+        if (existing.roles && rotation.roles) {
+          existing.roles.push(...rotation.roles);
+        }
+        if (existing.setups && rotation.setups) {
+          existing.setups.push(...rotation.setups);
+        }
+      } else {
+        // Deep copy to avoid mutating react-query cache
+        rotationMap.set(rotation.gameMode, JSON.parse(JSON.stringify(rotation)));
+      }
+    }
+
+    return Array.from(rotationMap.values());
+  }, [rotations]);
+
   const renderStandardRoles = (roles: RoleInfo[]) => {
     const roleInfos = roles.map(r => {
       const fullRole = rolesById.get(r.id);
@@ -121,7 +144,7 @@ export const RoleRotations = () => {
     const solo = roleInfos.filter(r => !['VILLAGER', 'RANDOM_VILLAGER', 'WEREWOLF', 'RANDOM_WEREWOLF'].includes(r.team));
     const sortedRoles = [...villagers, ...werewolves, ...solo];
 
-    return sortedRoles.map((role) => <RoleIcon key={role.id} role={role} showProbability={!!role.probability} />);
+    return sortedRoles.map((role, index) => <RoleIcon key={`${role.id}-${index}`} role={role} showProbability={!!role.probability} />);
   };
 
   const renderSandboxSetups = (setups: SandboxGameModeRotation['setups']) => (
@@ -143,7 +166,7 @@ export const RoleRotations = () => {
               if (fullChoiceInfo.length > 1) {
                 return (
                   <div key={choiceIndex} className="flex gap-1 border border-dashed border-primary/50 rounded-md p-1">
-                    {fullChoiceInfo.map(role => <RoleIcon key={role.id} role={role} showProbability={true} />)}
+                    {fullChoiceInfo.map((role, index) => <RoleIcon key={`${role.id}-${index}`} role={role} showProbability={true} />)}
                   </div>
                 );
               } else {
@@ -193,12 +216,12 @@ export const RoleRotations = () => {
           </Alert>
         )}
 
-        {rotations && rolesById.size > 0 && (
+        {processedRotations && rolesById.size > 0 && (
           <div className="space-y-6">
-            {rotations.map((rotation) => (
-              <div key={rotation.gameMode}>
+            {processedRotations.map((rotation, index) => (
+              <div key={`${rotation.gameMode}-${index}`}>
                 <h3 className="text-lg font-semibold text-primary">
-                  {t(`roleRotations.gameModes.${rotation.gameModeName}`, { defaultValue: rotation.gameModeName })}
+                  {t(`roleRotations.gameModes.${rotation.gameMode}`, { defaultValue: rotation.gameModeName })}
                 </h3>
                 {rotation.setups ? renderSandboxSetups(rotation.setups) : (
                   <div className="flex flex-wrap gap-2 mt-2">

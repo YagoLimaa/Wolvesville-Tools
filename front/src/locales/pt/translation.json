@@ -37,6 +37,7 @@
   },
   "welcomeDialog": {
     "title": "Bem-vindo ao seu Hub de Wolvesville",
+    "description": "Explore as novidades e recursos que preparamos para você:",
     "feature1": {
       "title": "🕵️‍♂️ Inspetor de Avatar",
       "description": "Ao pesquisar por um jogador, você pode clicar em qualquer um dos avatares dele para ver todos os itens que o compõem, incluindo sua origem (evento, passe de batalha, loja, etc.)."
@@ -44,6 +45,14 @@
     "feature2": {
       "title": "🎒 Explorador de Itens",
       "description": "Na seção 'Skins & Avatares', você pode navegar, pesquisar e filtrar todos os itens disponíveis no jogo, ver seus detalhes e como obtê-los."
+    },
+    "feature3": {
+      "title": "🎉 Eventos da Comunidade",
+      "description": "Fique por dentro dos últimos eventos da comunidade e participe para ganhar recompensas exclusivas."
+    },
+    "feature4": {
+      "title": "💡 Feedback e Sugestões",
+      "description": "Tem uma ideia para melhorar o site? Compartilhe seu feedback e sugestões conosco."
     }
   },
   "pagination": {
@@ -182,14 +191,15 @@
     "title": "Rotações da Semana",
     "setup": "Configuração ({{chance}}% de chance)",
     "gameModes": {
-      "Quick": "Jogo Rápido",
-      "Sandbox": "Sandbox",
-      "Ranked League Silver": "Liga Ranqueada: Prata",
-      "Ranked League Gold": "Liga Ranqueada: Ouro",
-      "Advanced": "Avançado",
-      "Assassins convention": "Convenção de Assassinos",
-      "All random": "Tudo Aleatório",
-      "Grid Wars": "Guerra de Grades"
+      "quick": "Jogo Rápido",
+      "sandbox": "Sandbox",
+      "ranked-league-silver": "Liga Ranqueada: Prata",
+      "ranked-league-gold": "Liga Ranqueada: Ouro",
+      "advanced": "Avançado",
+      "assassins-convention": "Convenção de Assassinos",
+      "all-random": "Tudo Aleatório",
+      "grid-wars": "Guerra de Grades",
+      "crazy-fun": "Categorias Aleatórias"
     }
   },
   "shop": {

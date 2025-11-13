@@ -2,7 +2,6 @@ import { WelcomeDialog } from "@/components/ui/WelcomeDialog";
 import { Link } from "react-router-dom";
 import { BattlePassChallenges } from "@/components/BattlePassChallenges";
 import { BattlePassSeason } from "@/components/BattlePassSeason";
-import { PlayersHighscores } from "@/components/PlayersHighscores";
 import { RoleRotations } from "@/components/RoleRotations";
 import {
   Card,
