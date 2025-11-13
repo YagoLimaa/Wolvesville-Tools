@@ -6,7 +6,6 @@ function jsonResponse(data, status = 200) {
     status: status,
     headers: {
       'Content-Type': 'application/json',
-      // Adicione cabeçalhos CORS se precisar de acesso de domínios diferentes
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -175,9 +174,6 @@ export async function onRequest(context) {
             }).filter(r => r.length > 0);
 
             return {
-              // Ensure probability is always a number for consistency
-              // and apply the 50% filter as requested
-              // If setupProbability is not 50%, it will be removed later if not explicitly needed
               probability: setupProbability !== undefined ? (setupProbability <= 1 ? setupProbability * 100 : setupProbability) : undefined,
               roles: processedRoles,
             };
@@ -189,7 +185,6 @@ export async function onRequest(context) {
             setups,
         };
       } else if (gameMode === 'sandbox' && !Array.isArray(rotationData.roleRotations)) {
-        // Handle sandbox mode without roleRotations array, if it exists
         return {
           gameMode,
           gameModeName,
@@ -218,7 +213,6 @@ export async function onRequest(context) {
         return indexA - indexB;
       });
 
-      // Use jsonResponse directly as it already handles CORS
       return jsonResponse(sortedRotations);
     }
 
@@ -497,7 +491,7 @@ export async function onRequest(context) {
         }
     }
 
-    // Se nenhuma rota corresponder
+
     return jsonResponse({ error: 'Rota não encontrada' }, 404);
 
   } catch (error) {

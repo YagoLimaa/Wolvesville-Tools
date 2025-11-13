@@ -12,7 +12,6 @@ interface HighscorePlayer {
   username: string;
   xp: number;
   oldRank: number;
-  // Level pode não estar presente, então o tornamos opcional
   level?: number;
   equippedAvatar?: {
     url: string;

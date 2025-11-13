@@ -1,12 +1,8 @@
-const path = require('path');
-
 // Este arquivo não será mais o servidor principal, mas pode ser mantido para desenvolvimento local.
-// A lógica principal será movida para /functions/api/[[path]].js para deploy na Cloudflare.
-// Para manter o desenvolvimento local funcionando, você pode adaptar este arquivo ou
-// usar uma ferramenta como `wrangler` da Cloudflare.
-// Por enquanto, vamos focar no deploy.
+// A lógica principal será movida para /functions/api/[[path]].js para deploy na Cloudflare
 
-// As dependências ainda são necessárias para a lógica da API.
+
+const path = require('path');
 const axios = require('axios');
 const cors = require('cors');
 const express = require('express'); // Mantido para o servidor de desenvolvimento local
@@ -25,9 +21,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({
   origin: (origin, callback) => {
     // Para desenvolvimento local, a lógica de CORS permanece.
-    // Em produção na Cloudflare, você pode configurar cabeçalhos personalizados se necessário,
-    // mas geralmente a origem da requisição será a mesma do seu site,
-    // ou você pode configurar domínios personalizados.
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -48,7 +41,6 @@ if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
 }
 
 const apiRouter = express.Router();
-// A lógica abaixo será movida para /functions/api/[[path]].js
 apiRouter.get('/search', async (req, res) => {
   const { username } = req.query;
   const page = parseInt(req.query.page) || 1;
@@ -66,9 +58,7 @@ apiRouter.get('/search', async (req, res) => {
 
     const response = await axios.get(requestUrl, requestConfig);
 
-    // Garante que allPlayers seja sempre um array.
-    // Se a API retornar um objeto (ex: em caso de não encontrar resultados),
-    // ele será convertido para um array vazio.
+
     let allPlayers;
     if (Array.isArray(response.data)) {
       allPlayers = response.data;
@@ -92,7 +82,7 @@ apiRouter.get('/search', async (req, res) => {
           player.clan = { id: player.clanId, name: clanResponse.data.name };
         } catch (clanError) {
           console.error(`Erro ao buscar detalhes do clã ${player.clanId}:`, clanError.message);
-          player.clan = null; // Garante que não haverá erro no template se a busca do clã falhar
+          player.clan = null; 
         }
       }
     }
