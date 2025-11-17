@@ -221,7 +221,7 @@ const ClanInfoPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <NavigationBar />
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="container mx-auto p-4 sm:p-6 lg:px-28 py-8">
         <Button variant="outline" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t('common.back')}

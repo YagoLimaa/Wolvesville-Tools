@@ -143,17 +143,17 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
         <div className="min-h-[400px]">
           {isInspecting ? (
             <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-12 h-12 animate-spin text-primary" />
+              <Loader2 className="w-10 h-10 animate-spin text-primary" />
             </div>
           ) : inspectorError ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-destructive">{inspectorError}</p>
             </div>
           ) : (
-            <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col md:flex-row gap-4">
               <div className="order-2 md:order-1 md:w-2/3">
                 <h4 className="font-semibold mb-4">{t('playerCard.avatarComposition')}</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto pr-2">
+                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[60vh] overflow-y-auto pr-2">
                   {inspectorData.map(item => (
                     <Card 
                       key={item.id}
@@ -161,7 +161,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                       onClick={() => findParentSet(item) && setSelectedItemForSet(item)}
                     >
                       <CardContent className="p-2 flex flex-col items-center text-center">
-                        <img src={getInspectorImageUrl(item)} alt={item.name} className="w-12 h-12 sm:w-20 sm:h-20 object-contain" />
+                        <img src={getInspectorImageUrl(item)} alt={item.name} className="w-10 h-10 sm:w-16 sm:h-16 object-contain" />
                         <p className="text-xs mt-2 font-semibold leading-tight">{item.name || item.id}</p>
                         {item.rarity && <Badge variant="secondary" className="mt-1 text-xs">{t(`itemsSkins.${item.rarity}`)}</Badge>}
                       </CardContent>
@@ -183,10 +183,10 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
               <DialogHeader>
                 <DialogTitle>{t('playerCard.setDetailsTitle')}</DialogTitle>
               </DialogHeader>
-              <div className="flex flex-col items-center text-center gap-4 mt-4">
+              <div className="flex flex-col items-center text-center gap-2 mt-4">
                 <p className="text-sm text-muted-foreground">{t('playerCard.itemBelongsTo')}</p>
-                <img src={getPopupImageUrl(parentSet)} alt={parentSet.name} className="w-64 h-64 sm:w-80 sm:h-80 object-contain rounded-lg border p-2"/>
-                <p className="font-bold text-xl">{getPopupTitle(parentSet)}</p>
+                <img src={getPopupImageUrl(parentSet)} alt={parentSet.name} className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg border p-2"/>
+                <p className="font-bold text-lg">{getPopupTitle(parentSet)}</p>
               </div>
             </DialogContent>
           )}
@@ -230,12 +230,12 @@ const AchievementsModal = ({ isOpen, onClose, achievements, rolesById }: Achieve
             };
 
             return (
-              <div key={achievement.roleId} className={`flex items-center gap-2 md:gap-4 p-2 md:p-3 rounded-lg bg-background border ${isMaxLevel ? 'border-yellow-400 shadow-lg shadow-yellow-400/20' : 'border-transparent'}`}>
-                <img src={role.imageUrl} alt={t(`roles.${role.name}`)} className="w-12 h-12 md:w-16 md:h-16 rounded-md" />
+              <div key={achievement.roleId} className={`flex items-center gap-1 md:gap-2 p-1 md:p-2 rounded-lg bg-background border ${isMaxLevel ? 'border-yellow-400 shadow-lg shadow-yellow-400/20' : 'border-transparent'}`}>
+                <img src={role.imageUrl} alt={t(`roles.${role.name}`)} className="w-10 h-10 md:w-12 md:h-12 rounded-md" />
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
-                    <p className="font-semibold text-foreground text-base md:text-lg">{t(`roles.${role.name}`)}</p>
-                    <p className={`text-base md:text-lg font-bold ${isMaxLevel ? 'text-yellow-400' : 'text-wolf-cyan'}`}>Lvl {achievement.level}</p>
+                    <p className="font-semibold text-foreground text-sm md:text-base">{t(`roles.${role.name}`)}</p>
+                    <p className={`text-sm md:text-base font-bold ${isMaxLevel ? 'text-yellow-400' : 'text-wolf-cyan'}`}>Lvl {achievement.level}</p>
                   </div>
                   {!isMaxLevel ? (
                     <>
@@ -287,14 +287,14 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
               <img
                 src={player.equippedAvatar.url}
                 alt={`Avatar de ${player.username}`}
-                className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-primary shadow-glow-primary object-cover flex-shrink-0"
+                className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary shadow-glow-primary object-cover flex-shrink-0"
               />
               <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
                 {player.level === -1 ? '?' : t('playerCard.level')} {player.level}
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-2xl font-bold text-foreground mb-2 break-words">
+              <h3 className="text-xl font-bold text-foreground mb-2 break-words">
                 {player.username}
               </h3>
               <div className="flex flex-wrap gap-2 mb-2">
@@ -316,7 +316,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                     key={index}
                     src={getBadgeImage(badgeId)}
                     alt="Badge"
-                    className="w-12 h-12 rounded-md"
+                    className="w-10 h-10 rounded-md"
                   />
                 ))}
                 {player.badgeIds.length > 5 && (
@@ -329,14 +329,14 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-2">
           {hasPublicGameStats && (
-            <div className="bg-secondary rounded-lg p-4">
+            <div className="bg-secondary rounded-lg p-3">
               <h4 className="text-lg font-semibold mb-3 text-wolf-cyan">
                 <Trophy className="inline w-5 h-5 mr-2" />
                 {t('playerCard.gameStats')}
               </h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-2 text-sm">
                 {player.gameStats.totalWinCount !== -1 && (
                   <div>
                     <span className="text-muted-foreground">{t('playerCard.wins')}</span>
@@ -393,7 +393,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           )}
 
           {player.gameStats.achievements && player.gameStats.achievements.length > 0 && (
-            <div className="bg-secondary rounded-lg p-4 cursor-pointer hover:bg-secondary/90" onClick={() => setIsAchievementsModalOpen(true)}>
+            <div className="bg-secondary rounded-lg p-3 cursor-pointer hover:bg-secondary/90" onClick={() => setIsAchievementsModalOpen(true)}>
               <div className="flex justify-between items-center">
                 <h4 className="text-lg font-semibold text-wolf-cyan">
                   <Star className="inline w-5 h-5 mr-2" />
@@ -404,7 +404,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
             </div>
           )}
 
-          <div className="bg-secondary rounded-lg p-4">
+          <div className="bg-secondary rounded-lg p-3">
             <p className="text-muted-foreground italic text-center">
               {player.personalMessage
                 ? `"${player.personalMessage}"`

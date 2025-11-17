@@ -5,7 +5,7 @@ export const Footer = () => {
 
   return (
     <footer className="bg-card/80 backdrop-blur border-t border-border mt-auto">
-      <div className="container mx-auto px-4 py-6 text-center text-muted-foreground">
+      <div className="container mx-auto px-4 py-6 text-center text-muted-foreground sm:px-6 lg:px-28">
         <p className="text-sm">
           {t("footer.unofficial_notice")}
         </p>

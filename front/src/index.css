@@ -5,6 +5,9 @@
 /* Wolvesville Dark Theme Design System */
 
 @layer base {
+  html{
+    font-size: 12.5px;;
+  }
   :root {
     --background: 240 10% 8%;
     --foreground: 0 0% 95%;

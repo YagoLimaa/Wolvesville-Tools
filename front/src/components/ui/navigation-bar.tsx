@@ -21,7 +21,7 @@ export const NavigationBar = () => {
 
   return (
     <header className="bg-card/80 backdrop-blur border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-28">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">

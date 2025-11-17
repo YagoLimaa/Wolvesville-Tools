@@ -75,7 +75,7 @@ const ClanRankings = () => {
     <div className="min-h-screen bg-background">
       <NavigationBar />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-28 py-8">
         <h1 className="text-3xl font-bold text-center mb-8">{t("clanRankings.title")}</h1>
         <div className="space-y-6">
           {isLoading && <p className="text-center text-muted-foreground text-lg">{t("clanRankings.loading")}</p>}

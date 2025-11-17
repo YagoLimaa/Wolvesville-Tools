@@ -118,7 +118,7 @@ const ClanSearch = () => {
     <div className="min-h-screen bg-background">
       <NavigationBar />
       
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-28 py-8">
         <div className="space-y-6">
           <Card className="max-w-2xl mx-auto bg-card/50 backdrop-blur border-accent/20">
             <CardContent className="p-6">
