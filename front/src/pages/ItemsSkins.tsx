@@ -396,7 +396,7 @@ const ItemsSkins = () => {
             </Card>
           </aside>
 
-          <div class="lg:col-span-3">
+          <div className="lg:col-span-3">
             {isLoading && (
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4">
                 {Array.from({ length: 18 }).map((_, i) => (
@@ -464,13 +464,13 @@ const ItemsSkins = () => {
           onClick={() => setSelectedCollection(null)}
         >
           <Card 
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-card"
+            className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-card"
             onClick={(e) => e.stopPropagation()}
           >
             <CardContent className="p-6">
               <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
               {collectionPieces.length > 0 ? (
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                   {collectionPieces.map(piece => (
                     <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity!] || 'border-gray-600/50'}`}>
                       <ItemImage item={piece} onImageError={handleImageError} isHovered={hoveredItemId === piece.id} />
