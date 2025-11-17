@@ -304,6 +304,17 @@ const ItemsSkins = () => {
     }
   };
 
+  const getInspectorImageUrl = (item: Item) => {
+    if (item.name && item.name.includes('Golden Wheel')) {
+      return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
+    } else if (item.name && item.name.includes('Wheel Of Fortune')) {
+      return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
+    } else if (item.name && item.name.includes('Daily Reward')) {
+      return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
+    }
+    return (item as Item & { promoImageUrl?: string }).promoImageUrl || item.imageUrl;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <NavigationBar />
@@ -469,6 +480,17 @@ const ItemsSkins = () => {
           >
             <CardContent className="p-6">
               <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
+              {(() => {
+                const imageUrl = getInspectorImageUrl(selectedCollection);
+                if (!imageUrl) return null;
+                return (
+                  <img
+                    src={imageUrl}
+                    alt={selectedCollection.name || 'Collection Image'}
+                    className="w-full h-auto max-h-48 md:max-h-56 object-contain mb-4 rounded-lg mx-auto"
+                  />
+                );
+              })()}
               {collectionPieces.length > 0 ? (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                   {collectionPieces.map(piece => (
