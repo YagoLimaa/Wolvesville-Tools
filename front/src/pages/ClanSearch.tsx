@@ -83,7 +83,6 @@ const ClanSearch = () => {
     const clanNameFromUrl = searchParams.get("name");
     if (clanNameFromUrl) {
       setQuery(clanNameFromUrl);
-      // The search itself is triggered by the effect below
     }
   }, [searchParams]);
 

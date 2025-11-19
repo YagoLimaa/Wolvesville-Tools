@@ -120,18 +120,16 @@ const ClanInfoPage = () => {
     if (!clan) {
       return null;
     }
-  
-    // Sort members: Leader, Co-Leaders, then by XP/Level (assuming level is available)
     const sortedMembers = [...clan.members].sort((a, b) => {
       const getRoleValue = (m: ClanMember, index: number) => {
-        if (index === 0) return 0; // Leader is always first in API response
+        if (index === 0) return 0; 
         if (m.isCoLeader) return 1;
         return 2;
       };
       const roleA = getRoleValue(a, clan.members.indexOf(a));
       const roleB = getRoleValue(b, clan.members.indexOf(b));
       if (roleA !== roleB) return roleA - roleB;
-      return b.level - a.level; // Sort by level for members with the same role
+      return b.level - a.level; 
     });
   
   

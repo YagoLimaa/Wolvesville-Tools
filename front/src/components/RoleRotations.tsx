@@ -125,7 +125,6 @@ export const RoleRotations = () => {
           existing.setups.push(...rotation.setups);
         }
       } else {
-        // Deep copy to avoid mutating react-query cache
         rotationMap.set(rotation.gameMode, JSON.parse(JSON.stringify(rotation)));
       }
     }

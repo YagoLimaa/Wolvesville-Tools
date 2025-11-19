@@ -118,14 +118,11 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
       case "bodyPaints":
         fallbackUrl = `${baseCdn}/bodyPaints/${item.id}.store@3x.png`;
         break;
-      // Adicione outras categorias que possam ter URLs quebradas
-      // e para as quais conhecemos o padrão do CDN.
     }
 
     if (fallbackUrl && fallbackUrl !== imageSrc) {
       setImageSrc(fallbackUrl);
     } else {
-      // Verifica para não entrar em loop se a própria imagem de fallback falhar.
       const FALLBACK_IMAGE_URL = "https://cdn-avatars2.wolvesville.com/ad3466d4-8798-4b9b-a5e7-2ae7d2343c58@3x.png";
       if (imageSrc !== FALLBACK_IMAGE_URL) {
         setImageSrc(FALLBACK_IMAGE_URL);
@@ -158,7 +155,6 @@ const ItemsSkins = () => {
   const getNameFromUrl = (url: string): string => {
     try {
       const filename = url.split('/').pop()?.split('.')[0] ?? '';
-      // Remove prefixos e sufixos comuns e substitui hífens/sublinhados por espaços
       const cleanedName = filename
         .replace(/bp\d+-/, '')
         .replace(/_store|@\dx/g, '')
@@ -176,15 +172,13 @@ const ItemsSkins = () => {
   const getTypeString = (collection: Item) => {
     let representativeItemId: string | undefined = undefined;
 
-    // 1. If an individual item was clicked to open the collection, use its ID.
     if (clickedItem && clickedItem.id !== collection.id && reverseSearchableCategories.includes(clickedItem.category)) {
         representativeItemId = clickedItem.id;
     }
-    // 2. If the collection itself was clicked, and it contains avatar items, use the first one.
+
     else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
         representativeItemId = collection.avatarItemIds[0];
     }
-    // 3. Special case for bundles that might contain sets.
     else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
         const firstSetOrId = collection.avatarItemSets[0];
         if (typeof firstSetOrId === 'string') {
@@ -202,10 +196,10 @@ const ItemsSkins = () => {
         if (tags) {
             const originTag = tags.find(t => t.startsWith('origin:'));
             if (originTag) {
-                // Transforma "origin:foo_bar:baz" em "origins.foo_bar.baz"
+                
                 const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
                 
-                // Valor padrão em inglês caso a tradução não exista
+               
                 const defaultValue = originTag
                     .replace('origin:', '')
                     .replace(/_/g, ' ')
@@ -214,13 +208,13 @@ const ItemsSkins = () => {
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
 
-                // Usa o t() com a chave e o valor padrão
+                
                 return t(translationKey, defaultValue);
             }
         }
     }
 
-    // Fallback to existing logic with translation
+
     const event = (collection as Item & { event?: string }).event;
     if (event === 'BATTLE_PASS') return t('origins.battle_pass', "BP (Battle Pass)");
     if (event) return t(`origins.event.${event}`, formatEventName(event));
@@ -262,8 +256,8 @@ const ItemsSkins = () => {
     return [...allItems].sort((a, b) => {
       const aIsBroken = brokenImageIds.has(a.id);
       const bIsBroken = brokenImageIds.has(b.id);
-      if (aIsBroken !== bIsBroken) return aIsBroken ? 1 : -1; // Itens quebrados vão para o final
-      return (rarityOrder[b.rarity!] || 0) - (rarityOrder[a.rarity!] || 0); // Ordenação por raridade (maior primeiro)
+      if (aIsBroken !== bIsBroken) return aIsBroken ? 1 : -1; 
+      return (rarityOrder[b.rarity!] || 0) - (rarityOrder[a.rarity!] || 0);
     });
   }, [allItems, brokenImageIds]);
 
@@ -273,14 +267,12 @@ const ItemsSkins = () => {
       const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
       const matchesRarity = rarityFilter === "all" || !item.rarity || item.rarity === rarityFilter;
 
-      // Aplica filtros de gênero e tipo APENAS se a categoria for 'avatarItems'
-      // E o item atual também for dessa categoria.
       let matchesGender = true;
       if (categoryFilter === 'avatarItems' && item.category === 'avatarItems') {
         if (genderFilter === 'all') {
           matchesGender = true;
         } else if (genderFilter === 'any') {
-          matchesGender = item.gender === 'any' || !item.gender; // Itens sem gênero são considerados unissex
+          matchesGender = item.gender === 'any' || !item.gender; 
         } else {
           matchesGender = item.gender === genderFilter;
         }
@@ -323,25 +315,25 @@ const ItemsSkins = () => {
 
     let pieceIdentifiers: ContainedItemIdentifier[] = [];
 
-    if (selectedCollection.avatarItemIds) { // Para avatarItemSets e avatarItemCollections
+    if (selectedCollection.avatarItemIds) { 
       pieceIdentifiers = selectedCollection.avatarItemIds.map(id => ({ id, type: 'avatarItems' }));
-    } else if (selectedCollection.emojiIds) { // Para emojiCollections
+    } else if (selectedCollection.emojiIds) { 
       pieceIdentifiers = selectedCollection.emojiIds.map(id => ({ id, type: 'emojis' }));
-    } else if (selectedCollection.rewards) { // Para calendars
+    } else if (selectedCollection.rewards) { 
       pieceIdentifiers = selectedCollection.rewards.map(reward => ({
         id: reward.avatarItemId || reward.loadingScreenId || reward.emojiId || '',
-        type: reward.type.toLowerCase().replace(/_/g, '') + 's' // ex: AVATAR_ITEM -> avataritems
+        type: reward.type.toLowerCase().replace(/_/g, '') + 's' 
       })).filter(p => p.id !== '');
     } else if (selectedCollection.category === 'bundles') {
-      const bundle = selectedCollection; // 'selectedCollection' já é do tipo 'Item' com as propriedades de bundle
+      const bundle = selectedCollection; 
       const pieceArrays = [
         ...(bundle.avatarItemSets?.flatMap(setOrId => {
           if (typeof setOrId === 'string') {
-            // Se for apenas o ID de um conjunto, precisamos encontrar esse conjunto nos allItems
+            
             const foundSet = allItems.find(item => item.id === setOrId);
             return (foundSet?.avatarItemIds as string[] | undefined)?.map(id => ({ id, type: 'avatarItems' })) || [];
           }
-          // Se for um objeto, podemos acessar os IDs diretamente
+         
           return (setOrId.avatarItemIds as string[] | undefined)?.map(id => ({ id, type: 'avatarItems' })) || [];
         }) || []),
         ...(bundle.emojis?.map(emoji => ({ id: emoji.id, type: 'emojis' })) || []),
@@ -350,7 +342,6 @@ const ItemsSkins = () => {
         ...(bundle.bodyPaints?.map(paint => ({ id: paint.id, type: 'bodyPaints' })) || []),
         ...(bundle.roseSkins?.map(skin => ({ id: skin.id, type: 'roseSkins' })) || []),
         ...(bundle.backgrounds?.map(bg => ({ id: bg.id, type: 'backgrounds' })) || []),
-        // Adiciona a propriedade 'items' se existir (para bundles mais genéricos)
         ...(bundle.items?.map(item => ({ id: item.avatarItemId || item.id, type: item.type.toLowerCase().replace(/_/g, '') + 's' })) || []),
       ];
       pieceIdentifiers = pieceArrays.filter(p => p && p.id);
@@ -359,7 +350,7 @@ const ItemsSkins = () => {
     return pieceIdentifiers.map(p => allItems.find(item => String(item.id) === String(p.id))).filter((item): item is Item => !!item);
   }, [selectedCollection, allItems]);
 
-  // Lista de categorias de itens individuais que podem pertencer a uma coleção
+  
   const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
 
   const handleItemClick = (item: Item) => {
@@ -367,7 +358,7 @@ const ItemsSkins = () => {
     if (collectionCategories.includes(item.category)) {
       setSelectedCollection(item);
     } else if (item.parentSetId && allItems) {
-      // Se o item tem um 'parentSetId' (adicionado pelo backend), encontra e exibe o conjunto pai
+      
       const parentSet = allItems.find(set => set.id === item.parentSetId);
       if (parentSet) setSelectedCollection(parentSet);
     } else if (reverseSearchableCategories.includes(item.category) && allItems) {
