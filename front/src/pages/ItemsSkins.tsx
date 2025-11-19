@@ -143,7 +143,7 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
 const ItemsSkins = () => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
-  const [categoryFilter, setCategoryFilter] = React.useState("avatarItems");
+  const [categoryFilter, setCategoryFilter] = React.useState("all");
   const [rarityFilter, setRarityFilter] = React.useState("all");
   const [genderFilter, setGenderFilter] = React.useState("all");
   const [typeFilter, setTypeFilter] = React.useState("all");
