@@ -68,9 +68,15 @@ interface ApiItem {
   [key: string]: unknown;
 }
 
+interface ApiTag {
+  avatarItemId: string;
+  tags: string[];
+}
+
 interface ItemsContextType {
   allItems: Item[];
   itemsById: Map<string, Item>;
+  tagsByItemId: Map<string, string[]>;
   isLoading: boolean;
   isError: boolean;
 }
@@ -80,7 +86,7 @@ const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined
 import type { TFunction } from 'i18next';
 
 const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
-  const categories = [...validCategories, 'tags', 'advancedRoleCardOffers'];
+  const categories = [...validCategories, 'advancedRoleCardOffers'];
 
   const promises = categories.map(async (category) => {
     try {
@@ -106,12 +112,42 @@ const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
   return allItems;
 };
 
+const fetchTags = async (): Promise<Map<string, string[]>> => {
+  try {
+    const response = await fetch(`/api/items/tags`);
+    if (!response.ok) {
+      console.warn('Failed to fetch item tags');
+      return new Map();
+    }
+    const tagsData = await response.json() as ApiTag[];
+    const map = new Map<string, string[]>();
+    if (Array.isArray(tagsData)) {
+      for (const tagInfo of tagsData) {
+        if (tagInfo.avatarItemId && tagInfo.tags) {
+          map.set(tagInfo.avatarItemId, tagInfo.tags);
+        }
+      }
+    }
+    return map;
+  } catch (error) {
+    console.error('Error fetching item tags:', error);
+    return new Map();
+  }
+};
+
 export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation();
   const { data: allItems = [], isLoading, isError } = useQuery<Item[]>({
     queryKey: ['allItemsGlobal'],
     queryFn: () => fetchAllItems(t),
     staleTime: 1000 * 60 * 60, // Cache de 1 hora
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: tagsByItemId = new Map() } = useQuery<Map<string, string[]>>({
+    queryKey: ['itemTags'],
+    queryFn: fetchTags,
+    staleTime: 1000 * 60 * 60, // 1 hour
     refetchOnWindowFocus: false,
   });
 
@@ -125,7 +161,7 @@ export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return map;
   }, [allItems]);
 
-  const value = { allItems, itemsById, isLoading, isError };
+  const value = { allItems, itemsById, tagsByItemId, isLoading, isError };
 
   return (
     <ItemsContext.Provider value={value}>

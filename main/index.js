@@ -526,11 +526,27 @@ apiRouter.get('/announcements', async (req, res) => {
       }
     };
     const response = await axios.get(requestUrl, requestConfig);
-    // A API retorna os anúncios mais recentes primeiro, vamos manter essa ordem.
     res.json(response.data);
   } catch (error) {
     console.error("Erro ao buscar anúncios:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar os anúncios.' });
+  }
+});
+
+apiRouter.get('/items/tags', async (req, res) => {
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
+    const requestConfig = {
+      headers: {
+        'Authorization': `Bot ${WOLVESVILLE_API_KEY}`,
+        'Accept': 'application/json'
+      }
+    };
+    const response = await axios.get(requestUrl, requestConfig);
+    res.json(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar tags de itens:", error.message);
+    res.status(500).json({ error: 'Não foi possível buscar as tags de itens.' });
   }
 });
 
@@ -549,6 +565,11 @@ apiRouter.get('/items/:category', async (req, res) => {
     const requestConfig = { headers: { 'Authorization': `Bot ${WOLVESVILLE_API_KEY}`, 'Accept': 'application/json' } };
 
     const response = await axios.get(requestUrl, requestConfig);
+
+    // Adiciona um caso especial para a categoria 'tags'
+    if (category === 'tags') {
+      return res.json(response.data);
+    }
 
     // Normaliza a resposta para garantir que sempre seja um array de itens
     const itemsArray = Array.isArray(response.data) ? response.data : (response.data.list ? Object.values(response.data.list) : Object.values(response.data));

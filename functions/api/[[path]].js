@@ -353,6 +353,13 @@ export async function onRequest(context) {
         return jsonResponse(clansFound);
     }
 
+    if (path === '/items/tags') {
+        const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
+        const response = await fetch(requestUrl, requestConfig);
+        const responseData = await response.json();
+        return jsonResponse(responseData);
+    }
+
     // Rota para /clan/:id
     const clanMatch = path.match(/^\/clan\/([^/]+)$/);
     if (clanMatch) {

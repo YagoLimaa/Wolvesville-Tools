@@ -178,6 +178,7 @@
     "fullAvatar": "Avatar Completo",
     "setDetailsTitle": "Detalhes do Conjunto",
     "itemBelongsTo": "Este item pertence ao conjunto:",
+    "origin": "Origem",
     "achievements": "Conquistas",
     "maxLevel": "Nível Máximo",
     "clickToSee": "Clique para ver"
@@ -247,6 +248,7 @@
     "noItemsFound": "Nenhum Item Encontrado",
     "adjustFilters": "Tente ajustar seus filtros.",
     "collectionDetailsError": "Não foi possível carregar os detalhes desta coleção.",
+    "origin": "Origem",
     "categories": {
       "avatarItems": "Itens de Avatar",
       "bodyPaints": "Pinturas Corporais",
@@ -530,6 +532,13 @@
     "language": "Idioma",
     "no_clans_found": "Nenhum clã encontrado",
     "no_clans_found_description": "Não encontramos nenhum clã para os filtros selecionados."
+  },
+  "origins": {
+    "battle_pass": "Passe de Batalha",
+    "bundle": "Pacote",
+    "item_set": "Conjunto de Itens",
+    "role_cards.role_advanced": "Cartas de Função: Função Avançada",
+    "event.VALENTINES_DAY_2024": "Evento de Dia dos Namorados 2024"
   },
   "roles": {
     "Villager": "Aldeão",

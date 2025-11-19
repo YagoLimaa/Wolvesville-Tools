@@ -16,6 +16,20 @@ const getSharedAvatarIdFromUrl = (url: string): string | null => {
   return match ? match[1] : null;
 };
 
+const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' = '3x'): string => {
+  if (!url) return "";
+  if (url.includes('wolvesville.com/static/media') || url.includes('via.placeholder.com') || url.match(/@\dx\./)) {
+    return url;
+  }
+  const extensions = ['.png', '.jpg', '.jpeg'];
+  for (const ext of extensions) {
+    if (url.endsWith(ext)) {
+      return url.slice(0, -ext.length) + `@${resolution}` + ext;
+    }
+  }
+  return url;
+};
+
 interface AvatarInspectorModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +39,7 @@ interface AvatarInspectorModalProps {
 
 const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspectorModalProps) => {
   const { t } = useTranslation();
-  const { itemsById, allItems } = useItems();
+  const { itemsById, allItems, tagsByItemId } = useItems();
   const [inspectorData, setInspectorData] = useState<Item[]>([]);
   const [isInspecting, setIsInspecting] = useState(false);
   const [inspectorError, setInspectorError] = useState<string | null>(null);
@@ -39,7 +53,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
     } else if (item.name && item.name.includes('Daily Reward')) {
       return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
-    return item.imageUrl;
+    return getHighResUrl(item.imageUrl);
   };
 
   const getPopupImageUrl = (item: Item) => {
@@ -57,7 +71,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
         return `https://cdn.wolvesville.com/battlePass/icons/bp${bpNumber}.png`;
       }
     }
-    return item.imageUrl;
+    return getHighResUrl(item.imageUrl);
   };
 
   const getPopupTitle = (item: Item) => {
@@ -73,6 +87,63 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
     }
     return item.name;
   };
+
+  const formatEventName = (event: string) => {
+    return event.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  const getTypeString = (collection: Item) => {
+    let representativeItemId: string | undefined = undefined;
+    const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
+
+    if (selectedItemForSet && selectedItemForSet.id !== collection.id && reverseSearchableCategories.includes(selectedItemForSet.category)) {
+        representativeItemId = selectedItemForSet.id;
+    }
+    else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
+        representativeItemId = collection.avatarItemIds[0];
+    }
+    else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
+        const firstSetOrId = collection.avatarItemSets[0];
+        if (typeof firstSetOrId === 'string') {
+            const set = itemsById.get(firstSetOrId);
+            if (set && set.avatarItemIds && set.avatarItemIds.length > 0) {
+                representativeItemId = set.avatarItemIds[0];
+            }
+        } else if (firstSetOrId.avatarItemIds && firstSetOrId.avatarItemIds.length > 0) {
+            representativeItemId = firstSetOrId.avatarItemIds[0];
+        }
+    }
+
+    if (representativeItemId) {
+        const tags = tagsByItemId.get(representativeItemId);
+        if (tags) {
+            const originTag = tags.find(t => t.startsWith('origin:'));
+            if (originTag) {
+                const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
+                
+                const defaultValue = originTag
+                    .replace('origin:', '')
+                    .replace(/_/g, ' ')
+                    .replace(/:/g, ' : ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                return t(translationKey, defaultValue);
+            }
+        }
+    }
+
+    const event = (collection as Item & { event?: string }).event;
+    if (event === 'BATTLE_PASS') return t('origins.battle_pass', "BP (Battle Pass)");
+    if (event) return t(`origins.event.${event}`, formatEventName(event));
+    if (collection.category === 'bundles') return t('origins.bundle', "Bundle");
+    if (['avatarItemSets', 'avatarItemCollections'].includes(collection.category)) {
+        return t('origins.item_set', "Item Set");
+    }
+
+    return null;
+  }
 
   useEffect(() => {
     if (isOpen && avatar) {
@@ -171,7 +242,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
               </div>
               <div className="order-1 md:order-2 md:w-1/3">
                 <h4 className="font-semibold mb-4 text-center">{t('playerCard.fullAvatar')}</h4>
-                {avatar && <img src={avatar.url} alt="Full Avatar" className="rounded-lg mx-auto md:w-full" />}
+                {avatar && <img src={getHighResUrl(avatar.url)} alt="Full Avatar" className="rounded-lg mx-auto md:w-full" />}
               </div>
             </div>
           )}
@@ -187,6 +258,17 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                 <p className="text-sm text-muted-foreground">{t('playerCard.itemBelongsTo')}</p>
                 <img src={getPopupImageUrl(parentSet)} alt={parentSet.name} className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg border p-2"/>
                 <p className="font-bold text-lg">{getPopupTitle(parentSet)}</p>
+                {(() => {
+                const typeString = getTypeString(parentSet);
+                if (!typeString) return null;
+                return (
+                    <div className="text-center mt-2">
+                        <span className="bg-primary text-primary-foreground font-bold py-1 px-3 rounded-full text-base">
+                            {t('playerCard.origin')}: {typeString}
+                        </span>
+                    </div>
+                );
+              })()}
               </div>
             </DialogContent>
           )}
@@ -231,7 +313,7 @@ const AchievementsModal = ({ isOpen, onClose, achievements, rolesById }: Achieve
 
             return (
               <div key={achievement.roleId} className={`flex items-center gap-1 md:gap-2 p-1 md:p-2 rounded-lg bg-background border ${isMaxLevel ? 'border-yellow-400 shadow-lg shadow-yellow-400/20' : 'border-transparent'}`}>
-                <img src={role.imageUrl} alt={t(`roles.${role.name}`)} className="w-10 h-10 md:w-12 md:h-12 rounded-md" />
+                <img src={getHighResUrl(role.imageUrl)} alt={t(`roles.${role.name}`)} className="w-10 h-10 md:w-12 md:h-12 rounded-md" />
                 <div className="flex-1">
                   <div className="flex justify-between items-center">
                     <p className="font-semibold text-foreground text-sm md:text-base">{t(`roles.${role.name}`)}</p>
@@ -269,7 +351,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
 
   const getBadgeImage = (badgeId: string) => {
     const badgeItem = itemsById.get(badgeId);
-    return badgeItem?.imageUrl || "https://via.placeholder.com/48";
+    return getHighResUrl(badgeItem?.imageUrl) || "https://via.placeholder.com/48";
   };
 
   const hasPublicGameStats =
@@ -285,7 +367,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           <div className="flex items-start gap-4">
             <div className="flex flex-col items-center gap-2">
               <img
-                src={player.equippedAvatar.url}
+                src={getHighResUrl(player.equippedAvatar.url)}
                 alt={`Avatar de ${player.username}`}
                 className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary shadow-glow-primary object-cover flex-shrink-0"
               />
@@ -442,7 +524,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                       title={t('playerCard.clickToInspect')}
                     >
                       <img
-                        src={avatar.url}
+                        src={getHighResUrl(avatar.url)}
                         alt="Avatar"
                         className="w-full aspect-[123/128] rounded-lg border border-border object-cover transition-colors group-hover:border-primary"
                       />

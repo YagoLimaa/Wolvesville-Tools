@@ -40,6 +40,20 @@ const rarityColors = {
 
 const ITEMS_PER_PAGE = 50;
 
+const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' = '3x'): string => {
+  if (!url) return "";
+  if (url.includes('wolvesville.com/static/media') || url.includes('via.placeholder.com') || url.match(/@\dx\./)) {
+    return url;
+  }
+  const extensions = ['.png', '.jpg', '.jpeg'];
+  for (const ext of extensions) {
+    if (url.endsWith(ext)) {
+      return url.slice(0, -ext.length) + `@${resolution}` + ext;
+    }
+  }
+  return url;
+};
+
 const AnimatedEmoji = ({ urlAnimation }: { urlAnimation: string }) => {
   const { data: animationData, isLoading } = useQuery({
     queryKey: ['emojiAnimation', urlAnimation],
@@ -65,11 +79,11 @@ const AnimatedEmoji = ({ urlAnimation }: { urlAnimation: string }) => {
 };
 
 const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError: (id: string) => void; isHovered: boolean; }) => {
-  const [imageSrc, setImageSrc] = React.useState(item.imageUrl || '');
+  const [imageSrc, setImageSrc] = React.useState(getHighResUrl(item.imageUrl) || '');
   const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
-    setImageSrc(item.imageUrl || '');
+    setImageSrc(getHighResUrl(item.imageUrl) || '');
     setHasError(false);
   }, [item.imageUrl]);
 
@@ -99,10 +113,10 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
 
     switch (item.category) {
       case "avatarItems":
-        fallbackUrl = `${baseCdn}/avatarItems/${item.id}.store@2x.png`;
+        fallbackUrl = `${baseCdn}/avatarItems/${item.id}.store@3x.png`;
         break;
       case "bodyPaints":
-        fallbackUrl = `${baseCdn}/bodyPaints/${item.id}.store@2x.png`;
+        fallbackUrl = `${baseCdn}/bodyPaints/${item.id}.store@3x.png`;
         break;
       // Adicione outras categorias que possam ter URLs quebradas
       // e para as quais conhecemos o padrão do CDN.
@@ -112,7 +126,7 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
       setImageSrc(fallbackUrl);
     } else {
       // Verifica para não entrar em loop se a própria imagem de fallback falhar.
-      const FALLBACK_IMAGE_URL = "https://cdn-avatars2.wolvesville.com/ad3466d4-8798-4b9b-a5e7-2ae7d2343c58@2x.png";
+      const FALLBACK_IMAGE_URL = "https://cdn-avatars2.wolvesville.com/ad3466d4-8798-4b9b-a5e7-2ae7d2343c58@3x.png";
       if (imageSrc !== FALLBACK_IMAGE_URL) {
         setImageSrc(FALLBACK_IMAGE_URL);
       }
@@ -136,9 +150,10 @@ const ItemsSkins = () => {
   const [currentPage, setCurrentPage] = React.useState(1);
   const [brokenImageIds, setBrokenImageIds] = React.useState<Set<string>>(new Set());
   const [selectedCollection, setSelectedCollection] = React.useState<Item | null>(null);
+  const [clickedItem, setClickedItem] = React.useState<Item | null>(null);
   const [hoveredItemId, setHoveredItemId] = React.useState<string | null>(null);
 
-  const { allItems, isLoading, isError } = useItems();
+  const { allItems, isLoading, isError, tagsByItemId, itemsById } = useItems();
 
   const getNameFromUrl = (url: string): string => {
     try {
@@ -153,6 +168,69 @@ const ItemsSkins = () => {
       return t("common.item");
     }
   };
+
+  const formatEventName = (event: string) => {
+    return event.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  const getTypeString = (collection: Item) => {
+    let representativeItemId: string | undefined = undefined;
+
+    // 1. If an individual item was clicked to open the collection, use its ID.
+    if (clickedItem && clickedItem.id !== collection.id && reverseSearchableCategories.includes(clickedItem.category)) {
+        representativeItemId = clickedItem.id;
+    }
+    // 2. If the collection itself was clicked, and it contains avatar items, use the first one.
+    else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
+        representativeItemId = collection.avatarItemIds[0];
+    }
+    // 3. Special case for bundles that might contain sets.
+    else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
+        const firstSetOrId = collection.avatarItemSets[0];
+        if (typeof firstSetOrId === 'string') {
+            const set = itemsById.get(firstSetOrId);
+            if (set && set.avatarItemIds && set.avatarItemIds.length > 0) {
+                representativeItemId = set.avatarItemIds[0];
+            }
+        } else if (firstSetOrId.avatarItemIds && firstSetOrId.avatarItemIds.length > 0) {
+            representativeItemId = firstSetOrId.avatarItemIds[0];
+        }
+    }
+
+    if (representativeItemId) {
+        const tags = tagsByItemId.get(representativeItemId);
+        if (tags) {
+            const originTag = tags.find(t => t.startsWith('origin:'));
+            if (originTag) {
+                // Transforma "origin:foo_bar:baz" em "origins.foo_bar.baz"
+                const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
+                
+                // Valor padrão em inglês caso a tradução não exista
+                const defaultValue = originTag
+                    .replace('origin:', '')
+                    .replace(/_/g, ' ')
+                    .replace(/:/g, ' : ')
+                    .split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                // Usa o t() com a chave e o valor padrão
+                return t(translationKey, defaultValue);
+            }
+        }
+    }
+
+    // Fallback to existing logic with translation
+    const event = (collection as Item & { event?: string }).event;
+    if (event === 'BATTLE_PASS') return t('origins.battle_pass', "BP (Battle Pass)");
+    if (event) return t(`origins.event.${event}`, formatEventName(event));
+    if (collection.category === 'bundles') return t('origins.bundle', "Bundle");
+    if (['avatarItemSets', 'avatarItemCollections'].includes(collection.category)) {
+        return t('origins.item_set', "Item Set");
+    }
+
+    return categoryDisplayNames[collection.category];
+  }
 
   const categoryDisplayNames: { [key: string]: string } = {
     avatarItemCollections: t('itemsSkins.categories.avatarItemCollections'),
@@ -285,6 +363,7 @@ const ItemsSkins = () => {
   const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
 
   const handleItemClick = (item: Item) => {
+    setClickedItem(item);
     if (collectionCategories.includes(item.category)) {
       setSelectedCollection(item);
     } else if (item.parentSetId && allItems) {
@@ -312,7 +391,7 @@ const ItemsSkins = () => {
     } else if (item.name && item.name.includes('Daily Reward')) {
       return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
-    return (item as Item & { promoImageUrl?: string }).promoImageUrl || item.imageUrl;
+    return getHighResUrl((item as Item & { promoImageUrl?: string }).promoImageUrl || item.imageUrl);
   };
 
   return (
@@ -479,7 +558,18 @@ const ItemsSkins = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <CardContent className="p-6">
-              <h3 className="text-2xl font-bold mb-4 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
+              <h3 className="text-2xl font-bold mb-2 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
+              {(() => {
+                const typeString = getTypeString(selectedCollection);
+                if (!typeString) return null;
+                return (
+                    <div className="text-center mb-4">
+                        <span className="bg-primary text-primary-foreground font-bold py-1 px-4 rounded-full text-lg">
+                            {t('itemsSkins.origin')}: {typeString}
+                        </span>
+                    </div>
+                );
+              })()}
               {(() => {
                 const imageUrl = getInspectorImageUrl(selectedCollection);
                 if (!imageUrl) return null;
