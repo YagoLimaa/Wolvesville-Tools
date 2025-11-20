@@ -17,21 +17,19 @@ export const LanguageSwitcher = () => {
       aria-label={`Mudar idioma para ${isPt ? 'Inglês' : 'Português'}`}
       type="button"
     >
-      {/* Fundo que desliza */}
       <span
         className={cn(
-          "pointer-events-none absolute h-7 w-8 rounded-full bg-primary shadow-lg ring-0 transition-transform",
+          "pointer-events-none absolute flex h-7 w-8 items-center justify-center rounded-full bg-primary shadow-lg ring-0 transition-transform",
           isPt ? 'translate-x-0' : 'translate-x-[38px]'
         )}
-      />
-      {/* Labels PT e EN */}
-      <span className="absolute flex w-full justify-around items-center text-xs font-semibold">
-        <span className={cn("transition-colors", isPt ? "text-primary-foreground" : "text-muted-foreground")}>
-          PT
+      >
+        <span className="text-xs font-semibold text-primary-foreground">
+          {isPt ? 'PT' : 'EN'}
         </span>
-        <span className={cn("transition-colors", !isPt ? "text-primary-foreground" : "text-muted-foreground")}>
-          EN
-        </span>
+      </span>
+      <span className="flex w-full justify-around items-center text-xs font-semibold text-muted-foreground">
+        <span>PT</span>
+        <span>EN</span>
       </span>
     </button>
   );

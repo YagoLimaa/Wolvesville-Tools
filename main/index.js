@@ -534,6 +534,8 @@ apiRouter.get('/announcements', async (req, res) => {
 });
 
 apiRouter.get('/items/tags', async (req, res) => {
+  const { season } = req.query;
+
   try {
     const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
     const requestConfig = {
@@ -543,7 +545,14 @@ apiRouter.get('/items/tags', async (req, res) => {
       }
     };
     const response = await axios.get(requestUrl, requestConfig);
-    res.json(response.data);
+    let tagsData = response.data;
+
+    if (season) {
+      const seasonTag = `origin:battle_pass:season_${season}`;
+      tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
+    }
+
+    res.json(tagsData);
   } catch (error) {
     console.error("Erro ao buscar tags de itens:", error.message);
     res.status(500).json({ error: 'Não foi possível buscar as tags de itens.' });

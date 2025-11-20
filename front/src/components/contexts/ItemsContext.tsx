@@ -60,7 +60,6 @@ export interface Item {
   [key: string]: unknown;
 }
 
-// Interface para os itens como eles vêm da API, antes de adicionar a categoria
 interface ApiItem {
   id: string;
   imageUrl: string;
@@ -108,7 +107,19 @@ const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
   });
 
   const results = await Promise.all(promises);
-  const allItems = results.flat().filter(item => item && item.id)
+  const allItemsRaw = results.flat().filter(item => item && item.id);
+
+  const itemMap = new Map<string, Item>();
+  for (const item of allItemsRaw) {
+    if (itemMap.has(item.id)) {
+      const existingItem = itemMap.get(item.id)!;
+      itemMap.set(item.id, { ...item, ...existingItem });
+    } else {
+      itemMap.set(item.id, item);
+    }
+  }
+  const allItems = Array.from(itemMap.values());
+
   return allItems;
 };
 

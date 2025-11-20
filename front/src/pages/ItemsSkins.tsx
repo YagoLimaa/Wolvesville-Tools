@@ -9,10 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Pagination } from "@/components/Pagination";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Search, AlertTriangle, Gem, Filter } from "lucide-react";
+import { Search, AlertTriangle, Gem, Filter, Loader2, X } from "lucide-react";
 import { PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomFontAwesomeIcon } from "@/components/ui/font-awesome-icon";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Lottie from "lottie-react";
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
@@ -66,10 +67,10 @@ const AnimatedEmoji = ({ urlAnimation }: { urlAnimation: string }) => {
         return await response.json();
       } catch (error) {
         console.error('Error fetching or parsing Lottie animation:', error);
-        throw error; // Re-throw to let react-query handle the error state
+        throw error; 
       }
     },
-    staleTime: Infinity, // As animações são estáticas
+    staleTime: Infinity, 
   });
 
   if (isLoading) return <Skeleton className="w-full h-full" />;
@@ -87,12 +88,10 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
     setHasError(false);
   }, [item.imageUrl]);
 
-  // Caso especial para emojis com animação
   if (isHovered && item.category === 'emojis' && item.urlAnimation) {
     return <AnimatedEmoji urlAnimation={item.urlAnimation} />;
   }
 
-  // Caso especial para profileIcons que são ícones do FontAwesome
   if (item.category === 'profileIcons' && item.name?.startsWith('font-awesome-')) {
     return (
       <div className="w-full h-full flex items-center justify-center">
@@ -107,7 +106,6 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
       onImageError(item.id);
     }
 
-    // Se a URL original falhar, tenta construir uma URL de fallback para o CDN
     const baseCdn = "https://cdn2.wolvesville.com";
     let fallbackUrl = '';
 
@@ -137,20 +135,142 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
   );
 };
 
+const BattlePassSeasonInspector = ({ season, onClose, itemsById, onImageError, hoveredItemId, getNameFromUrl, t }) => {
+  const { data: seasonItemsData, isLoading } = useQuery({
+      queryKey: ['bpSeason', season],
+      queryFn: () => fetch(`/api/items/tags?season=${season}`).then(res => res.json()),
+      enabled: !!season,
+  });
+
+  const seasonItems = React.useMemo(() => {
+    if (!seasonItemsData || !Array.isArray(seasonItemsData) || !itemsById) {
+      return [];
+    }
+
+    const uniqueItems = new Map<string, Item>();
+    seasonItemsData.forEach(tagInfo => {
+      let item: Item | undefined;
+      if (tagInfo && tagInfo.id) { 
+          item = tagInfo;
+      } else if (tagInfo && tagInfo.avatarItemId) {
+          item = itemsById.get(tagInfo.avatarItemId);
+      }
+      
+      if (item && !uniqueItems.has(item.id)) {
+          uniqueItems.set(item.id, item);
+      }
+    });
+    
+    const finalItems = Array.from(uniqueItems.values());
+    return finalItems;
+  }, [seasonItemsData, itemsById]);
+
+  return (
+      <Dialog open={!!season} onOpenChange={(open) => !open && onClose()}>
+          <DialogContent className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-card custom-scrollbar">
+              <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <img src={`https://cdn.wolvesville.com/battlePass/icons/bp${season}@3x.png`} alt={`BP ${season}`} className="w-14 h-14" />
+                    {t('itemsSkins.battlePassSeason')} {season}
+                  </DialogTitle>
+              </DialogHeader>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-96">
+                  <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                  {seasonItems.map(piece => (
+                    <div key={piece.id} className={`relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 ${rarityColors[piece.rarity] || 'border-gray-600/50'}`}>
+                      <ItemImage item={piece} onImageError={onImageError} isHovered={hoveredItemId === piece.id} />
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 text-center">
+                        <p className="text-xs font-semibold text-white truncate">{piece.name || getNameFromUrl(piece.imageUrl)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+          </DialogContent>
+      </Dialog>
+  );
+}
+
+const getCollectionPieces = (collection: Item | null, allItems: Item[] | null, itemsById: Map<string, Item>): Item[] => {
+  if (!collection || !allItems) {
+    return [];
+  }
+
+  let pieceIdentifiers: ContainedItemIdentifier[] = [];
+
+  if (collection.avatarItemIds) {
+    pieceIdentifiers = collection.avatarItemIds.map(id => ({ id, type: 'avatarItems' }));
+  } else if (collection.emojiIds) {
+    pieceIdentifiers = collection.emojiIds.map(id => ({ id, type: 'emojis' }));
+  } else if (collection.rewards) {
+    pieceIdentifiers = collection.rewards.map(reward => ({
+      id: reward.avatarItemId || reward.loadingScreenId || reward.emojiId || '',
+      type: reward.type.toLowerCase().replace(/_/g, '') + 's'
+    })).filter(p => p.id !== '');
+  } else if (collection.category === 'bundles' && collection.items) {
+      pieceIdentifiers = (collection.items as ContainedItem[]).map((item) => ({
+        id: item.avatarItemId || item.loadingScreenId || item.emojiId || '',
+        type: item.type.toLowerCase().replace(/_/g, '') + 's'
+      })).filter(p => p.id !== '');
+  }
+
+
+  const uniquePieces = new Map<string, Item>();
+  pieceIdentifiers.forEach(p => {
+    const item = itemsById.get(String(p.id));
+    if (item && !uniquePieces.has(item.id)) {
+      uniquePieces.set(item.id, item);
+    }
+  });
+
+  const result = Array.from(uniquePieces.values());
+  return result;
+};
+
 const ItemsSkins = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchTerm, setSearchTerm] = React.useState("");
   const [categoryFilter, setCategoryFilter] = React.useState("all");
   const [rarityFilter, setRarityFilter] = React.useState("all");
   const [genderFilter, setGenderFilter] = React.useState("all");
   const [typeFilter, setTypeFilter] = React.useState("all");
+  const [bpSeasonFilter, setBpSeasonFilter] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const [brokenImageIds, setBrokenImageIds] = React.useState<Set<string>>(new Set());
   const [selectedCollection, setSelectedCollection] = React.useState<Item | null>(null);
   const [clickedItem, setClickedItem] = React.useState<Item | null>(null);
   const [hoveredItemId, setHoveredItemId] = React.useState<string | null>(null);
+  const [inspectingBpSeason, setInspectingBpSeason] = React.useState<string | null>(null);
 
   const { allItems, isLoading, isError, tagsByItemId, itemsById } = useItems();
+
+  const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'emojiCollections'];
+  const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
+
+  const getSeasonFromItem = (item: Item): string | null => {
+    const tags = tagsByItemId.get(item.id);
+    if (tags) {
+        const originTag = tags.find(t => t.startsWith('origin:battle_pass:season_'));
+        if (originTag) {
+            const season = originTag.split('_').pop() || null;
+            return season;
+        }
+    }
+
+    if (item.imageUrl) {
+        const match = item.imageUrl.match(/\/bp(\d+)-/);
+        if (match && match[1]) {
+            const season = match[1];
+            return season;
+        }
+    }
+    
+    return null;
+  }
 
   const getNameFromUrl = (url: string): string => {
     try {
@@ -196,19 +316,19 @@ const ItemsSkins = () => {
         if (tags) {
             const originTag = tags.find(t => t.startsWith('origin:'));
             if (originTag) {
-                
-                const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
-                
-               
-                const defaultValue = originTag
-                    .replace('origin:', '')
-                    .replace(/_/g, ' ')
-                    .replace(/:/g, ' : ')
-                    .split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
+                if (originTag.startsWith('origin:battle_pass:season_')) {
+                  const seasonNumber = originTag.split('_').pop()?.replace(/^0+/, '');
+                  return t('origins.battle_pass_season', { season: seasonNumber });
+                }
 
-                
+                const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
+                const defaultValue = originTag
+                  .replace('origin:', '')
+                  .replace(/_/g, ' ')
+                  .replace(/:/g, ' : ')
+                  .split(' ')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ');
                 return t(translationKey, defaultValue);
             }
         }
@@ -223,25 +343,25 @@ const ItemsSkins = () => {
         return t('origins.item_set', "Item Set");
     }
 
-    return categoryDisplayNames[collection.category];
+    return t(`itemsSkins.categories.${collection.category}`);
   }
 
-  const categoryDisplayNames: { [key: string]: string } = {
-    avatarItemCollections: t('itemsSkins.categories.avatarItemCollections'),
-    avatarItems: t('itemsSkins.categories.avatarItems'),
-    avatarItemSets: t('itemsSkins.categories.avatarItemSets'),
-    backgrounds: t('itemsSkins.categories.backgrounds'),
-    bodyPaints: t('itemsSkins.categories.bodyPaints'),
-    bundles: t('itemsSkins.categories.bundles'),
-    calendars: t('itemsSkins.categories.calendars'),
-    emojiCollections: t('itemsSkins.categories.emojiCollections'),
-    emojis: t('itemsSkins.categories.emojis'),
-    loadingScreens: t('itemsSkins.categories.loadingScreens'),
-    profileIconBorders: t('itemsSkins.categories.profileIconBorders'),
-    profileIcons: t('itemsSkins.categories.profileIcons'),
-    roleIcons: t('itemsSkins.categories.roleIcons'),
-    roseSkins: t('itemsSkins.categories.roseSkins'),
-  };
+  const categoryKeys = React.useMemo(() => [
+    "avatarItemCollections",
+    "avatarItems",
+    "avatarItemSets",
+    "backgrounds",
+    "bodyPaints",
+    "bundles",
+    "calendars",
+    "emojiCollections",
+    "emojis",
+    "loadingScreens",
+    "profileIconBorders",
+    "profileIcons",
+    "roleIcons",
+    "roseSkins",
+  ], []);
 
   const handleImageError = React.useCallback((itemId: string) => {
     setBrokenImageIds(prev => {
@@ -279,13 +399,39 @@ const ItemsSkins = () => {
       }
       const matchesType = categoryFilter !== 'avatarItems' || item.category !== 'avatarItems' || typeFilter === "all" || item.type === typeFilter;
 
-      return matchesSearch && matchesCategory && matchesRarity && matchesGender && matchesType;
+      const matchesBpSeason = (() => {
+        if (!bpSeasonFilter) return true;
+        const seasonTag = `origin:battle_pass:season_${bpSeasonFilter}`;
+        
+        const itemTags = tagsByItemId.get(item.id);
+        if (itemTags && itemTags.includes(seasonTag)) {
+          return true;
+        }
+
+        if (collectionCategories.includes(item.category)) {
+            const pieceIds = item.avatarItemIds || item.emojiIds || item.rewards?.map(r => r.avatarItemId || r.emojiId) || [];
+            for (const pieceId of pieceIds) {
+                if (pieceId) {
+                    const pieceTags = tagsByItemId.get(pieceId);
+                    if (pieceTags && pieceTags.includes(seasonTag)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+      })();
+
+      return matchesSearch && matchesCategory && matchesRarity && matchesGender && matchesType && matchesBpSeason;
     });
-  }, [sortedItems, searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter]);
+  }, [sortedItems, searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter, bpSeasonFilter, tagsByItemId]);
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter]);
+  }, [searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter, bpSeasonFilter]);
+
+
 
   const paginatedItems = React.useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -304,75 +450,80 @@ const ItemsSkins = () => {
   const avatarItemTypes = React.useMemo(() => {
     if (!allItems) return [];
     const types = new Set(allItems.filter(i => i.category === 'avatarItems' && i.type).map(i => i.type!));
-    return Array.from(types).sort();
+    return Array.from(types);
   }, [allItems]);
 
-  // Categorias que abrem popup
-  const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars', 'emojiCollections'];
-
   const collectionPieces = React.useMemo(() => {
-    if (!selectedCollection || !allItems) return [];
-
-    let pieceIdentifiers: ContainedItemIdentifier[] = [];
-
-    if (selectedCollection.avatarItemIds) { 
-      pieceIdentifiers = selectedCollection.avatarItemIds.map(id => ({ id, type: 'avatarItems' }));
-    } else if (selectedCollection.emojiIds) { 
-      pieceIdentifiers = selectedCollection.emojiIds.map(id => ({ id, type: 'emojis' }));
-    } else if (selectedCollection.rewards) { 
-      pieceIdentifiers = selectedCollection.rewards.map(reward => ({
-        id: reward.avatarItemId || reward.loadingScreenId || reward.emojiId || '',
-        type: reward.type.toLowerCase().replace(/_/g, '') + 's' 
-      })).filter(p => p.id !== '');
-    } else if (selectedCollection.category === 'bundles') {
-      const bundle = selectedCollection; 
-      const pieceArrays = [
-        ...(bundle.avatarItemSets?.flatMap(setOrId => {
-          if (typeof setOrId === 'string') {
-            
-            const foundSet = allItems.find(item => item.id === setOrId);
-            return (foundSet?.avatarItemIds as string[] | undefined)?.map(id => ({ id, type: 'avatarItems' })) || [];
-          }
-         
-          return (setOrId.avatarItemIds as string[] | undefined)?.map(id => ({ id, type: 'avatarItems' })) || [];
-        }) || []),
-        ...(bundle.emojis?.map(emoji => ({ id: emoji.id, type: 'emojis' })) || []),
-        ...(bundle.loadingScreens?.map(screen => ({ id: screen.id, type: 'loadingScreens' })) || []),
-        ...(bundle.roleIcons?.map(icon => ({ id: icon.id, type: 'roleIcons' })) || []),
-        ...(bundle.bodyPaints?.map(paint => ({ id: paint.id, type: 'bodyPaints' })) || []),
-        ...(bundle.roseSkins?.map(skin => ({ id: skin.id, type: 'roseSkins' })) || []),
-        ...(bundle.backgrounds?.map(bg => ({ id: bg.id, type: 'backgrounds' })) || []),
-        ...(bundle.items?.map(item => ({ id: item.avatarItemId || item.id, type: item.type.toLowerCase().replace(/_/g, '') + 's' })) || []),
-      ];
-      pieceIdentifiers = pieceArrays.filter(p => p && p.id);
-    }
-
-    return pieceIdentifiers.map(p => allItems.find(item => String(item.id) === String(p.id))).filter((item): item is Item => !!item);
-  }, [selectedCollection, allItems]);
-
-  
-  const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
+    return getCollectionPieces(selectedCollection, allItems, itemsById);
+  }, [selectedCollection, allItems, itemsById]);
 
   const handleItemClick = (item: Item) => {
     setClickedItem(item);
+
+    let parentSet: Item | undefined | null = null;
     if (collectionCategories.includes(item.category)) {
-      setSelectedCollection(item);
-    } else if (item.parentSetId && allItems) {
-      
-      const parentSet = allItems.find(set => set.id === item.parentSetId);
-      if (parentSet) setSelectedCollection(parentSet);
+      parentSet = item;
+    } else if (item.parentSetId && itemsById) {
+      parentSet = itemsById.get(item.parentSetId);
     } else if (reverseSearchableCategories.includes(item.category) && allItems) {
-      const parentSet = allItems.find(
-        set => (collectionCategories.includes(set.category)) && 
-               (set.avatarItemIds?.includes(item.id) || 
-                set.rewards?.some(r => r.avatarItemId === item.id || r.emojiId === item.id) || 
+      parentSet = allItems.find(
+        set => (collectionCategories.includes(set.category)) &&
+               (set.avatarItemIds?.includes(item.id) ||
+                set.rewards?.some(r => r.avatarItemId === item.id || r.emojiId === item.id) ||
                 set.items?.some(i => i.avatarItemId === item.id) ||
                 set.emojiIds?.includes(item.id)
                )
       );
-      if (parentSet) setSelectedCollection(parentSet);
+    }
+    const pieces = parentSet ? getCollectionPieces(parentSet, allItems, itemsById) : [];
+
+    if (parentSet && pieces.length > 0) {
+      setSelectedCollection(parentSet);
+      return;
+    }
+
+    const season = getSeasonFromItem(item);
+    if (season) {
+      setInspectingBpSeason(season);
+      return;
+    }
+    if (parentSet) {
+        setSelectedCollection(parentSet);
     }
   };
+
+  const getBattlePassSeasonFromCollection = (collection: Item): string | null => {
+    let representativeItemId: string | undefined = undefined;
+
+    if (clickedItem && clickedItem.id !== collection.id && reverseSearchableCategories.includes(clickedItem.category)) {
+        representativeItemId = clickedItem.id;
+    }
+    else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
+        representativeItemId = collection.avatarItemIds[0];
+    }
+    else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
+        const firstSetOrId = collection.avatarItemSets[0];
+        if (typeof firstSetOrId === 'string') {
+            const set = itemsById.get(firstSetOrId);
+            if (set && set.avatarItemIds && set.avatarItemIds.length > 0) {
+                representativeItemId = set.avatarItemIds[0];
+            }
+        } else if (firstSetOrId.avatarItemIds && firstSetOrId.avatarItemIds.length > 0) {
+            representativeItemId = firstSetOrId.avatarItemIds[0];
+        }
+    }
+
+    if (representativeItemId) {
+        const tags = tagsByItemId.get(representativeItemId);
+        if (tags) {
+            const originTag = tags.find(t => t.startsWith('origin:battle_pass:season_'));
+            if (originTag) {
+                return originTag.split('_').pop() || null;
+            }
+        }
+    }
+    return null;
+  }
 
   const getInspectorImageUrl = (item: Item) => {
     if (item.name && item.name.includes('Golden Wheel')) {
@@ -382,6 +533,12 @@ const ItemsSkins = () => {
     } else if (item.name && item.name.includes('Daily Reward')) {
       return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
+    
+    const season = getBattlePassSeasonFromCollection(item);
+    if (season) {
+        return getHighResUrl(`https://cdn.wolvesville.com/battlePass/icons/bp${season}.png`);
+    }
+
     return getHighResUrl((item as Item & { promoImageUrl?: string }).promoImageUrl || item.imageUrl);
   };
 
@@ -389,7 +546,7 @@ const ItemsSkins = () => {
     <div className="min-h-screen bg-background">
       <NavigationBar />
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-28 py-8 mt-[84px]">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-28 py-8 mt-[5px]">
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
           <aside className="lg:col-span-1 mb-8 lg:mb-0 lg:flex lg:flex-col lg:justify-center">
             <Card className="bg-card/50 backdrop-blur border-accent/20 w-full">
@@ -407,7 +564,7 @@ const ItemsSkins = () => {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <Accordion type="multiple" defaultValue={['type', 'rarity', 'gender', 'subtype']} className="w-full">
+                <Accordion type="multiple" defaultValue={['type', 'rarity', 'gender', 'subtype', 'bp_season']} className="w-full">
                   <AccordionItem value="type">
                     <AccordionTrigger>{t('itemsSkins.itemType')}</AccordionTrigger>
                     <AccordionContent>
@@ -415,11 +572,17 @@ const ItemsSkins = () => {
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
-                          {Object.entries(categoryDisplayNames)
-                            .sort(([, nameA], [, nameB]) => nameA.localeCompare(nameB))
-                            .map(([key, name]) => (
-                            <SelectItem key={key} value={key}>{t(`itemsSkins.categories.${key}`, name)}</SelectItem>
-                          ))}
+                          {categoryKeys
+                            .map(key => ({
+                              key: key,
+                              name: t(`itemsSkins.categories.${key}`)
+                            }))
+                            .sort((a, b) => a.name.localeCompare(b.name, i18n.language))
+                            .map(category => (
+                              <SelectItem key={category.key} value={category.key}>
+                                {category.name}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                     </AccordionContent>
@@ -439,8 +602,7 @@ const ItemsSkins = () => {
                       </Select>
                     </AccordionContent>
                   </AccordionItem>
-                  {/* Filtros que só se aplicam a "Itens de Avatar" */}
-                  <AccordionItem value="gender" disabled={categoryFilter !== 'avatarItems'}>
+                  <AccordionItem value="gender">
                     <AccordionTrigger>{t('itemsSkins.gender')}</AccordionTrigger>
                     <AccordionContent>
                       <Select value={genderFilter} onValueChange={setGenderFilter} disabled={categoryFilter !== 'avatarItems'}>
@@ -454,7 +616,7 @@ const ItemsSkins = () => {
                       </Select>
                     </AccordionContent>
                   </AccordionItem>
-                  <AccordionItem value="subtype" disabled={categoryFilter !== 'avatarItems'}>
+                  <AccordionItem value="subtype">
                     <AccordionTrigger>{t('itemsSkins.avatarType')}</AccordionTrigger>
                     <AccordionContent>
                       <Select value={typeFilter} onValueChange={setTypeFilter} disabled={categoryFilter !== 'avatarItems'}>
@@ -462,12 +624,38 @@ const ItemsSkins = () => {
                         <SelectContent>
                           <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
                           {avatarItemTypes
-                            .sort((a, b) => a.localeCompare(b))
-                            .map(type => (
-                              <SelectItem key={type} value={type}>
-                                {type.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            .map(type => ({
+                              key: type,
+                              name: t(`itemsSkins.avatarTypes.${type}`, type.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+                            }))
+                            .sort((a, b) => a.name.localeCompare(b.name, i18n.language))
+                            .map(item => (
+                              <SelectItem key={item.key} value={item.key}>
+                                {item.name}
                               </SelectItem>
                             ))}
+                        </SelectContent>
+                      </Select>
+                    </AccordionContent>
+                  </AccordionItem>
+                   <AccordionItem value="bp_season">
+                    <AccordionTrigger>{t('itemsSkins.battlePassSeason')}</AccordionTrigger>
+                    <AccordionContent>
+                      <Select
+                        value={bpSeasonFilter}
+                        onValueChange={(value) => setBpSeasonFilter(value === 'all' ? '' : value)}
+                        disabled={categoryFilter !== 'avatarItems'}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('itemsSkins.selectSeasonPlaceholder')} />
+                        </SelectTrigger>
+                        <SelectContent position="popper" side="bottom">
+                          <SelectItem value="all">{t('itemsSkins.allSeasons')}</SelectItem>
+                          {Array.from({ length: 45 }, (_, i) => 45 - i).sort((a, b) => a - b).map(season => (
+                            <SelectItem key={season} value={String(season).padStart(2, '0')}>
+                              {t('itemsSkins.season', { season: String(season).padStart(2, '0') })}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </AccordionContent>
@@ -544,10 +732,16 @@ const ItemsSkins = () => {
           className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedCollection(null)}
         >
-          <Card 
-            className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-card"
+          <Card
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-card custom-scrollbar"
             onClick={(e) => e.stopPropagation()}
           >
+            <button
+              onClick={() => setSelectedCollection(null)}
+              className="absolute top-3 right-3 p-1.5 rounded-full bg-background/50 hover:bg-background/80 transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
             <CardContent className="p-6">
               <h3 className="text-2xl font-bold mb-2 text-center">{selectedCollection.name || getNameFromUrl(selectedCollection.imageUrl)}</h3>
               {(() => {
@@ -590,6 +784,16 @@ const ItemsSkins = () => {
           </Card>
         </div>
       )}
+
+      <BattlePassSeasonInspector 
+        season={inspectingBpSeason} 
+        onClose={() => setInspectingBpSeason(null)}
+        itemsById={itemsById}
+        onImageError={handleImageError}
+        hoveredItemId={hoveredItemId}
+        getNameFromUrl={getNameFromUrl}
+        t={t}
+      />
     </div>
   );
 };

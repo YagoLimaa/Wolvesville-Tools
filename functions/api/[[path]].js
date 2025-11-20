@@ -354,10 +354,17 @@ export async function onRequest(context) {
     }
 
     if (path === '/items/tags') {
+        const season = searchParams.get('season');
         const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
         const response = await fetch(requestUrl, requestConfig);
-        const responseData = await response.json();
-        return jsonResponse(responseData);
+        let tagsData = await response.json();
+
+        if (season) {
+          const seasonTag = `origin:battle_pass:season_${season}`;
+          tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
+        }
+
+        return jsonResponse(tagsData);
     }
 
     // Rota para /clan/:id

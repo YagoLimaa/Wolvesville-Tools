@@ -56,6 +56,40 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
     return getHighResUrl(item.imageUrl);
   };
 
+  const getBattlePassSeason = (collection: Item): string | null => {
+    let representativeItemId: string | undefined = undefined;
+    const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
+
+    if (selectedItemForSet && selectedItemForSet.id !== collection.id && reverseSearchableCategories.includes(selectedItemForSet.category)) {
+        representativeItemId = selectedItemForSet.id;
+    }
+    else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
+        representativeItemId = collection.avatarItemIds[0];
+    }
+    else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
+        const firstSetOrId = collection.avatarItemSets[0];
+        if (typeof firstSetOrId === 'string') {
+            const set = itemsById.get(firstSetOrId);
+            if (set && set.avatarItemIds && set.avatarItemIds.length > 0) {
+                representativeItemId = set.avatarItemIds[0];
+            }
+        } else if (firstSetOrId.avatarItemIds && firstSetOrId.avatarItemIds.length > 0) {
+            representativeItemId = firstSetOrId.avatarItemIds[0];
+        }
+    }
+
+    if (representativeItemId) {
+        const tags = tagsByItemId.get(representativeItemId);
+        if (tags) {
+            const originTag = tags.find(t => t.startsWith('origin:battle_pass:season_'));
+            if (originTag) {
+                return originTag.split('_').pop() || null;
+            }
+        }
+    }
+    return null;
+  }
+
   const getPopupImageUrl = (item: Item) => {
     if (item.name && item.name.includes('Golden Wheel')) {
       return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
@@ -64,11 +98,17 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
     } else if (item.name && item.name.includes('Daily Reward')) {
       return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
     }
+
+    const season = getBattlePassSeason(item);
+    if (season) {
+        return getHighResUrl(`https://cdn.wolvesville.com/battlePass/icons/bp${season}.png`);
+    }
+
     if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
       const match = item.imageUrl.match(/\/bp(\d+)/);
       if (match) {
         const bpNumber = match[1];
-        return `https://cdn.wolvesville.com/battlePass/icons/bp${bpNumber}.png`;
+        return getHighResUrl(`https://cdn.wolvesville.com/battlePass/icons/bp${bpNumber}.png`);
       }
     }
     return getHighResUrl(item.imageUrl);
