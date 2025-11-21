@@ -26,7 +26,6 @@ export function useApi<T = unknown>(
       const response = await apiFn();
 
       if (response.error) {
-        // Backend validation error
         throw new Error(response.error);
       }
 

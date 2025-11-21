@@ -64,7 +64,6 @@ const ClanSearch = () => {
       if (response.error) {
         throw new Error(response.error);
       }
-      // Handle both array and object responses
       let results: Clan[] = [];
       if (Array.isArray(response.data)) {
         results = response.data;

@@ -19,62 +19,60 @@ const addRoute = (method, path, handler) => {
   routes.push({ method, pathRegex, handler });
 };
 
-// --- Define Routes ---
+// definindo tipo de rotas ( para futuras implementeações)
 const router = {
   get: (path, handler) => addRoute('GET', path, handler),
   post: (path, handler) => addRoute('POST', path, handler),
   all: (path, handler) => addRoute('ALL', path, handler),
 };
 
-// Announcements
+// anuncios do jogo
 router.get('/api/announcements', handleAnnouncements);
 
-// Avatars
+// tudo relacionados para avatares
 router.get('/api/avatars/sharedAvatarId/:playerId/:slotNumber', handleSharedAvatarId);
 router.get('/api/avatars/:sharedAvatarId', handleAvatarDetails);
 router.get('/api/avatars', handleAvatars); 
 
-// Battle Pass
+// tudo de battle pass
 router.get('/api/battlePass/season', handleBattlePassSeason);
 router.get('/api/battlePass/shop', handleBattlePassShop);
 router.get('/api/battlePass/challenges', handleBattlePassChallenges);
 
-// Clans
+// tudo de clans
 router.get('/api/clans/search', handleClanSearch);
 router.get('/api/clans/:id', handleClanDetails);
 router.get('/api/clan/:id', handleClanDetails); // backward compatibility
 
-// Items
+// tudo de items
 router.get('/api/items/tags', handleItemsByTags);
 router.get('/api/items/:category', handleItemsByCategory);
 
-// Players
+// tudo de jogadores
 router.get('/api/players/search', handlePlayersSearch);
 router.get('/api/players/highscores', handlePlayersHighscores);
 
-// Roles
+// tudo sobre as funções de roles
 router.get('/api/roles', handleRoles);
 router.get('/api/roles/rotations', handleRoleRotations);
 router.get('/api/roleRotations', handleRoleRotations); // Alias
 
-// Shop
+// loja
 router.get('/api/shop/activeOffers', handleShopActiveOffers);
 router.get('/api/shop/active', handleShopActiveOffers); // Alias
 
-// Validation
+// fazer as validações
 router.get('/api/validation/item-categories', handleItemCategories);
 router.get('/api/validation/roles', handleRoleIds);
 
-// --- Request Handler ---
 export async function onRequest(context) {
   const { request, env } = context;
   const { pathname } = new URL(request.url);
 
-  // Attach env to the request object so middleware can access it
   request.env = env;
 
   try {
-    // Run middleware
+    // comecando o middleware
     const middlewareResponse = requestConfigMiddleware(request);
     if (middlewareResponse) return middlewareResponse;
 

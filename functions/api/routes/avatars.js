@@ -24,8 +24,6 @@ export async function handleSharedAvatarId(request) {
   
   const responseData = await response.text();
   
-  // The frontend's apiGet helper expects a JSON response.
-  // We send the plain text ID back, but JSON-encoded.
   return jsonResponse(responseData);
 }
 

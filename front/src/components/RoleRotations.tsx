@@ -8,8 +8,7 @@ import { Zap, AlertTriangle, Clock } from "lucide-react";
 import { useRoles, type Role } from "@/components/contexts/RolesContext";
 import { rolesApi } from "@/lib/api";
 
-// --- Tipos de Dados ---
-
+// tipos de Dados 
 interface RoleInfo {
   id: string;
   probability?: number;
@@ -37,8 +36,6 @@ type GameModeRotation = StandardGameModeRotation | SandboxGameModeRotation;
 function isDefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
-
-// --- Funções de Fetch e Hooks ---
 
 const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
   const response = await rolesApi.getRotations();
@@ -80,8 +77,6 @@ const useCountdownToNextWednesday = () => {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 };
 
-// --- Componentes de UI ---
-
 const RoleIcon = ({ role, showProbability }: { role: Role & { probability?: number }, showProbability: boolean }) => (
   <div className="group relative">
     <img
@@ -99,8 +94,6 @@ const RoleIcon = ({ role, showProbability }: { role: Role & { probability?: numb
     </div>
   </div>
 );
-
-// --- Componente Principal ---
 
 export const RoleRotations = () => {
   const { t } = useTranslation();

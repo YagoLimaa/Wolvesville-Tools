@@ -30,7 +30,6 @@ interface Offer {
   emojisCollectionId?: string;
 }
 
-// Local type to avoid using 'any'
 interface ContainedItemForShop {
   avatarItemId?: string;
 }

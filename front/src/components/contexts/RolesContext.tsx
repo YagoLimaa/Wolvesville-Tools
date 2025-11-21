@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { rolesApi } from '@/lib/api';
 
-// A API retorna a imagem dentro de um objeto 'image'
 interface RoleFromApi {
   id: string;
   name: string;
@@ -53,7 +52,7 @@ export const RolesProvider = ({ children }: RolesProviderProps) => {
   const { data: allRoles = [], isLoading, isError } = useQuery<Role[]>({
     queryKey: ['allRolesGlobal'],
     queryFn: fetchAllRoles,
-    staleTime: 1000 * 60 * 60, // Cache de 1 hora
+    staleTime: 1000 * 60 * 60, 
     refetchOnWindowFocus: false,
   });
 

@@ -1,12 +1,4 @@
-/**
- * Centralized API client
- * - All requests go through here
- * - Backend validates everything
- * - Frontend just passes data and handles responses
- */
-
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
 export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
@@ -23,10 +15,6 @@ export interface SearchParams extends PaginationParams {
   [key: string]: string | number | undefined;
 }
 
-/**
- * Make a GET request to the API
- * Backend handles all validation
- */
 export async function apiGet<T = unknown>(
   endpoint: string,
   params?: SearchParams
@@ -64,9 +52,6 @@ export async function apiGet<T = unknown>(
   }
 }
 
-/**
- * Player endpoints
- */
 export const playerApi = {
   search: (username: string, page?: number) =>
     apiGet('/players/search', { username, page }),
@@ -75,9 +60,6 @@ export const playerApi = {
     apiGet('/players/highscores', { limit }),
 };
 
-/**
- * Items endpoints
- */
 export const itemsApi = {
   getCategory: (category: string) =>
     apiGet(`/items/${category}`),
@@ -86,18 +68,12 @@ export const itemsApi = {
     apiGet('/items/tags', { season }),
 };
 
-/**
- * Roles endpoints
- */
 export const rolesApi = {
   getAll: () => apiGet<unknown>('/roles'),
 
   getRotations: () => apiGet<unknown[]>('/roleRotations'),
 };
 
-/**
- * Battle Pass endpoints
- */
 export const battlePassApi = {
   getSeason: () => apiGet('/battlePass/season'),
 
@@ -107,9 +83,6 @@ export const battlePassApi = {
     apiGet('/battlePass/challenges', { locale }),
 };
 
-/**
- * Clans endpoints
- */
 export const clansApi = {
   search: (name: string, language?: string, open?: boolean) =>
     apiGet('/clans/search', { name, language, open: open ? 'true' : undefined }),
@@ -118,17 +91,12 @@ export const clansApi = {
     apiGet(`/clan/${id}`),
 };
 
-/**
- * Shop endpoints
- */
 export const shopApi = {
   getActiveOffers: () =>
     apiGet('/shop/activeOffers'),
 };
 
-/**
- * Announcements endpoints
- */
+
 export const announcementsApi = {
   getAll: (locale?: string) =>
     apiGet('/announcements', { locale }),
@@ -138,9 +106,7 @@ export interface AvatarDetailsResponse {
   items: Record<string, string>;
 }
 
-/**
- * Avatars endpoints
- */
+
 export const avatarsApi = {
   getSharedId: (playerId: string, slotNumber: number) =>
     apiGet<string>(`/avatars/sharedAvatarId/${playerId}/${slotNumber}`),
@@ -149,15 +115,10 @@ export const avatarsApi = {
     apiGet<AvatarDetailsResponse>(`/avatars/${sharedAvatarId}`),
 };
 
-/**
- * Validation endpoints (get allowed values from backend)
- */
 export const validationApi = {
-  // Get all valid item categories from backend
+
   getItemCategories: () =>
     apiGet<string[]>('/validation/item-categories'),
-
-  // Get all valid roles
   getRoleIds: () =>
     apiGet<string[]>('/validation/roles'),
 };

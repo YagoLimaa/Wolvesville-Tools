@@ -165,8 +165,7 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                 if (i18n.exists(translationKey)) {
                   return t(translationKey);
                 }
-                
-                // Fallback for dynamic keys like season, calendar, etc.
+  
                 const parts = originTag.replace('origin:', '').split(':');
                 if (parts.length > 1) {
                   const genericKey = `origins.${parts[0]}`;
@@ -176,7 +175,6 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                   }
                 }
 
-                // If no key exists, format the tag manually to avoid warnings
                 return originTag
                     .replace('origin:', '')
                     .replace(/_/g, ' ')

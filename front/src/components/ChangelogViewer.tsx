@@ -21,7 +21,7 @@ const fetchChangelogs = async (): Promise<{ changelogs: Changelog[] }> => {
   if (response.error) {
     throw new Error('Não foi possível buscar os changelogs.');
   }
-  const announcements = Array.isArray(response.data) ? response.data : response.data?.announcements || [];
+  const announcements = Array.isArray(response.data) ? response.data as Changelog[] : (response.data as { announcements: Changelog[] })?.announcements || [];
   return { changelogs: announcements };
 };
 

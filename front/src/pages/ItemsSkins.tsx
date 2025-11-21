@@ -17,7 +17,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import Lottie from "lottie-react";
 import { itemsApi } from "@/lib/api";
 
-// Interface específica para os itens dentro de coleções, removendo o 'any'
 interface ContainedItem {
   type: string;
   amount: number;
@@ -142,7 +141,6 @@ const BattlePassSeasonInspector = ({ season, onClose, itemsById, onImageError, h
       queryFn: async () => {
         const response = await itemsApi.getTags(season);
         if (response.error) throw new Error(response.error);
-        // Handle both array and object responses
         if (Array.isArray(response.data)) {
           return response.data;
         } else if (response.data && typeof response.data === 'object') {

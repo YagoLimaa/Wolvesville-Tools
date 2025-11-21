@@ -4,15 +4,13 @@ import { fas, faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
 import { IconName } from '@fortawesome/fontawesome-common-types';
 import { icons } from 'lucide-react';
 
-// Adiciona todos os ícones sólidos à biblioteca para que possamos usá-los dinamicamente
 library.add(fas);
 
 interface CustomFontAwesomeIconProps {
-  iconName: string; // ex: "font-awesome-5:tooth:light"
+  iconName: string; 
   className?: string;
 }
 
-// Mapeamento de nomes de ícones do FontAwesome v5 para v6
 const v5tov6: { [key: string]: string } = {
   'atom-alt': 'atom',
   'chart-network': 'project-diagram',
@@ -49,7 +47,6 @@ const v5tov6: { [key: string]: string } = {
   'drumstick': 'drumstick-bite',
 };
 
-// Mapeamento de ícones FontAwesome (Pro) para ícones Lucide
 const faToLucide: { [key: string]: string } = {
   'axe': 'Axe',
   'campfire': 'Flame',
@@ -125,7 +122,6 @@ const faToLucide: { [key: string]: string } = {
 };
 
 
-// Função para converter o nome da API para um nome de ícone válido
 const parseIconName = (name: string): IconName | null => {
   if (!name.startsWith('font-awesome-') && !name.startsWith('streamline-icons')) return null;
   const parts = name.split(':');
@@ -133,7 +129,6 @@ const parseIconName = (name: string): IconName | null => {
   
   let icon = parts[1];
 
-  // Converte nomes de ícones v5 para v6 se existir no mapa
   if (v5tov6[icon]) {
     icon = v5tov6[icon];
   }
@@ -148,14 +143,12 @@ export const CustomFontAwesomeIcon = ({ iconName, className }: CustomFontAwesome
     return <FontAwesomeIcon icon={faQuestionCircle} className={className} />;
   }
 
-  // 1. Tenta encontrar o ícone no FontAwesome Solid
   const faIconDefinition = findIconDefinition({ prefix: 'fas', iconName: parsedName });
 
   if (faIconDefinition) {
     return <FontAwesomeIcon icon={['fas', parsedName]} className={className} />;
   }
 
-  // 2. Se não encontrar, tenta encontrar um substituto na biblioteca Lucide
   const lucideIconName = faToLucide[parsedName];
   if (lucideIconName) {
     const LucideIcon = icons[lucideIconName as keyof typeof icons];
@@ -164,6 +157,5 @@ export const CustomFontAwesomeIcon = ({ iconName, className }: CustomFontAwesome
     }
   }
 
-  // 3. Se nada funcionar, retorna o ícone de fallback
   return <FontAwesomeIcon icon={faQuestionCircle} className={className} />;
 };

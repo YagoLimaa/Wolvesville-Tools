@@ -66,11 +66,9 @@ interface ItemsContextType {
 
 const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined);
 
-/**
- * Fetch all items from all categories
- * Backend validates categories - frontend just passes them
- */
-const fetchAllItems = async (categories: string[], t: any): Promise<Item[]> => {
+import type { TFunction } from 'i18next';
+
+const fetchAllItems = async (categories: string[], t: TFunction): Promise<Item[]> => {
   const promises = categories.map(async (category) => {
     try {
       const response = await itemsApi.getCategory(category);
@@ -78,7 +76,7 @@ const fetchAllItems = async (categories: string[], t: any): Promise<Item[]> => {
         console.warn(t('itemsContext.fetchCategoryFailed', { category }));
         return [];
       }
-      const itemsArray = (response.data || []) as any[];
+      const itemsArray = (response.data || []) as ApiItem[];
       return itemsArray.map((apiItem): Item => ({
         ...apiItem,
         category,
@@ -107,9 +105,6 @@ const fetchAllItems = async (categories: string[], t: any): Promise<Item[]> => {
   return allItems;
 };
 
-/**
- * Fetch item tags
- */
 const fetchTags = async (): Promise<Map<string, string[]>> => {
   try {
     const response = await itemsApi.getTags();
@@ -136,29 +131,27 @@ const fetchTags = async (): Promise<Map<string, string[]>> => {
 export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation();
 
-  // Fetch valid categories from backend
   const { data: categoriesResponse } = useQuery({
     queryKey: ['itemCategories'],
     queryFn: () => validationApi.getItemCategories(),
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    staleTime: 1000 * 60 * 60, 
     refetchOnWindowFocus: false,
   });
 
   const categories = categoriesResponse?.data || [];
 
-  // Fetch all items only after we have categories
   const { data: allItems = [], isLoading, isError } = useQuery<Item[]>({
     queryKey: ['allItemsGlobal', categories],
     queryFn: () => fetchAllItems(categories, t),
-    enabled: categories.length > 0, // Only fetch when we have categories
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    enabled: categories.length > 0, 
+    staleTime: 1000 * 60 * 60, 
     refetchOnWindowFocus: false,
   });
 
   const { data: tagsByItemId = new Map() } = useQuery<Map<string, string[]>>({
     queryKey: ['itemTags'],
     queryFn: fetchTags,
-    staleTime: 1000 * 60 * 60, // 1 hour
+    staleTime: 1000 * 60 * 60, 
     refetchOnWindowFocus: false,
   });
 

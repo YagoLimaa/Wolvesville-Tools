@@ -27,8 +27,20 @@ const fetchAnnouncements = async (): Promise<{ announcements: Announcement[] }> 
   if (response.error) {
     throw new Error('Não foi possível buscar os anúncios.');
   }
-  const announcements = Array.isArray(response.data) ? response.data : response.data?.announcements || [];
-  return { announcements };
+
+  const responseData = response.data;
+  if (Array.isArray(responseData)) {
+    return { announcements: responseData as Announcement[] };
+  }
+
+  if (typeof responseData === 'object' && responseData !== null && 'announcements' in responseData) {
+    const announcementsData = (responseData as { announcements: unknown }).announcements;
+    if (Array.isArray(announcementsData)) {
+      return { announcements: announcementsData as Announcement[] };
+    }
+  }
+  
+  return { announcements: [] }; // Return empty array if data is not in expected format
 };
 
 export const AnnouncementsViewer = () => {

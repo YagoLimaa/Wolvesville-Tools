@@ -1,8 +1,3 @@
-/**
- * Error handling utilities for consistent error messages
- * Backend returns all error messages - frontend just displays them
- */
-
 export interface ApiError {
   status: number;
   message: string;
@@ -10,11 +5,7 @@ export interface ApiError {
   isValidationError: boolean;
 }
 
-/**
- * Parse error from API response
- */
 export function parseApiError(error: unknown, defaultMessage: string = 'An error occurred'): ApiError {
-  // Network error
   if (error instanceof TypeError) {
     return {
       status: 0,
@@ -24,7 +15,6 @@ export function parseApiError(error: unknown, defaultMessage: string = 'An error
     };
   }
 
-  // Error object
   if (error instanceof Error) {
     return {
       status: 0,
@@ -42,13 +32,9 @@ export function parseApiError(error: unknown, defaultMessage: string = 'An error
   };
 }
 
-/**
- * Get user-friendly error message
- */
 export function getErrorMessage(error: unknown, t?: (key: string, defaults?: string) => string): string {
   const apiError = parseApiError(error);
 
-  // Use translation function if provided
   if (t) {
     if (apiError.isNetworkError) {
       return t('error.network', 'Network error. Please try again.');
@@ -62,9 +48,6 @@ export function getErrorMessage(error: unknown, t?: (key: string, defaults?: str
   return apiError.message;
 }
 
-/**
- * Format multiple errors
- */
 export function formatErrors(errors: unknown[]): string[] {
   return errors.map((error) => {
     if (typeof error === 'string') return error;
@@ -73,9 +56,6 @@ export function formatErrors(errors: unknown[]): string[] {
   });
 }
 
-/**
- * Retry with exponential backoff
- */
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,

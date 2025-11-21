@@ -11,6 +11,5 @@ export function errorHandler(err, request) {
     return jsonResponse({ error: 'Não autorizado. Verifique sua chave de API.' }, err.status);
   }
 
-  // Default to 500
   return jsonResponse({ error: 'Erro interno do servidor.' }, 500);
 }

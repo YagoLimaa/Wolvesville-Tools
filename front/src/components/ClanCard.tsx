@@ -4,7 +4,7 @@ import { Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-// As tipagens são mantidas para compatibilidade com a página de busca que busca esses dados
+// as tipagens são mantidas para compatibilidade com a página de busca que busca esses dados
 export interface ClanMember {
   id: string;
   username: string;
