@@ -7,6 +7,7 @@ import { handleClanSearch, handleClanDetails } from './routes/clans.js';
 import { handleItemsByCategory, handleItemsByTags } from './routes/items.js';
 import { handleAvatars } from './routes/avatars.js';
 import { handleAnnouncements } from './routes/announcements.js';
+import { handleItemCategories, handleRoleIds } from './routes/validation.js';
 
 // Importar utilitários
 import { VALID_ITEM_CATEGORIES } from './utils/constants.js';
@@ -28,8 +29,13 @@ export async function onRequest(context) {
 
   try {
     // Roteamento baseado no caminho da URL
-    if (path === '/search') {
+    if (path === '/players/search') {
       const responseData = await handlePlayersSearch(searchParams, requestConfig);
+      return jsonResponse(responseData);
+    }
+
+    if (path === '/players/highscores') {
+      const responseData = await handlePlayersHighscores(searchParams, requestConfig);
       return jsonResponse(responseData);
     }
 
@@ -63,11 +69,6 @@ export async function onRequest(context) {
       return jsonResponse(responseData);
     }
 
-    if (path === '/players/highscores') {
-      const responseData = await handlePlayersHighscores(searchParams, requestConfig);
-      return jsonResponse(responseData);
-    }
-
     if (path === '/clans/search') {
       const responseData = await handleClanSearch(searchParams, requestConfig);
       return jsonResponse(responseData);
@@ -75,6 +76,17 @@ export async function onRequest(context) {
 
     if (path === '/announcements') {
       const responseData = await handleAnnouncements(searchParams, requestConfig);
+      return jsonResponse(responseData);
+    }
+
+    // Validation routes
+    if (path === '/validation/item-categories') {
+      const responseData = await handleItemCategories();
+      return jsonResponse(responseData);
+    }
+
+    if (path === '/validation/roles') {
+      const responseData = await handleRoleIds(requestConfig);
       return jsonResponse(responseData);
     }
 
