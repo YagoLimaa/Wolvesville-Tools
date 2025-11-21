@@ -1,9 +1,14 @@
+import express from 'express';
+import axios from 'axios';
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 
-export async function handleBattlePassSeason(requestConfig) {
+const router = express.Router();
+
+router.get('/season', asyncHandler(async (req, res) => {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
-  const response = await fetch(requestUrl, requestConfig);
-  const seasonData = await response.json();
+  const response = await axios.get(requestUrl, req.requestConfig);
+  const seasonData = response.data;
 
   const currencyTotals = {
     GOLD: 0,
@@ -30,8 +35,8 @@ export async function handleBattlePassSeason(requestConfig) {
   });
 
   const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roses`;
-  const rosesResponse = await fetch(rosesUrl, requestConfig);
-  const roses = await rosesResponse.json();
+  const rosesResponse = await axios.get(rosesUrl, req.requestConfig);
+  const roses = rosesResponse.data;
 
   const currencyIcons = {
     GOLD: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png",
@@ -44,35 +49,40 @@ export async function handleBattlePassSeason(requestConfig) {
   };
 
   if (Array.isArray(roses)) {
-    for (const rose of roses) {
-      if (rose.id === 'U0s') {
-        currencyIcons.ROSES.SERVER_ROSE = rose.imageUrl;
-      } else if (rose.id === 'mkQ') {
-        currencyIcons.ROSES.SINGLE_ROSE = rose.imageUrl;
+    for (const skin of roses) {
+      if (skin.id === 'U0s') {
+        currencyIcons.ROSES.SERVER_ROSE = skin.imageUrl;
+      } else if (skin.id === 'mkQ') {
+        currencyIcons.ROSES.SINGLE_ROSE = skin.imageUrl;
       }
     }
   }
 
-  return {
+  const responseData = {
     ...seasonData,
     currencyTotals,
     currencyIcons,
   };
-}
 
-export async function handleBattlePassShop(requestConfig) {
+  res.json(responseData);
+}));
+
+router.get('/shop', asyncHandler(async (req, res) => {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
-  const response = await fetch(requestUrl, requestConfig);
-  const responseData = await response.json();
-  return responseData;
-}
+  const response = await axios.get(requestUrl, req.requestConfig);
+  res.json(response.data);
+}));
 
-export async function handleBattlePassChallenges(searchParams, requestConfig) {
-  const locale = searchParams.get('locale') || 'en';
-  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`);
-  requestUrl.searchParams.append('locale', locale);
-  
-  const response = await fetch(requestUrl.toString(), requestConfig);
-  const responseData = await response.json();
-  return responseData;
-}
+router.get('/challenges', asyncHandler(async (req, res) => {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`;
+  const requestConfig = {
+    ...req.requestConfig,
+    params: {
+      locale: req.query.locale || 'en'
+    }
+  };
+  const response = await axios.get(requestUrl, requestConfig);
+  res.json(response.data);
+}));
+
+export default router;

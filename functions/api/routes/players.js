@@ -1,23 +1,28 @@
+import express from 'express';
+import axios from 'axios';
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 
-export async function handlePlayersSearch(searchParams, requestConfig) {
-  const username = searchParams.get('username');
-  const page = parseInt(searchParams.get('page')) || 1;
+const router = express.Router();
+
+router.get('/search', asyncHandler(async (req, res) => {
+  const { username } = req.query;
+  const page = parseInt(req.query.page) || 1;
   const resultsPerPage = 5;
 
-  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/players/search`);
-  if (username) {
-    requestUrl.searchParams.append('username', username);
-  }
-  
-  const response = await fetch(requestUrl.toString(), requestConfig);
-  const responseData = await response.json();
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/search`;
+  const requestConfig = {
+    params: { username },
+    headers: req.requestConfig.headers
+  };
+
+  const response = await axios.get(requestUrl, requestConfig);
 
   let allPlayers;
-  if (Array.isArray(responseData)) {
-    allPlayers = responseData;
-  } else if (responseData && typeof responseData === 'object' && responseData.id) {
-    allPlayers = [responseData];
+  if (Array.isArray(response.data)) {
+    allPlayers = response.data;
+  } else if (response.data && typeof response.data === 'object' && response.data.id) {
+    allPlayers = [response.data];
   } else {
     allPlayers = [];
   }
@@ -26,9 +31,8 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
     if (player.clanId) {
       try {
         const clanUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${player.clanId}/info`;
-        const clanResponse = await fetch(clanUrl, requestConfig);
-        const clanData = await clanResponse.json();
-        player.clan = { id: player.clanId, name: clanData.name };
+        const clanResponse = await axios.get(clanUrl, req.requestConfig);
+        player.clan = { id: player.clanId, name: clanResponse.data.name };
       } catch (clanError) {
         console.error(`Erro ao buscar detalhes do clã ${player.clanId}:`, clanError.message);
         player.clan = null;
@@ -37,7 +41,10 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
   }
 
   if (!allPlayers || allPlayers.length === 0) {
-    return { players: [], pagination: { currentPage: 1, totalPages: 1 } };
+    return res.json({
+      players: [],
+      pagination: { currentPage: 1, totalPages: 1 }
+    });
   }
 
   const totalPages = Math.ceil(allPlayers.length / resultsPerPage);
@@ -45,7 +52,7 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
   const endIndex = startIndex + resultsPerPage;
   const paginatedPlayers = allPlayers.slice(startIndex, endIndex);
 
-  return {
+  res.json({
     players: paginatedPlayers,
     pagination: {
       currentPage: page,
@@ -54,28 +61,28 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
       prevPage: page > 1 ? page - 1 : undefined,
       nextPage: page < totalPages ? page + 1 : undefined
     }
-  };
-}
+  });
+}));
 
-export async function handlePlayersHighscores(searchParams, requestConfig) {
+router.get('/highscores', asyncHandler(async (req, res) => {
   const type = 'oldRank';
-  const limit = parseInt(searchParams.get('limit')) || 10;
+  const { limit = 10 } = req.query;
 
-  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/players/highscores`);
-  requestUrl.searchParams.append('type', type);
-  requestUrl.searchParams.append('limit', limit);
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/players/highscores`;
+  const requestConfig = {
+    headers: req.requestConfig.headers,
+    params: { type, limit }
+  };
 
-  const response = await fetch(requestUrl.toString(), requestConfig);
-  const responseData = await response.json();
+  const response = await axios.get(requestUrl, requestConfig);
 
-  const allPlayersFromApi = responseData.allTime || [];
+  const allPlayersFromApi = response.data.allTime || [];
   const highscorePlayers = allPlayersFromApi.slice(0, limit);
 
   const playerDetailPromises = highscorePlayers.map(player => {
     const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
-    return fetch(playerDetailsUrl, requestConfig)
-      .then(detailsResponse => detailsResponse.json())
-      .then(detailsData => ({ ...player, ...detailsData }))
+    return axios.get(playerDetailsUrl, req.requestConfig)
+      .then(detailsResponse => ({ ...player, ...detailsResponse.data }))
       .catch(detailsError => {
         console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
         return player;
@@ -83,5 +90,8 @@ export async function handlePlayersHighscores(searchParams, requestConfig) {
   });
 
   const detailedPlayers = await Promise.all(playerDetailPromises);
-  return detailedPlayers;
-}
+
+  res.json(detailedPlayers);
+}));
+
+export default router;

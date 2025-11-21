@@ -1,57 +1,76 @@
+import express from 'express';
+import axios from 'axios';
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { asyncHandler } from '../middleware/errorHandler.js';
 
-export async function handleClanSearch(searchParams, requestConfig) {
-  const searchQuery = searchParams.get('search');
-  const offset = searchParams.get('offset') || '0';
-  const limit = searchParams.get('limit') || '10';
+const router = express.Router();
 
-  if (!searchQuery || searchQuery.trim().length === 0) {
-    return {
-      error: 'Search query is required',
-    };
+router.get('/search', asyncHandler(async (req, res) => {
+  const { name, language, open } = req.query;
+
+  const searchUrl = `${WOLVESVILLE_API_BASE_URL}/clans/search`;
+
+  const searchParams = {};
+  if (name) searchParams.name = name;
+  if (language && language.toLowerCase() !== 'all') {
+    searchParams.language = language;
   }
 
-  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/clans/search`);
-  requestUrl.searchParams.append('search', searchQuery);
-  requestUrl.searchParams.append('offset', offset);
-  requestUrl.searchParams.append('limit', limit);
+  const searchConfig = {
+    ...req.requestConfig,
+    params: searchParams
+  };
 
-  const response = await fetch(requestUrl.toString(), requestConfig);
-  const responseData = await response.json();
-  return responseData;
-}
-
-export async function handleClanDetails(params, requestConfig) {
-  const clanId = params;
-
-  if (!clanId || clanId.trim().length === 0) {
-    return {
-      error: 'Clan ID is required',
-    };
+  const searchResponse = await axios.get(searchUrl, searchConfig);
+  let clansFound = Array.isArray(searchResponse.data) ? searchResponse.data : [];
+  if (open === 'true') {
+    clansFound = clansFound.filter(clan => clan.joinType === 'PUBLIC');
   }
 
-  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${clanId}`;
-  const response = await fetch(requestUrl, requestConfig);
-  const clanData = await response.json();
+  res.json(clansFound);
+}));
 
-  if (!clanData.members) {
-    return clanData;
+router.get('/:id', asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/info`;
+  const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/members/detailed`;
+
+  const [infoResponse, membersResponse] = await Promise.all([
+    axios.get(infoUrl, req.requestConfig),
+    axios.get(membersUrl, req.requestConfig)
+  ]);
+
+  if (!infoResponse.data || !infoResponse.data.id) {
+    return res.status(404).json({ error: `Clan with ID ${id} not found.` });
   }
 
-  const memberDetailsPromises = clanData.members.map(member => {
-    const memberUrl = `${WOLVESVILLE_API_BASE_URL}/player/${member.playerId}`;
-    return fetch(memberUrl, requestConfig).then(res => res.json());
+  const membersWithDetailsPromises = membersResponse.data.map(async (member) => {
+    try {
+      const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
+      const playerDetailsResponse = await axios.get(playerDetailsUrl, req.requestConfig);
+      const playerDetails = playerDetailsResponse.data;
+      return {
+        id: member.id,
+        username: playerDetails.username || member.username,
+        isCoLeader: member.isCoLeader,
+        equippedAvatar: playerDetails.equippedAvatar,
+        level: playerDetails.level,
+      };
+    } catch (playerDetailsError) {
+      console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
+      return member;
+    }
   });
 
-  const memberDetails = await Promise.all(memberDetailsPromises);
+  const detailedMembers = await Promise.all(membersWithDetailsPromises);
 
-  const enrichedMembers = clanData.members.map((member, index) => ({
-    ...member,
-    ...memberDetails[index],
-  }));
-
-  return {
-    ...clanData,
-    members: enrichedMembers,
+  const combinedData = {
+    ...infoResponse.data,
+    members: detailedMembers,
   };
-}
+
+  res.json(combinedData);
+}));
+
+export default router;
