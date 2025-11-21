@@ -19,6 +19,8 @@ export async function onRequest(context) {
   const url = new URL(context.request.url);
   const { searchParams } = url;
 
+  console.log(`[Cloudflare API] Path: ${path}, Query: ${url.search}`);
+
   const WOLVESVILLE_API_KEY = context.env.WOLVESVILLE_API_KEY;
 
   if (!WOLVESVILLE_API_KEY || WOLVESVILLE_API_KEY === 'SUA_CHAVE_API_VEM_AQUI') {
@@ -39,7 +41,7 @@ export async function onRequest(context) {
       return jsonResponse(responseData);
     }
 
-    if (path === '/roleRotations') {
+    if (path === '/roleRotations' || path === '/roles/rotations') {
       const responseData = await handleRoleRotations(requestConfig);
       return jsonResponse(responseData);
     }
@@ -49,7 +51,7 @@ export async function onRequest(context) {
       return jsonResponse(responseData);
     }
 
-    if (path === '/shop/activeOffers') {
+    if (path === '/shop/activeOffers' || path === '/shop/active') {
       const responseData = await handleShopActiveOffers(requestConfig);
       return jsonResponse(responseData);
     }
@@ -160,6 +162,7 @@ export async function onRequest(context) {
       }
     }
 
+    console.log(`[Cloudflare API] Rota não encontrada: ${path}`);
     return jsonResponse({ error: 'Rota não encontrada' }, 404);
 
   } catch (error) {

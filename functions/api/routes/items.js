@@ -35,9 +35,9 @@ export async function handleItemsByTags(searchParams, requestConfig) {
       tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
     }
 
-    return tagsData;
+    return Array.isArray(tagsData) ? tagsData : [];
   } catch (error) {
     console.error("Erro ao buscar tags de itens:", error.message);
-    return { error: 'Não foi possível buscar as tags de itens.' };
+    return [];
   }
 }

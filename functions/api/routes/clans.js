@@ -1,7 +1,8 @@
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
 
 export async function handleClanSearch(searchParams, requestConfig) {
-  const searchQuery = searchParams.get('search');
+  const searchQuery = searchParams.get('name') || searchParams.get('search');
+  const language = searchParams.get('language');
   const offset = searchParams.get('offset') || '0';
   const limit = searchParams.get('limit') || '10';
 
@@ -13,6 +14,9 @@ export async function handleClanSearch(searchParams, requestConfig) {
 
   const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/clans/search`);
   requestUrl.searchParams.append('search', searchQuery);
+  if (language) {
+    requestUrl.searchParams.append('language', language);
+  }
   requestUrl.searchParams.append('offset', offset);
   requestUrl.searchParams.append('limit', limit);
 

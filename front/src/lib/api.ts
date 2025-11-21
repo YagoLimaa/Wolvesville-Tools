@@ -69,7 +69,7 @@ export async function apiGet<T = unknown>(
  */
 export const playerApi = {
   search: (username: string, page?: number) =>
-    apiGet('/search', { username, page }),
+    apiGet('/players/search', { username, page }),
 
   highscores: (limit?: number) =>
     apiGet('/players/highscores', { limit }),
