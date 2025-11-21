@@ -13,18 +13,20 @@ export async function handleSharedAvatarId(request) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/sharedAvatarId/${playerId}/${slotNumber}`;
   
   const response = await fetch(requestUrl, request.requestConfig);
+
+  if (!response.ok) {
+    console.error(`Upstream API for sharedAvatarId failed with status ${response.status}`);
+    return jsonResponse(
+      { error: `Failed to fetch from upstream API. Status: ${response.status}` }, 
+      response.status
+    );
+  }
+  
   const responseData = await response.text();
   
-  // This endpoint returns plain text, so we create a text response
-  // but still use jsonResponse's headers for CORS.
-  const textResponse = new Response(responseData, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/plain',
-      ...jsonResponse(null, 204).headers, // get CORS headers
-    },
-  });
-  return textResponse;
+  // The frontend's apiGet helper expects a JSON response.
+  // We send the plain text ID back, but JSON-encoded.
+  return jsonResponse(responseData);
 }
 
 export async function handleAvatarDetails(request) {
@@ -32,6 +34,15 @@ export async function handleAvatarDetails(request) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/${sharedAvatarId}`;
   
   const response = await fetch(requestUrl, request.requestConfig);
+
+  if (!response.ok) {
+    console.error(`Upstream API for avatarDetails failed with status ${response.status}`);
+    return jsonResponse(
+      { error: `Failed to fetch from upstream API. Status: ${response.status}` },
+      response.status
+    );
+  }
+
   const data = await response.json();
   return jsonResponse(data);
 }

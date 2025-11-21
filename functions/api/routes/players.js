@@ -75,15 +75,22 @@ export async function handlePlayersHighscores(request) {
   const allPlayersFromApi = responseData.allTime || [];
   const highscorePlayers = allPlayersFromApi.slice(0, limit);
 
-  const playerDetailPromises = highscorePlayers.map(player => {
-    const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
-    return fetch(playerDetailsUrl, request.requestConfig)
-      .then(detailsResponse => detailsResponse.json())
-      .then(detailsData => ({ ...player, ...detailsData }))
-      .catch(detailsError => {
-        console.error(`Erro ao buscar detalhes para o jogador ${player.username}:`, detailsError.message);
+  const playerDetailPromises = highscorePlayers.map(async (player) => {
+    try {
+      const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
+      const response = await fetch(playerDetailsUrl, request.requestConfig);
+
+      if (!response.ok) {
+        console.error(`Error fetching details for player ${player.username} (ID: ${player.playerId}). Status: ${response.status}`);
         return player;
-      });
+      }
+
+      const detailsData = await response.json();
+      return { ...player, ...detailsData };
+    } catch (detailsError) {
+      console.error(`Network error fetching details for player ${player.username}:`, detailsError.message);
+      return player;
+    }
   });
 
   const detailedPlayers = await Promise.all(playerDetailPromises);
