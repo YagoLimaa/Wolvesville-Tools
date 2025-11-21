@@ -1,4 +1,6 @@
-export async function handlePlayersSearch(searchParams, requestConfig, WOLVESVILLE_API_BASE_URL) {
+import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+
+export async function handlePlayersSearch(searchParams, requestConfig) {
   const username = searchParams.get('username');
   const page = parseInt(searchParams.get('page')) || 1;
   const resultsPerPage = 5;
@@ -55,7 +57,7 @@ export async function handlePlayersSearch(searchParams, requestConfig, WOLVESVIL
   };
 }
 
-export async function handlePlayersHighscores(searchParams, requestConfig, WOLVESVILLE_API_BASE_URL) {
+export async function handlePlayersHighscores(searchParams, requestConfig) {
   const type = 'oldRank';
   const limit = parseInt(searchParams.get('limit')) || 10;
 

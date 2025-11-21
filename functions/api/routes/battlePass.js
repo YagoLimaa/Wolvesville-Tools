@@ -1,4 +1,6 @@
-export async function handleBattlePassSeason(requestConfig, WOLVESVILLE_API_BASE_URL) {
+import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+
+export async function handleBattlePassSeason(requestConfig) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
   const response = await fetch(requestUrl, requestConfig);
   const seasonData = await response.json();
@@ -58,14 +60,14 @@ export async function handleBattlePassSeason(requestConfig, WOLVESVILLE_API_BASE
   };
 }
 
-export async function handleBattlePassShop(requestConfig, WOLVESVILLE_API_BASE_URL) {
+export async function handleBattlePassShop(requestConfig) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
   const response = await fetch(requestUrl, requestConfig);
   const responseData = await response.json();
   return responseData;
 }
 
-export async function handleBattlePassChallenges(searchParams, requestConfig, WOLVESVILLE_API_BASE_URL) {
+export async function handleBattlePassChallenges(searchParams, requestConfig) {
   const locale = searchParams.get('locale') || 'en';
   const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`);
   requestUrl.searchParams.append('locale', locale);

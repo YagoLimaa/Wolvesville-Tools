@@ -1,11 +1,13 @@
-export async function handleRoles(requestConfig, WOLVESVILLE_API_BASE_URL) {
+import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+
+export async function handleRoles(requestConfig) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
   const response = await fetch(requestUrl, requestConfig);
   const responseData = await response.json();
   return responseData;
 }
 
-export async function handleRoleRotations(requestConfig, WOLVESVILLE_API_BASE_URL) {
+export async function handleRoleRotations(requestConfig) {
   const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
   const responseData = await response.json();
   const rotationsFromApi = Array.isArray(responseData) ? responseData : [];

@@ -1,4 +1,6 @@
-export async function handleClanSearch(searchParams, requestConfig, WOLVESVILLE_API_BASE_URL) {
+import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+
+export async function handleClanSearch(searchParams, requestConfig) {
   const searchQuery = searchParams.get('search');
   const offset = searchParams.get('offset') || '0';
   const limit = searchParams.get('limit') || '10';
@@ -19,7 +21,7 @@ export async function handleClanSearch(searchParams, requestConfig, WOLVESVILLE_
   return responseData;
 }
 
-export async function handleClanDetails(params, requestConfig, WOLVESVILLE_API_BASE_URL) {
+export async function handleClanDetails(params, requestConfig) {
   const clanId = params;
 
   if (!clanId || clanId.trim().length === 0) {
