@@ -123,21 +123,42 @@ export async function onRequest(context) {
     // Rota para /items/tags
     if (path === '/items/tags') {
       const season = searchParams.get('season');
-      
-      if (season) {
-        const seasonTag = `origin:battle_pass:season_${season}`;
-        const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
-        const response = await fetch(requestUrl, requestConfig);
-        let tagsData = await response.json();
-
-        tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
-        return jsonResponse(tagsData);
-      }
-
       const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
       const response = await fetch(requestUrl, requestConfig);
-      const responseData = await response.json();
-      return jsonResponse(responseData);
+      let tagsData = await response.json();
+
+      if (season) {
+        const seasonTag = `origin:battle_pass:season_${season}`;
+        // Filtra apenas items que têm a tag da season
+        tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
+        
+        // Processa os items para garantir que tenham imageUrl e name
+        tagsData = tagsData.map(item => {
+          const newItem = { ...item };
+          if (!newItem.imageUrl) {
+            newItem.imageUrl = newItem.promoImageUrl || newItem.iconUrl || (newItem.image && newItem.image.url) || newItem.singleImageUrl || newItem.urlPreview || (newItem.imageDay && newItem.imageDay.url) || (newItem.imageSmall && newItem.imageSmall.url);
+          }
+          if (!newItem.name) {
+            const getNameFromUrl = (url) => {
+              if (!url || typeof url !== 'string') return "Item";
+              try {
+                const filename = url.split('/').pop()?.split('.')[0] ?? '';
+                const cleanedName = filename.replace(/bp\d+-/, '').replace(/_store|@\dx/g, '').replace(/[-_]/g, ' ');
+                return cleanedName.replace(/\b\w/g, l => l.toUpperCase());
+              } catch {
+                return "Item";
+              }
+            };
+            newItem.name = newItem.title || getNameFromUrl(newItem.imageUrl);
+          }
+          if (newItem.rarity) {
+            newItem.rarity = String(newItem.rarity).toLowerCase();
+          }
+          return newItem;
+        });
+      }
+
+      return jsonResponse(tagsData);
     }
 
     // Rota para /avatars/sharedAvatarId/:playerId/:slotNumber
