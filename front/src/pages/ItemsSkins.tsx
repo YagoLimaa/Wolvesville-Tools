@@ -655,7 +655,6 @@ const ItemsSkins = () => {
                       <Select
                         value={bpSeasonFilter}
                         onValueChange={(value) => setBpSeasonFilter(value === 'all' ? '' : value)}
-                        disabled={categoryFilter !== 'avatarItems'}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder={t('itemsSkins.selectSeasonPlaceholder')} />

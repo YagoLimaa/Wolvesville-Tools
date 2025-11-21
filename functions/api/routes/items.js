@@ -30,11 +30,12 @@ export async function handleItemsByTags(request) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
   const response = await fetch(requestUrl, request.requestConfig);
   let tagsData = await response.json();
+  let parsedTags = parseItemsArray(tagsData);
 
   if (season) {
     const seasonTag = `origin:battle_pass:season_${season}`;
-    tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
+    parsedTags = parsedTags.filter(item => item.tags && item.tags.includes(seasonTag));
   }
 
-  return jsonResponse(Array.isArray(tagsData) ? tagsData : []);
+  return jsonResponse(parsedTags);
 }
