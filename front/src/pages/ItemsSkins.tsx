@@ -142,7 +142,13 @@ const BattlePassSeasonInspector = ({ season, onClose, itemsById, onImageError, h
       queryFn: async () => {
         const response = await itemsApi.getTags(season);
         if (response.error) throw new Error(response.error);
-        return response.data || [];
+        // Handle both array and object responses
+        if (Array.isArray(response.data)) {
+          return response.data;
+        } else if (response.data && typeof response.data === 'object') {
+          return [];
+        }
+        return [];
       },
       enabled: !!season,
   });

@@ -64,7 +64,13 @@ const ClanSearch = () => {
       if (response.error) {
         throw new Error(response.error);
       }
-      const results = (response.data || []) as Clan[];
+      // Handle both array and object responses
+      let results: Clan[] = [];
+      if (Array.isArray(response.data)) {
+        results = response.data;
+      } else if (response.data && typeof response.data === 'object' && 'clans' in response.data) {
+        results = Array.isArray(response.data.clans) ? response.data.clans : [];
+      }
       setSearchResults(results);
     } catch (err) {
       setError(t("common.searchError"));

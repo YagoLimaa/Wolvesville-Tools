@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { SearchForm } from "@/components/SearchForm";
@@ -23,14 +23,7 @@ const SearchPlayer = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const usernameFromUrl = searchParams.get("username");
-    if (usernameFromUrl) {
-      handleSearch(usernameFromUrl);
-    }
-  }, [searchParams]);
-
-  const handleSearch = async (username: string, page: number = 1) => {
+  const handleSearch = useCallback(async (username: string, page: number = 1) => {
     setIsLoading(true);
     setError(null);
     
@@ -51,7 +44,14 @@ const SearchPlayer = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [setSearchParams, t]);
+
+  useEffect(() => {
+    const usernameFromUrl = searchParams.get("username");
+    if (usernameFromUrl) {
+      handleSearch(usernameFromUrl);
+    }
+  }, [searchParams, handleSearch]);
 
   const handlePageChange = (page: number) => {
     if (currentQuery) {
