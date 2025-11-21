@@ -1,4 +1,4 @@
-main/.env
-main/.env
 front/.env
 backup_backend/.env
+/node_modules
+/main
