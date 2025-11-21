@@ -39,7 +39,7 @@ interface AvatarInspectorModalProps {
 }
 
 const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspectorModalProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { itemsById, allItems, tagsByItemId } = useItems();
   const [inspectorData, setInspectorData] = useState<Item[]>([]);
   const [isInspecting, setIsInspecting] = useState(false);
@@ -161,16 +161,29 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
             const originTag = tags.find(t => t.startsWith('origin:'));
             if (originTag) {
                 const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
+
+                if (i18n.exists(translationKey)) {
+                  return t(translationKey);
+                }
                 
-                const defaultValue = originTag
+                // Fallback for dynamic keys like season, calendar, etc.
+                const parts = originTag.replace('origin:', '').split(':');
+                if (parts.length > 1) {
+                  const genericKey = `origins.${parts[0]}`;
+                  if (i18n.exists(genericKey)) {
+                    const name = parts.slice(1).join(' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    return t(genericKey, { name });
+                  }
+                }
+
+                // If no key exists, format the tag manually to avoid warnings
+                return originTag
                     .replace('origin:', '')
                     .replace(/_/g, ' ')
                     .replace(/:/g, ' : ')
                     .split(' ')
                     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
                     .join(' ');
-
-                return t(translationKey, defaultValue);
             }
         }
     }

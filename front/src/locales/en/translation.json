@@ -555,7 +555,12 @@
   "origins": {
     "battle_pass": "Battle Pass",
     "battle_pass_season": "Battle Pass: Season {{season}}",
-    "bundle": "Bundle"
+    "bundle": "Bundle",
+    "item_set": "Item Set",
+    "role_cards.role_advanced": "Role Cards: Advanced Role",
+    "event.VALENTINES_DAY_2024": "Valentine's Day Event 2024",
+    "calendar": "Calendar: {{name}}",
+    "collection_outfits": "Collection Outfits: {{name}}"
   },
   "roles": {
     "Villager": "Villager",
