@@ -1,39 +1,19 @@
-import { VALID_ITEM_CATEGORIES } from '../utils/constants.js';
+import { VALID_ITEM_CATEGORIES, WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { jsonResponse } from '../utils/response.js';
 
-/**
- * Retorna as categorias de item válidas
- */
-export async function handleItemCategories() {
-  return {
-    categories: VALID_ITEM_CATEGORIES
-  };
+export async function handleItemCategories(request) {
+  return jsonResponse(VALID_ITEM_CATEGORIES);
 }
 
-/**
- * Retorna os IDs de papéis válidos
- */
-export async function handleRoleIds(requestConfig) {
-  const { WOLVESVILLE_API_BASE_URL } = await import('../utils/constants.js');
-  
-  try {
-    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
-    const response = await fetch(requestUrl, requestConfig);
-    const responseData = await response.json();
+export async function handleRoleIds(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const responseData = await response.json();
 
-    if (Array.isArray(responseData)) {
-      const roleIds = responseData.map(role => role.id);
-      return {
-        roleIds: roleIds
-      };
-    }
-
-    return {
-      roleIds: []
-    };
-  } catch (error) {
-    console.error('Erro ao buscar IDs de papéis:', error.message);
-    return {
-      roleIds: []
-    };
+  let roleIds = [];
+  if (Array.isArray(responseData)) {
+    roleIds = responseData.map(role => role.id);
   }
+
+  return jsonResponse(roleIds);
 }

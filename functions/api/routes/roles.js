@@ -1,14 +1,15 @@
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { jsonResponse } from '../utils/response.js';
 
-export async function handleRoles(requestConfig) {
+export async function handleRoles(request) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
-  const response = await fetch(requestUrl, requestConfig);
+  const response = await fetch(requestUrl, request.requestConfig);
   const responseData = await response.json();
-  return responseData;
+  return jsonResponse(responseData);
 }
 
-export async function handleRoleRotations(requestConfig) {
-  const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
+export async function handleRoleRotations(request) {
+  const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, request.requestConfig);
   const responseData = await response.json();
   const rotationsFromApi = Array.isArray(responseData) ? responseData : [];
 
@@ -122,5 +123,5 @@ export async function handleRoleRotations(requestConfig) {
     return indexA - indexB;
   });
 
-  return sortedRotations;
+  return jsonResponse(sortedRotations);
 }

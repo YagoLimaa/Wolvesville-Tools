@@ -1,6 +1,8 @@
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { jsonResponse } from '../utils/response.js';
 
-export async function handlePlayersSearch(searchParams, requestConfig) {
+export async function handlePlayersSearch(request) {
+  const { searchParams } = new URL(request.url);
   const username = searchParams.get('username');
   const page = parseInt(searchParams.get('page')) || 1;
   const resultsPerPage = 5;
@@ -10,7 +12,7 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
     requestUrl.searchParams.append('username', username);
   }
   
-  const response = await fetch(requestUrl.toString(), requestConfig);
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
   const responseData = await response.json();
 
   let allPlayers;
@@ -26,7 +28,7 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
     if (player.clanId) {
       try {
         const clanUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${player.clanId}/info`;
-        const clanResponse = await fetch(clanUrl, requestConfig);
+        const clanResponse = await fetch(clanUrl, request.requestConfig);
         const clanData = await clanResponse.json();
         player.clan = { id: player.clanId, name: clanData.name };
       } catch (clanError) {
@@ -37,7 +39,7 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
   }
 
   if (!allPlayers || allPlayers.length === 0) {
-    return { players: [], pagination: { currentPage: 1, totalPages: 1 } };
+    return jsonResponse({ players: [], pagination: { currentPage: 1, totalPages: 1 } });
   }
 
   const totalPages = Math.ceil(allPlayers.length / resultsPerPage);
@@ -45,7 +47,7 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
   const endIndex = startIndex + resultsPerPage;
   const paginatedPlayers = allPlayers.slice(startIndex, endIndex);
 
-  return {
+  const data = {
     players: paginatedPlayers,
     pagination: {
       currentPage: page,
@@ -55,9 +57,11 @@ export async function handlePlayersSearch(searchParams, requestConfig) {
       nextPage: page < totalPages ? page + 1 : undefined
     }
   };
+  return jsonResponse(data);
 }
 
-export async function handlePlayersHighscores(searchParams, requestConfig) {
+export async function handlePlayersHighscores(request) {
+  const { searchParams } = new URL(request.url);
   const type = 'oldRank';
   const limit = parseInt(searchParams.get('limit')) || 10;
 
@@ -65,7 +69,7 @@ export async function handlePlayersHighscores(searchParams, requestConfig) {
   requestUrl.searchParams.append('type', type);
   requestUrl.searchParams.append('limit', limit);
 
-  const response = await fetch(requestUrl.toString(), requestConfig);
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
   const responseData = await response.json();
 
   const allPlayersFromApi = responseData.allTime || [];
@@ -73,7 +77,7 @@ export async function handlePlayersHighscores(searchParams, requestConfig) {
 
   const playerDetailPromises = highscorePlayers.map(player => {
     const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
-    return fetch(playerDetailsUrl, requestConfig)
+    return fetch(playerDetailsUrl, request.requestConfig)
       .then(detailsResponse => detailsResponse.json())
       .then(detailsData => ({ ...player, ...detailsData }))
       .catch(detailsError => {
@@ -83,5 +87,5 @@ export async function handlePlayersHighscores(searchParams, requestConfig) {
   });
 
   const detailedPlayers = await Promise.all(playerDetailPromises);
-  return detailedPlayers;
+  return jsonResponse(detailedPlayers);
 }

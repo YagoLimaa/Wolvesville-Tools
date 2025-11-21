@@ -1,61 +1,70 @@
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { jsonResponse } from '../utils/response.js';
 
-export async function handleClanSearch(searchParams, requestConfig) {
-  const searchQuery = searchParams.get('name') || searchParams.get('search');
+export async function handleClanSearch(request) {
+  const { searchParams } = new URL(request.url);
+  const name = searchParams.get('name');
   const language = searchParams.get('language');
-  const offset = searchParams.get('offset') || '0';
-  const limit = searchParams.get('limit') || '10';
+  const open = searchParams.get('open');
 
-  if (!searchQuery || searchQuery.trim().length === 0) {
-    return {
-      error: 'Search query is required',
-    };
+  const searchUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/clans/search`);
+  if (name) searchUrl.searchParams.append('name', name);
+  if (language && language.toLowerCase() !== 'all') {
+    searchUrl.searchParams.append('language', language);
   }
 
-  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/clans/search`);
-  requestUrl.searchParams.append('search', searchQuery);
-  if (language) {
-    requestUrl.searchParams.append('language', language);
-  }
-  requestUrl.searchParams.append('offset', offset);
-  requestUrl.searchParams.append('limit', limit);
+  const response = await fetch(searchUrl.toString(), request.requestConfig);
+  let clansFound = await response.json();
 
-  const response = await fetch(requestUrl.toString(), requestConfig);
-  const responseData = await response.json();
-  return responseData;
+  if (Array.isArray(clansFound) && open === 'true') {
+    clansFound = clansFound.filter(clan => clan.joinType === 'PUBLIC');
+  }
+
+  return jsonResponse(clansFound);
 }
 
-export async function handleClanDetails(params, requestConfig) {
-  const clanId = params;
+export async function handleClanDetails(request) {
+  const { id } = request.params;
 
-  if (!clanId || clanId.trim().length === 0) {
-    return {
-      error: 'Clan ID is required',
-    };
+  const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/info`;
+  const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/members/detailed`;
+
+  const [infoResponse, membersResponse] = await Promise.all([
+    fetch(infoUrl, request.requestConfig),
+    fetch(membersUrl, request.requestConfig)
+  ]);
+
+  const infoData = await infoResponse.json();
+  const membersData = await membersResponse.json();
+
+  if (!infoData || !infoData.id) {
+    return jsonResponse({ error: `Clan with ID ${id} not found.` }, 404);
   }
 
-  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${clanId}`;
-  const response = await fetch(requestUrl, requestConfig);
-  const clanData = await response.json();
-
-  if (!clanData.members) {
-    return clanData;
-  }
-
-  const memberDetailsPromises = clanData.members.map(member => {
-    const memberUrl = `${WOLVESVILLE_API_BASE_URL}/player/${member.playerId}`;
-    return fetch(memberUrl, requestConfig).then(res => res.json());
+  const membersWithDetailsPromises = membersData.map(async (member) => {
+    try {
+      const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
+      const playerDetailsResponse = await fetch(playerDetailsUrl, request.requestConfig);
+      const playerDetails = await playerDetailsResponse.json();
+      return {
+        id: member.id,
+        username: playerDetails.username || member.username,
+        isCoLeader: member.isCoLeader,
+        equippedAvatar: playerDetails.equippedAvatar,
+        level: playerDetails.level,
+      };
+    } catch (playerDetailsError) {
+      console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
+      return member;
+    }
   });
 
-  const memberDetails = await Promise.all(memberDetailsPromises);
+  const detailedMembers = await Promise.all(membersWithDetailsPromises);
 
-  const enrichedMembers = clanData.members.map((member, index) => ({
-    ...member,
-    ...memberDetails[index],
-  }));
-
-  return {
-    ...clanData,
-    members: enrichedMembers,
+  const combinedData = {
+    ...infoData,
+    members: detailedMembers,
   };
+
+  return jsonResponse(combinedData);
 }

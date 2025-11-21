@@ -1,43 +1,40 @@
-import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { WOLVESVILLE_API_BASE_URL, VALID_ITEM_CATEGORIES } from '../utils/constants.js';
 import { processItems, parseItemsArray } from '../utils/itemProcessor.js';
+import { jsonResponse } from '../utils/response.js';
 
-export async function handleItemsByCategory(category, requestConfig) {
-  if (!category || category.trim().length === 0) {
-    return {
-      error: 'Category is required',
-    };
+export async function handleItemsByCategory(request) {
+  const { category } = request.params;
+
+  if (!VALID_ITEM_CATEGORIES.includes(category)) {
+    return jsonResponse({ error: 'Categoria de item inválida.' }, 400);
   }
 
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/${category}`;
-  const response = await fetch(requestUrl, requestConfig);
+  const response = await fetch(requestUrl, request.requestConfig);
   const responseData = await response.json();
 
+  if (category === 'tags') {
+    return jsonResponse(responseData);
+  }
+
   const itemsArray = parseItemsArray(responseData);
-  return processItems(itemsArray);
+  const processedItems = processItems(itemsArray);
+
+  return jsonResponse(processedItems);
 }
 
-export async function handleItemsByTags(searchParams, requestConfig) {
+export async function handleItemsByTags(request) {
+  const { searchParams } = new URL(request.url);
   const season = searchParams.get('season');
 
-  try {
-    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
-    const requestConfig2 = {
-      headers: {
-        'Authorization': requestConfig.headers.Authorization,
-        'Accept': 'application/json'
-      }
-    };
-    const response = await fetch(requestUrl, requestConfig2);
-    let tagsData = await response.json();
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  let tagsData = await response.json();
 
-    if (season) {
-      const seasonTag = `origin:battle_pass:season_${season}`;
-      tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
-    }
-
-    return Array.isArray(tagsData) ? tagsData : [];
-  } catch (error) {
-    console.error("Erro ao buscar tags de itens:", error.message);
-    return [];
+  if (season) {
+    const seasonTag = `origin:battle_pass:season_${season}`;
+    tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
   }
+
+  return jsonResponse(Array.isArray(tagsData) ? tagsData : []);
 }

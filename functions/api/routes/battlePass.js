@@ -1,8 +1,9 @@
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { jsonResponse } from '../utils/response.js';
 
-export async function handleBattlePassSeason(requestConfig) {
+export async function handleBattlePassSeason(request) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
-  const response = await fetch(requestUrl, requestConfig);
+  const response = await fetch(requestUrl, request.requestConfig);
   const seasonData = await response.json();
 
   const currencyTotals = {
@@ -29,8 +30,8 @@ export async function handleBattlePassSeason(requestConfig) {
     }
   });
 
-  const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roses`;
-  const rosesResponse = await fetch(rosesUrl, requestConfig);
+  const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roseSkins`;
+  const rosesResponse = await fetch(rosesUrl, request.requestConfig);
   const roses = await rosesResponse.json();
 
   const currencyIcons = {
@@ -53,26 +54,30 @@ export async function handleBattlePassSeason(requestConfig) {
     }
   }
 
-  return {
+  const responseData = {
     ...seasonData,
     currencyTotals,
     currencyIcons,
   };
+
+  return jsonResponse(responseData);
 }
 
-export async function handleBattlePassShop(requestConfig) {
+export async function handleBattlePassShop(request) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
-  const response = await fetch(requestUrl, requestConfig);
+  const response = await fetch(requestUrl, request.requestConfig);
   const responseData = await response.json();
-  return responseData;
+  return jsonResponse(responseData);
 }
 
-export async function handleBattlePassChallenges(searchParams, requestConfig) {
+export async function handleBattlePassChallenges(request) {
+  const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
+
   const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`);
   requestUrl.searchParams.append('locale', locale);
   
-  const response = await fetch(requestUrl.toString(), requestConfig);
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
   const responseData = await response.json();
-  return responseData;
+  return jsonResponse(responseData);
 }
