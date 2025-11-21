@@ -195,18 +195,28 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
 
         try {
           const sharedIdResponse = await avatarsApi.getSharedId(playerId, avatar.index);
-          if (sharedIdResponse.error) throw new Error("Failed to fetch shared avatar ID");
+          if (sharedIdResponse.error || typeof sharedIdResponse.data !== 'string') {
+            throw new Error("Failed to fetch shared avatar ID");
+          }
           const sharedAvatarId = sharedIdResponse.data;
 
-          if (!sharedAvatarId) throw new Error("Invalid shared avatar ID received");
+          if (!sharedAvatarId) {
+            throw new Error("Invalid shared avatar ID received");
+          }
 
           const response = await avatarsApi.getDetails(sharedAvatarId);
-          if (response.error) throw new Error(t('playerCard.fetchAvatarError'));
+          if (response.error || !response.data) {
+            throw new Error(t('playerCard.fetchAvatarError'));
+          }
           const data = response.data;
           
-          const itemIds = Object.values(data.items).filter(id => typeof id === 'string') as string[];
-          const items = itemIds.map(id => itemsById.get(id)).filter((item): item is Item => !!item);
-          setInspectorData(items);
+          if (data.items && typeof data.items === 'object') {
+            const itemIds = Object.values(data.items).filter(id => typeof id === 'string') as string[];
+            const items = itemIds.map(id => itemsById.get(id)).filter((item): item is Item => !!item);
+            setInspectorData(items);
+          } else {
+            setInspectorData([]);
+          }
 
         } catch (err: unknown) {
             if (err instanceof Error) {

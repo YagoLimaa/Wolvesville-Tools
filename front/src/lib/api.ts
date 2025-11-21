@@ -134,15 +134,19 @@ export const announcementsApi = {
     apiGet('/announcements', { locale }),
 };
 
+export interface AvatarDetailsResponse {
+  items: Record<string, string>;
+}
+
 /**
  * Avatars endpoints
  */
 export const avatarsApi = {
   getSharedId: (playerId: string, slotNumber: number) =>
-    apiGet(`/avatars/sharedAvatarId/${playerId}/${slotNumber}`),
+    apiGet<string>(`/avatars/sharedAvatarId/${playerId}/${slotNumber}`),
 
   getDetails: (sharedAvatarId: string) =>
-    apiGet(`/avatars/${sharedAvatarId}`),
+    apiGet<AvatarDetailsResponse>(`/avatars/${sharedAvatarId}`),
 };
 
 /**
