@@ -1,14 +1,11 @@
-import express from 'express';
-import axios from 'axios';
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
 
-const router = express.Router();
-
-router.get('/', asyncHandler(async (req, res) => {
-  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/announcements`;
-  const response = await axios.get(requestUrl, req.requestConfig);
-  res.json(response.data);
-}));
-
-export default router;
+export async function handleAnnouncements(searchParams, requestConfig) {
+  const locale = searchParams.get('locale') || 'en';
+  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/announcements`);
+  requestUrl.searchParams.append('locale', locale);
+  
+  const response = await fetch(requestUrl.toString(), requestConfig);
+  const responseData = await response.json();
+  return responseData;
+}

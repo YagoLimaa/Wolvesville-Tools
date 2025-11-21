@@ -1,14 +1,8 @@
-import express from 'express';
-import axios from 'axios';
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
 
-const router = express.Router();
-
-router.get('/activeOffers', asyncHandler(async (req, res) => {
+export async function handleShopActiveOffers(requestConfig) {
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/shop/activeOffers`;
-  const response = await axios.get(requestUrl, req.requestConfig);
-  res.json(response.data);
-}));
-
-export default router;
+  const response = await fetch(requestUrl, requestConfig);
+  const responseData = await response.json();
+  return responseData;
+}

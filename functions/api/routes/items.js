@@ -1,44 +1,43 @@
-import express from 'express';
-import axios from 'axios';
-import { VALID_ITEM_CATEGORIES, WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
 import { processItems, parseItemsArray } from '../utils/itemProcessor.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
 
-const router = express.Router();
-
-router.get('/tags', asyncHandler(async (req, res) => {
-  const { season } = req.query;
-
-  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
-  const response = await axios.get(requestUrl, req.requestConfig);
-  let tagsData = response.data;
-
-  if (season) {
-    const seasonTag = `origin:battle_pass:season_${season}`;
-    tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
-  }
-
-  res.json(tagsData);
-}));
-
-router.get('/:category', asyncHandler(async (req, res) => {
-  const { category } = req.params;
-
-  if (!VALID_ITEM_CATEGORIES.includes(category)) {
-    return res.status(400).json({ error: 'Categoria de item inválida.' });
+export async function handleItemsByCategory(category, requestConfig) {
+  if (!category || category.trim().length === 0) {
+    return {
+      error: 'Category is required',
+    };
   }
 
   const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/${category}`;
-  const response = await axios.get(requestUrl, req.requestConfig);
+  const response = await fetch(requestUrl, requestConfig);
+  const responseData = await response.json();
 
-  if (category === 'tags') {
-    return res.json(response.data);
+  const itemsArray = parseItemsArray(responseData);
+  return processItems(itemsArray);
+}
+
+export async function handleItemsByTags(searchParams, requestConfig) {
+  const season = searchParams.get('season');
+
+  try {
+    const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
+    const requestConfig2 = {
+      headers: {
+        'Authorization': requestConfig.headers.Authorization,
+        'Accept': 'application/json'
+      }
+    };
+    const response = await fetch(requestUrl, requestConfig2);
+    let tagsData = await response.json();
+
+    if (season) {
+      const seasonTag = `origin:battle_pass:season_${season}`;
+      tagsData = tagsData.filter(item => item.tags && item.tags.includes(seasonTag));
+    }
+
+    return tagsData;
+  } catch (error) {
+    console.error("Erro ao buscar tags de itens:", error.message);
+    return { error: 'Não foi possível buscar as tags de itens.' };
   }
-
-  const itemsArray = parseItemsArray(response.data);
-  const processedItems = processItems(itemsArray);
-
-  res.json(processedItems);
-}));
-
-export default router;
+}

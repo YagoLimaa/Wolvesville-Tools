@@ -1,44 +1,47 @@
-import express from 'express';
-import axios from 'axios';
 import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
-import { asyncHandler } from '../middleware/errorHandler.js';
 
-const router = express.Router();
+export async function handleRoles(requestConfig) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
+  const response = await fetch(requestUrl, requestConfig);
+  const responseData = await response.json();
+  return responseData;
+}
 
-// Helper function to recursively extract and flatten roles, handling complex structures.
-const extractRoles = (data) => {
-  if (!data) return [];
-  if (Array.isArray(data)) return data.flatMap(extractRoles);
+export async function handleRoleRotations(requestConfig) {
+  const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, requestConfig);
+  const responseData = await response.json();
+  const rotationsFromApi = Array.isArray(responseData) ? responseData : [];
 
-  let roleId;
-  let probability;
+  const extractRoles = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data.flatMap(extractRoles);
 
-  if (typeof data === 'string') {
-    roleId = data;
-  } else if (data && typeof data.role === 'string') {
-    roleId = data.role;
-    if (typeof data.probability === 'number') {
-      probability = data.probability;
+    let roleId;
+    let probability;
+
+    if (typeof data === 'string') {
+      roleId = data;
+    } else if (data && typeof data.role === 'string') {
+      roleId = data.role;
+      if (typeof data.probability === 'number') {
+        probability = data.probability;
+      }
+    } else if (data && Array.isArray(data.roles)) {
+      return data.roles.flatMap(extractRoles);
     }
-  } else if (data && Array.isArray(data.roles)) {
-    return data.roles.flatMap(extractRoles);
-  }
 
-  if (roleId) {
-    const roleInfo = { id: roleId === 'red-lady' ? 'harlot' : roleId };
-    if (probability !== undefined) {
-      roleInfo.probability = probability <= 1 ? probability * 100 : probability;
+    if (roleId) {
+      const roleInfo = { id: roleId === 'red-lady' ? 'harlot' : roleId };
+      if (probability !== undefined) {
+        roleInfo.probability = probability <= 1 ? probability * 100 : probability;
+      }
+      if (roleInfo.probability !== undefined && roleInfo.probability !== 50) {
+        delete roleInfo.probability;
+      }
+      return [roleInfo];
     }
-    return [roleInfo];
-  }
-  return [];
-};
-
-async function handleRoleRotations(req, res) {
-  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roleRotations`;
-  const response = await axios.get(requestUrl, req.requestConfig);
-
-  const rotationsFromApi = Array.isArray(response.data) ? response.data : [];
+    return [];
+  };
 
   const formattedRotations = rotationsFromApi.map(rotationData => {
     const gameMode = rotationData?.gameMode ?? '';
@@ -80,7 +83,7 @@ async function handleRoleRotations(req, res) {
         }).filter(r => r.length > 0);
 
         return {
-          probability: setupProbability <= 1 ? setupProbability * 100 : setupProbability,
+          probability: setupProbability !== undefined ? (setupProbability <= 1 ? setupProbability * 100 : setupProbability) : undefined,
           roles: processedRoles,
         };
       });
@@ -89,6 +92,11 @@ async function handleRoleRotations(req, res) {
         gameMode,
         gameModeName,
         setups,
+      };
+    } else if (gameMode === 'sandbox' && !Array.isArray(rotationData.roleRotations)) {
+      return {
+        gameMode,
+        gameModeName,
       };
     } else {
       const rolesSource = rotationData?.roleRotations?.[0]?.roleRotation?.roles ?? [];
@@ -114,19 +122,5 @@ async function handleRoleRotations(req, res) {
     return indexA - indexB;
   });
 
-  res.json(sortedRotations);
+  return sortedRotations;
 }
-
-router.get('/', asyncHandler(async (req, res) => {
-  if (req.baseUrl.includes('roleRotations')) {
-    return handleRoleRotations(req, res);
-  }
-
-  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
-  const response = await axios.get(requestUrl, req.requestConfig);
-  res.json(response.data);
-}));
-
-router.get('/rotations', asyncHandler(handleRoleRotations));
-
-export default router;
