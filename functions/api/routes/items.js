@@ -9,7 +9,13 @@ export async function handleItemsByCategory(category, requestConfig, WOLVESVILLE
   const response = await fetch(requestUrl, requestConfig);
   const responseData = await response.json();
 
-  const itemsArray = Array.isArray(responseData) ? responseData : (responseData.list ? Object.values(responseData.list) : Object.values(responseData));
+  let itemsArray = [];
+  if (Array.isArray(responseData)) {
+    itemsArray = responseData;
+  } else if (responseData && typeof responseData === 'object') {
+    // Se for um objeto, tenta pegar a propriedade 'list' ou pega os values
+    itemsArray = responseData.list ? Object.values(responseData.list) : Object.values(responseData).filter(item => typeof item === 'object' && item !== null);
+  }
 
   const getNameFromUrl = (url) => {
     if (!url || typeof url !== 'string') return "Item";
