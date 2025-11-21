@@ -9,6 +9,7 @@ import { BattlePassRewards } from "./BattlePassRewards";
 import { useTranslation } from "react-i18next";
 import { BattlePassShop } from "./BattlePassShop";
 import { Trophy, Calendar, AlertTriangle } from "lucide-react";
+import { battlePassApi } from "@/lib/api";
 
 export interface Reward {
   type: string;
@@ -62,11 +63,11 @@ export interface BattlePassSeasonData {
 type Currency = keyof BattlePassSeasonData['currencyTotals'];
 
 const fetchBattlePassSeason = async (): Promise<BattlePassSeasonData> => {
-  const response = await fetch('/api/battlePass/season');
-  if (!response.ok) {
-    throw new Error("fetch_error");
+  const response = await battlePassApi.getSeason();
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  return response.data || {} as BattlePassSeasonData;
 };
 
 const getCurrencyTranslationKey = (currency: Currency) => {

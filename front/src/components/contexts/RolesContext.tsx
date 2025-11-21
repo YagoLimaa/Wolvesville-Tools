@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { rolesApi } from '@/lib/api';
 
 // A API retorna a imagem dentro de um objeto 'image'
 interface RoleFromApi {
@@ -31,14 +32,14 @@ interface RolesContextType {
 
 const RolesContext = React.createContext<RolesContextType | undefined>(undefined);
 
-const fetchAllRoles = async (): Promise<Role[]> => { 
-  const response = await fetch('/api/roles');
-  if (!response.ok) {
-    throw new Error('fetch_error');
+const fetchAllRoles = async (): Promise<Role[]> => {
+  const response = await rolesApi.getAll();
+  if (response.error) {
+    throw new Error(response.error);
   }
-  const data: { roles: RoleFromApi[] } = await response.json();
+  const data = response.data as { roles: RoleFromApi[] };
   
-  return data.roles.map(role => ({
+  return (data.roles || []).map(role => ({
     ...role,
     imageUrl: role.image.url,
   }));

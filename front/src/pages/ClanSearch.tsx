@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import { debounce } from "@/lib/utils";
 import { ClanFilters } from "@/components/ClanFilters";
+import { clansApi } from "@/lib/api";
 
 const localesList = [
   "all", "br", "de", "fr", "gb", "th", "vn", "tr", "aq", "ar", "at", "au", 
@@ -59,11 +60,11 @@ const ClanSearch = () => {
     navigate(`/clan/search?${params.toString()}`);
 
     try {
-      const response = await fetch(`/api/clans/search?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error(t("common.fetchError"));
+      const response = await clansApi.search(clanName, lang !== 'all' ? lang : undefined);
+      if (response.error) {
+        throw new Error(response.error);
       }
-      const results = await response.json() as Clan[];
+      const results = (response.data || []) as Clan[];
       setSearchResults(results);
     } catch (err) {
       setError(t("common.searchError"));

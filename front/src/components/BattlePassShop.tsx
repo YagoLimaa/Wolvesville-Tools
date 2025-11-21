@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useItems } from "./contexts/ItemsContext";
+import { battlePassApi } from "@/lib/api";
 
 interface BattlePassShopReward {
   id: string;
@@ -19,11 +20,11 @@ interface BattlePassShopData {
 }
 
 const fetchBattlePassShop = async (): Promise<BattlePassShopData> => {
-  const response = await fetch('/api/battlePass/shop');
-  if (!response.ok) {
-    throw new Error("fetch_error");
+  const response = await battlePassApi.getShop();
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  return response.data || { rewards: [] };
 };
 
 export const BattlePassShop = () => {

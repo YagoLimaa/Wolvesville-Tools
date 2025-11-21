@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { CustomFontAwesomeIcon } from "@/components/ui/font-awesome-icon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Lottie from "lottie-react";
+import { itemsApi } from "@/lib/api";
 
 // Interface específica para os itens dentro de coleções, removendo o 'any'
 interface ContainedItem {
@@ -138,7 +139,11 @@ const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError
 const BattlePassSeasonInspector = ({ season, onClose, itemsById, onImageError, hoveredItemId, getNameFromUrl, t }) => {
   const { data: seasonItemsData, isLoading } = useQuery({
       queryKey: ['bpSeason', season],
-      queryFn: () => fetch(`/api/items/tags?season=${season}`).then(res => res.json()),
+      queryFn: async () => {
+        const response = await itemsApi.getTags(season);
+        if (response.error) throw new Error(response.error);
+        return response.data || [];
+      },
       enabled: !!season,
   });
 

@@ -11,6 +11,7 @@ import { SearchResult } from "@/types/Player";
 import { ArrowLeft, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PlayersHighscores } from "@/components/PlayersHighscores";
+import { playerApi } from "@/lib/api";
 
 const SearchPlayer = () => {
   const { t } = useTranslation();
@@ -34,11 +35,11 @@ const SearchPlayer = () => {
     setError(null);
     
     try {
-      const response = await fetch(`/api/search?username=${encodeURIComponent(username)}&page=${page}`);
-      if (!response.ok) {
-        throw new Error('fetchError');
+      const response = await playerApi.search(username, page);
+      if (response.error) {
+        throw new Error(response.error);
       }
-      const result = await response.json() as SearchResult;
+      const result = response.data as SearchResult;
 
       setSearchResult(result);
       setCurrentQuery(username);

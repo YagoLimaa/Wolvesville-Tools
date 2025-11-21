@@ -5,6 +5,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, User, Calendar } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { announcementsApi } from '@/lib/api';
 
 interface Attachment {
   url: string;
@@ -22,11 +23,12 @@ interface Announcement {
 }
 
 const fetchAnnouncements = async (): Promise<{ announcements: Announcement[] }> => {
-  const response = await fetch('/api/announcements');
-  if (!response.ok) {
+  const response = await announcementsApi.getAll();
+  if (response.error) {
     throw new Error('Não foi possível buscar os anúncios.');
   }
-  return response.json();
+  const announcements = Array.isArray(response.data) ? response.data : response.data?.announcements || [];
+  return { announcements };
 };
 
 export const AnnouncementsViewer = () => {

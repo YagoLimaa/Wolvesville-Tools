@@ -1,6 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { Button } from "@/components/ui/button";
+import { clansApi } from "@/lib/api";
 
 interface ClanMember {
   id: string;
@@ -54,9 +54,12 @@ function isClanInfoData(data: unknown): data is ClanInfoData {
 }
 
 const fetchClanInfo = async (clanId: string): Promise<ClanInfoData> => {
-  const { data } = await axios.get(`/api/clan/${clanId}`);
-  if (isClanInfoData(data)) {
-    return data;
+  const response = await clansApi.getDetails(clanId);
+  if (response.error) {
+    throw new Error(response.error);
+  }
+  if (isClanInfoData(response.data)) {
+    return response.data;
   }
   throw new Error("Invalid clan data received from server.");
 };

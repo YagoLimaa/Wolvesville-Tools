@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { Target, Clock, AlertTriangle } from "lucide-react";
+import { battlePassApi } from "@/lib/api";
 
 interface Challenge {
   id: string;
@@ -17,11 +18,11 @@ interface Challenge {
 }
 
 const fetchBattlePassChallenges = async (language: string): Promise<Challenge[]> => {
-  const response = await fetch(`/api/battlePass/challenges?locale=${language}`);
-  if (!response.ok) {
-    throw new Error("fetch_error");
+  const response = await battlePassApi.getChallenges(language);
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  return response.data || [];
 };
 
 const getTimeLeft = (startTime: string, durationInDays: number, t: (key: string, options?: Record<string, unknown>) => string): string => {

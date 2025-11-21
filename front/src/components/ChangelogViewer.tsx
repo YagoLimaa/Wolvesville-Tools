@@ -6,6 +6,7 @@ import { AlertTriangle, User, Calendar } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
+import { announcementsApi } from '@/lib/api';
 
 interface Changelog {
   content: string;
@@ -16,12 +17,12 @@ interface Changelog {
 }
 
 const fetchChangelogs = async (): Promise<{ changelogs: Changelog[] }> => {
-  const response = await fetch('/api/announcements');
-  if (!response.ok) {
+  const response = await announcementsApi.getAll();
+  if (response.error) {
     throw new Error('Não foi possível buscar os changelogs.');
   }
-  const data = await response.json();
-  return { changelogs: data.changelogs || [] };
+  const announcements = Array.isArray(response.data) ? response.data : response.data?.announcements || [];
+  return { changelogs: announcements };
 };
 
 export const ChangelogViewer = () => {

@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { ShoppingBag, Gem, AlertTriangle } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
+import { shopApi } from "@/lib/api";
 
 interface Offer {
   type: string;
@@ -35,11 +36,11 @@ interface ContainedItemForShop {
 }
 
 const fetchShopOffers = async (): Promise<Offer[]> => {
-  const response = await fetch('/api/shop/activeOffers');
-  if (!response.ok) {
-    throw new Error("fetch_error");
+  const response = await shopApi.getActiveOffers();
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  return Array.isArray(response.data) ? response.data : [];
 };
 
 const getOfferNameFromUrl = (url: string, t: (key: string) => string): string => {

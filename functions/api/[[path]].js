@@ -14,9 +14,6 @@ import { getRequestConfig, jsonResponse } from './utils/response.js';
 
 // Função principal que será executada pela Cloudflare
 export async function onRequest(context) {
-  // O `context.params.path` contém as partes da URL após /api/
-  // Ex: /api/search -> context.params.path = ['search']
-  // Ex: /api/items/avatarItems -> context.params.path = ['items', 'avatarItems']
   const path = `/${context.params.path.join('/')}`;
   const url = new URL(context.request.url);
   const { searchParams } = url;

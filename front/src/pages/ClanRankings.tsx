@@ -5,6 +5,7 @@ import { ClanCard, Clan } from "@/components/ClanCard";
 import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import { ClanFilters } from "@/components/ClanFilters";
+import { clansApi } from "@/lib/api";
 
 const ClanRankings = () => {
   const { t } = useTranslation();
@@ -28,15 +29,11 @@ const ClanRankings = () => {
     setError(null);
 
     try {
-      let url = `/api/clans/search`;
-      if (lang !== 'all') {
-        url += `?language=${lang.toUpperCase()}`;
-      }
-      const response = await fetch(url);
-      if (!response.ok) {
+      const response = await clansApi.search(lang !== 'all' ? lang.toUpperCase() : undefined);
+      if (response.error) {
         throw new Error(t("clanRankings.fetch_error"));
       }
-      const results = await response.json() as Clan[];
+      const results = (Array.isArray(response.data) ? response.data : response.data?.clans || []) as Clan[];
       setRankings(results);
     } catch (err) {
       setError(t("clanRankings.search_error"));

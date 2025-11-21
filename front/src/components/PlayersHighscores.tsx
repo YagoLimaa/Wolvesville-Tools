@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { Trophy, Medal, Award, Crown, AlertTriangle } from "lucide-react";
+import { playerApi } from "@/lib/api";
 
 interface HighscorePlayer {
   playerId: string;
@@ -19,11 +20,11 @@ interface HighscorePlayer {
 }
 
 const fetchHighscores = async (): Promise<HighscorePlayer[]> => {
-  const response = await fetch('/api/players/highscores?limit=10');
-  if (!response.ok) {
-    throw new Error("fetch_error");
+  const response = await playerApi.highscores(10);
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  return response.data || [];
 };
 
 const getRankIcon = (rank: number) => {

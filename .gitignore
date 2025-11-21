@@ -3,3 +3,4 @@ backup_backend/.env
 /node_modules
 /main
 backup backend/functions/api/backuo.js
+front/.env.example

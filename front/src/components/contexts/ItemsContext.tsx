@@ -1,23 +1,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-
-const validCategories = [
-  'avatarItems',
-  'bodyPaints',
-  'avatarItemSets',
-  'avatarItemCollections',
-  'bundles',
-  'calendars',
-  'profileIcons',
-  'profileIconBorders',
-  'emojis',
-  'emojiCollections',
-  'backgrounds',
-  'loadingScreens',
-  'roleIcons',
-  'roseSkins',
-];
+import { itemsApi, validationApi } from '@/lib/api';
 
 interface ContainedItem {
   type: string;
@@ -82,20 +66,20 @@ interface ItemsContextType {
 
 const ItemsContext = React.createContext<ItemsContextType | undefined>(undefined);
 
-import type { TFunction } from 'i18next';
-
-const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
-  const categories = [...validCategories, 'advancedRoleCardOffers'];
-
+/**
+ * Fetch all items from all categories
+ * Backend validates categories - frontend just passes them
+ */
+const fetchAllItems = async (categories: string[], t: any): Promise<Item[]> => {
   const promises = categories.map(async (category) => {
     try {
-      const response = await fetch(`/api/items/${category}`);
-      if (!response.ok) {
+      const response = await itemsApi.getCategory(category);
+      if (response.error) {
         console.warn(t('itemsContext.fetchCategoryFailed', { category }));
         return [];
       }
-      const itemsArray = await response.json() as ApiItem[];
-      return itemsArray.map((apiItem: ApiItem): Item => ({
+      const itemsArray = (response.data || []) as any[];
+      return itemsArray.map((apiItem): Item => ({
         ...apiItem,
         category,
         gender: (apiItem.gender as string | undefined)?.toLowerCase() as 'male' | 'female' | 'any' | undefined
@@ -123,14 +107,17 @@ const fetchAllItems = async (t: TFunction): Promise<Item[]> => {
   return allItems;
 };
 
+/**
+ * Fetch item tags
+ */
 const fetchTags = async (): Promise<Map<string, string[]>> => {
   try {
-    const response = await fetch(`/api/items/tags`);
-    if (!response.ok) {
+    const response = await itemsApi.getTags();
+    if (response.error) {
       console.warn('Failed to fetch item tags');
       return new Map();
     }
-    const tagsData = await response.json() as ApiTag[];
+    const tagsData = (response.data || []) as ApiTag[];
     const map = new Map<string, string[]>();
     if (Array.isArray(tagsData)) {
       for (const tagInfo of tagsData) {
@@ -148,10 +135,23 @@ const fetchTags = async (): Promise<Map<string, string[]>> => {
 
 export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation();
+
+  // Fetch valid categories from backend
+  const { data: categoriesResponse } = useQuery({
+    queryKey: ['itemCategories'],
+    queryFn: () => validationApi.getItemCategories(),
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    refetchOnWindowFocus: false,
+  });
+
+  const categories = categoriesResponse?.data || [];
+
+  // Fetch all items only after we have categories
   const { data: allItems = [], isLoading, isError } = useQuery<Item[]>({
-    queryKey: ['allItemsGlobal'],
-    queryFn: () => fetchAllItems(t),
-    staleTime: 1000 * 60 * 60, // Cache de 1 hora
+    queryKey: ['allItemsGlobal', categories],
+    queryFn: () => fetchAllItems(categories, t),
+    enabled: categories.length > 0, // Only fetch when we have categories
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
     refetchOnWindowFocus: false,
   });
 
@@ -172,7 +172,7 @@ export const ItemsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return map;
   }, [allItems]);
 
-  const value = { allItems, itemsById, tagsByItemId, isLoading, isError };
+  const value = { allItems, itemsById, tagsByItemId, isLoading: isLoading || categories.length === 0, isError };
 
   return (
     <ItemsContext.Provider value={value}>

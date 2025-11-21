@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRoles, Role } from "./contexts/RolesContext";
 import { Progress } from "@/components/ui/progress";
+import { avatarsApi } from "@/lib/api";
 
 const getSharedAvatarIdFromUrl = (url: string): string | null => {
   const match = url.match(/\/([a-f0-9-]+)\.png/);
@@ -193,15 +194,15 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
         setInspectorData([]);
 
         try {
-          const sharedIdResponse = await fetch(`/api/avatars/sharedAvatarId/${playerId}/${avatar.index}`);
-          if (!sharedIdResponse.ok) throw new Error("Failed to fetch shared avatar ID");
-          const sharedAvatarId = await sharedIdResponse.text();
+          const sharedIdResponse = await avatarsApi.getSharedId(playerId, avatar.index);
+          if (sharedIdResponse.error) throw new Error("Failed to fetch shared avatar ID");
+          const sharedAvatarId = sharedIdResponse.data;
 
           if (!sharedAvatarId) throw new Error("Invalid shared avatar ID received");
 
-          const response = await fetch(`/api/avatars/${sharedAvatarId}`);
-          if (!response.ok) throw new Error(t('playerCard.fetchAvatarError'));
-          const data = await response.json();
+          const response = await avatarsApi.getDetails(sharedAvatarId);
+          if (response.error) throw new Error(t('playerCard.fetchAvatarError'));
+          const data = response.data;
           
           const itemIds = Object.values(data.items).filter(id => typeof id === 'string') as string[];
           const items = itemIds.map(id => itemsById.get(id)).filter((item): item is Item => !!item);

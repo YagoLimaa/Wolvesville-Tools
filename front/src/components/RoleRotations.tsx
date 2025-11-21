@@ -6,6 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from "react-i18next";
 import { Zap, AlertTriangle, Clock } from "lucide-react";
 import { useRoles, type Role } from "@/components/contexts/RolesContext";
+import { rolesApi } from "@/lib/api";
 
 // --- Tipos de Dados ---
 
@@ -40,11 +41,11 @@ function isDefined<T>(value: T | null | undefined): value is T {
 // --- Funções de Fetch e Hooks ---
 
 const fetchRoleRotations = async (): Promise<GameModeRotation[]> => {
-  const response = await fetch('/api/roleRotations');
-  if (!response.ok) {
-    throw new Error("fetch_error");
+  const response = await rolesApi.getRotations();
+  if (response.error) {
+    throw new Error(response.error);
   }
-  return response.json();
+  return (Array.isArray(response.data) ? response.data : []) as GameModeRotation[];
 };
 
 const useCountdownToNextWednesday = () => {
