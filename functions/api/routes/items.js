@@ -12,9 +12,10 @@ export async function handleItemsByCategory(category, requestConfig, WOLVESVILLE
   let itemsArray = [];
   if (Array.isArray(responseData)) {
     itemsArray = responseData;
-  } else if (responseData && typeof responseData === 'object') {
-    // Se for um objeto, tenta pegar a propriedade 'list' ou pega os values
-    itemsArray = responseData.list ? Object.values(responseData.list) : Object.values(responseData).filter(item => typeof item === 'object' && item !== null);
+  } else if (responseData.list) {
+    itemsArray = Object.values(responseData.list);
+  } else {
+    itemsArray = Object.values(responseData);
   }
 
   const getNameFromUrl = (url) => {
