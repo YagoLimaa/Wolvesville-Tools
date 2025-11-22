@@ -437,6 +437,15 @@ const ItemsSkins = () => {
   }, [sortedItems, searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter, bpSeasonFilter, tagsByItemId]);
 
   React.useEffect(() => {
+    if (categoryFilter === "all") {
+      setRarityFilter("all");
+      setGenderFilter("all");
+      setTypeFilter("all");
+      setBpSeasonFilter("");
+    }
+  }, [categoryFilter]);
+
+  React.useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter, bpSeasonFilter]);
 
@@ -556,7 +565,7 @@ const ItemsSkins = () => {
       <NavigationBar />
 
       <main className="container mx-auto px-4 sm:px-6 lg:px-28 py-8 mt-[5px]">
-        <div className="lg:grid lg:grid-cols-4 lg:gap-8">
+        <div className="lg:grid lg:grid-cols-4 lg:gap-8 min-h-[70vh]">
           <aside className="lg:col-span-1 mb-8 lg:mb-0 lg:flex lg:flex-col lg:justify-center">
             <Card className="bg-card/50 backdrop-blur border-accent/20 w-full">
               <CardContent className="p-4">
@@ -614,7 +623,7 @@ const ItemsSkins = () => {
                   <AccordionItem value="gender">
                     <AccordionTrigger>{t('itemsSkins.gender')}</AccordionTrigger>
                     <AccordionContent>
-                      <Select value={genderFilter} onValueChange={setGenderFilter} disabled={categoryFilter !== 'avatarItems'}>
+                      <Select value={genderFilter} onValueChange={setGenderFilter}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">{t('itemsSkins.allGenders')}</SelectItem>
@@ -628,7 +637,7 @@ const ItemsSkins = () => {
                   <AccordionItem value="subtype">
                     <AccordionTrigger>{t('itemsSkins.avatarType')}</AccordionTrigger>
                     <AccordionContent>
-                      <Select value={typeFilter} onValueChange={setTypeFilter} disabled={categoryFilter !== 'avatarItems'}>
+                      <Select value={typeFilter} onValueChange={setTypeFilter}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">{t('itemsSkins.allTypes')}</SelectItem>
@@ -690,8 +699,7 @@ const ItemsSkins = () => {
                 </Alert>
               </Card>
             )}
-            {totalPages > 1 && (
-              <div className="mb-4 flex justify-end">
+            <div className="mb-4 flex justify-end">
                 <Pagination
                   currentPage={currentPage}
                   totalPages={totalPages}
@@ -700,7 +708,6 @@ const ItemsSkins = () => {
                   hasNext={currentPage < totalPages}
                 />
               </div>
-            )}
             {allItems && (
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
                 {paginatedItems.map((item) => (

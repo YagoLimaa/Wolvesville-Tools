@@ -19,8 +19,6 @@ export const Pagination = ({
 }: PaginationProps) => {
   const { t } = useTranslation();
 
-  if (totalPages <= 1) return null;
-
   return (
     <div className="flex items-center justify-center gap-4 mt-8">
       <GradientButton
