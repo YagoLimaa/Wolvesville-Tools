@@ -12,6 +12,7 @@ import { handlePlayersSearch, handlePlayersHighscores } from './routes/players';
 import { handleRoles, handleRoleRotations } from './routes/roles';
 import { handleShopActiveOffers } from './routes/shop';
 import { handleItemCategories, handleRoleIds } from './routes/validation';
+import { handleProxy } from './routes/proxy';
 
 const routes = [];
 const addRoute = (method, path, handler) => {
@@ -19,14 +20,13 @@ const addRoute = (method, path, handler) => {
   routes.push({ method, pathRegex, handler });
 };
 
-// definindo tipo de rotas ( para futuras implementeações)
 const router = {
   get: (path, handler) => addRoute('GET', path, handler),
   post: (path, handler) => addRoute('POST', path, handler),
   all: (path, handler) => addRoute('ALL', path, handler),
 };
 
-// anuncios do jogo
+router.get('/api/proxy', handleProxy);
 router.get('/api/announcements', handleAnnouncements);
 
 // tudo relacionados para avatares
@@ -42,7 +42,6 @@ router.get('/api/battlePass/challenges', handleBattlePassChallenges);
 // tudo de clans
 router.get('/api/clans/search', handleClanSearch);
 router.get('/api/clans/:id', handleClanDetails);
-router.get('/api/clan/:id', handleClanDetails); // backward compatibility
 
 // tudo de items
 router.get('/api/items/tags', handleItemsByTags);
@@ -54,12 +53,10 @@ router.get('/api/players/highscores', handlePlayersHighscores);
 
 // tudo sobre as funções de roles
 router.get('/api/roles', handleRoles);
-router.get('/api/roles/rotations', handleRoleRotations);
-router.get('/api/roleRotations', handleRoleRotations); // Alias
+router.get('/api/roleRotations', handleRoleRotations); 
 
 // loja
 router.get('/api/shop/activeOffers', handleShopActiveOffers);
-router.get('/api/shop/active', handleShopActiveOffers); // Alias
 
 // fazer as validações
 router.get('/api/validation/item-categories', handleItemCategories);
@@ -72,7 +69,6 @@ export async function onRequest(context) {
   request.env = env;
 
   try {
-    // comecando o middleware
     const middlewareResponse = requestConfigMiddleware(request);
     if (middlewareResponse) return middlewareResponse;
 

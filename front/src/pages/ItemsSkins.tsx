@@ -10,7 +10,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Pagination } from "@/components/Pagination";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Search, AlertTriangle, Gem, Filter, Loader2, X } from "lucide-react";
-import { PawPrint } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CustomFontAwesomeIcon } from "@/components/ui/font-awesome-icon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -55,23 +54,30 @@ const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' = '3x'):
   return url;
 };
 
-const AnimatedEmoji = ({ urlAnimation }: { urlAnimation: string }) => {
+const AnimatedEmoji = ({ urlAnimation, onError }: { urlAnimation: string; onError: () => void; }) => {
   const { data: animationData, isLoading } = useQuery({
     queryKey: ['emojiAnimation', urlAnimation],
     queryFn: async () => {
-      try {
-        const response = await fetch(urlAnimation);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch animation: ${response.statusText}`);
-        }
-        return await response.json();
-      } catch (error) {
-        console.error('Error fetching or parsing Lottie animation:', error);
-        throw error; 
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(urlAnimation)}`;
+      const response = await fetch(proxyUrl);
+      if (!response.ok) {
+        return null;
       }
+      const data = await response.json();
+      if (data.proxyError) {
+        return null;
+      }
+      return data;
     },
-    staleTime: Infinity, 
+    staleTime: Infinity,
+    retry: false,
   });
+
+  React.useEffect(() => {
+    if (!isLoading && !animationData) {
+      onError();
+    }
+  }, [isLoading, animationData, onError]);
 
   if (isLoading) return <Skeleton className="w-full h-full" />;
   if (!animationData) return null;
@@ -79,17 +85,21 @@ const AnimatedEmoji = ({ urlAnimation }: { urlAnimation: string }) => {
   return <Lottie animationData={animationData} loop={true} className="w-full h-full" />;
 };
 
-const ItemImage = ({ item, onImageError, isHovered }: { item: Item; onImageError: (id: string) => void; isHovered: boolean; }) => {
+const ItemImage = ({ item, onImageError, isHovered, categoryFilter }: { item: Item; onImageError: (id: string) => void; isHovered: boolean; categoryFilter?: string; }) => {
   const [imageSrc, setImageSrc] = React.useState(getHighResUrl(item.imageUrl) || '');
   const [hasError, setHasError] = React.useState(false);
+  const [animationFailed, setAnimationFailed] = React.useState(false);
 
   React.useEffect(() => {
     setImageSrc(getHighResUrl(item.imageUrl) || '');
     setHasError(false);
-  }, [item.imageUrl]);
+    setAnimationFailed(false);
+  }, [item.id, item.imageUrl]);
 
-  if (isHovered && item.category === 'emojis' && item.urlAnimation) {
-    return <AnimatedEmoji urlAnimation={item.urlAnimation} />;
+  const shouldAnimate = item.urlAnimation && (item.category !== 'emojis' || categoryFilter !== 'emojis' || isHovered);
+
+  if (shouldAnimate && !animationFailed) {
+    return <AnimatedEmoji urlAnimation={item.urlAnimation} onError={() => setAnimationFailed(true)} />;
   }
 
   if (item.category === 'profileIcons' && item.name?.startsWith('font-awesome-')) {
@@ -382,13 +392,26 @@ const ItemsSkins = () => {
 
   const sortedItems = React.useMemo(() => {
     if (!allItems) return [];
-    return [...allItems].sort((a, b) => {
+    
+    const itemsToSort = [...allItems];
+
+    if (categoryFilter === 'calendars' || categoryFilter === 'bundles' || categoryFilter === 'roseSkins' || categoryFilter === 'avatarItemSets') {
+        itemsToSort.reverse();
+        return itemsToSort.sort((a, b) => {
+            const aIsBroken = brokenImageIds.has(a.id);
+            const bIsBroken = brokenImageIds.has(b.id);
+            if (aIsBroken !== bIsBroken) return aIsBroken ? 1 : -1;
+            return 0;
+        });
+    }
+
+    return itemsToSort.sort((a, b) => {
       const aIsBroken = brokenImageIds.has(a.id);
       const bIsBroken = brokenImageIds.has(b.id);
       if (aIsBroken !== bIsBroken) return aIsBroken ? 1 : -1; 
       return (rarityOrder[b.rarity!] || 0) - (rarityOrder[a.rarity!] || 0);
     });
-  }, [allItems, brokenImageIds]);
+  }, [allItems, brokenImageIds, categoryFilter]);
 
   const filteredItems = React.useMemo(() => {
     return sortedItems.filter(item => {
@@ -397,7 +420,7 @@ const ItemsSkins = () => {
       const matchesRarity = rarityFilter === "all" || !item.rarity || item.rarity === rarityFilter;
 
       let matchesGender = true;
-      if (categoryFilter === 'avatarItems' && item.category === 'avatarItems') {
+      if (item.category === 'avatarItems') {
         if (genderFilter === 'all') {
           matchesGender = true;
         } else if (genderFilter === 'any') {
@@ -406,7 +429,7 @@ const ItemsSkins = () => {
           matchesGender = item.gender === genderFilter;
         }
       }
-      const matchesType = categoryFilter !== 'avatarItems' || item.category !== 'avatarItems' || typeFilter === "all" || item.type === typeFilter;
+      const matchesType = item.category !== 'avatarItems' || typeFilter === "all" || item.type === typeFilter;
 
       const matchesBpSeason = (() => {
         if (!bpSeasonFilter) return true;
@@ -656,10 +679,14 @@ const ItemsSkins = () => {
                       </Select>
                     </AccordionContent>
                   </AccordionItem>
+                  {/* ... other accordion items ... */}
                    <AccordionItem value="bp_season">
-                    <AccordionTrigger>{t('itemsSkins.battlePassSeason')}</AccordionTrigger>
+                    <AccordionTrigger disabled={categoryFilter !== 'all' && categoryFilter !== 'avatarItems'}>
+                      {t('itemsSkins.battlePassSeason')}
+                    </AccordionTrigger>
                     <AccordionContent>
                       <Select
+                        disabled={categoryFilter !== 'all' && categoryFilter !== 'avatarItems'}
                         value={bpSeasonFilter}
                         onValueChange={(value) => setBpSeasonFilter(value === 'all' ? '' : value)}
                       >
@@ -721,7 +748,7 @@ const ItemsSkins = () => {
                       ${collectionCategories.includes(item.category) || item.parentSetId || reverseSearchableCategories.includes(item.category) ? 'cursor-pointer' : 'cursor-default'}
                     `}
                   >
-                    <ItemImage item={item} onImageError={handleImageError} isHovered={hoveredItemId === item.id} />
+                    <ItemImage item={item} onImageError={handleImageError} isHovered={hoveredItemId === item.id} categoryFilter={categoryFilter} />
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-md">
                       <p className="text-xs font-semibold text-white truncate">{item.name || getNameFromUrl(item.imageUrl)}</p>
                     </div>
