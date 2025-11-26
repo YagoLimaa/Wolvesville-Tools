@@ -1,0 +1,27 @@
+{
+  "name": "website",
+  "version": "1.0.0",
+  "description": "Wolvesville Tools is your ultimate companion for Wolvesville. Dive deep into the world of Wolvesville with our comprehensive platform designed to enhance your gaming experience. Whether you're a seasoned veteran or a new recruit, we have everything you need to stay ahead of the curve!",
+  "main": "index.js",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "wait-on": "^9.0.3"
+  },
+  "scripts": {
+    "dev:front": "npm run dev --prefix front",
+    "dev:backend": "wait-on tcp:5173 && wrangler pages dev --proxy=5173 --compatibility-date=\"2024-05-08\"",
+    "dev": "npx concurrently \"npm:dev:front\" \"npm:dev:backend\""
+},
+
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YagoLimaa/Wolvesville-Tools.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YagoLimaa/Wolvesville-Tools/issues"
+  },
+  "homepage": "https://github.com/YagoLimaa/Wolvesville-Tools#readme"
+}

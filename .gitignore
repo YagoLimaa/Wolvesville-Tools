@@ -1,8 +1,4 @@
-front/.env
-backup_backend/.env
+.env
 /node_modules
 /functions/node_modules
-/main
-backup backend/functions/api/backuo.js
-front/.env.example
 front/node_modules

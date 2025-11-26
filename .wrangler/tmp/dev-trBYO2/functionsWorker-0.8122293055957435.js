@@ -1,0 +1,1488 @@
+var __defProp = Object.defineProperty;
+var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
+
+// .wrangler/tmp/bundle-oDIDne/checked-fetch.js
+var urls = /* @__PURE__ */ new Set();
+function checkURL(request, init) {
+  const url = request instanceof URL ? request : new URL(
+    (typeof request === "string" ? new Request(request, init) : request).url
+  );
+  if (url.port && url.port !== "443" && url.protocol === "https:") {
+    if (!urls.has(url.toString())) {
+      urls.add(url.toString());
+      console.warn(
+        `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
+ - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
+`
+      );
+    }
+  }
+}
+__name(checkURL, "checkURL");
+globalThis.fetch = new Proxy(globalThis.fetch, {
+  apply(target, thisArg, argArray) {
+    const [request, init] = argArray;
+    checkURL(request, init);
+    return Reflect.apply(target, thisArg, argArray);
+  }
+});
+
+// .wrangler/tmp/pages-UlvH7P/functionsWorker-0.8122293055957435.mjs
+var __defProp2 = Object.defineProperty;
+var __name2 = /* @__PURE__ */ __name((target, value) => __defProp2(target, "name", { value, configurable: true }), "__name");
+var urls2 = /* @__PURE__ */ new Set();
+function checkURL2(request, init) {
+  const url = request instanceof URL ? request : new URL(
+    (typeof request === "string" ? new Request(request, init) : request).url
+  );
+  if (url.port && url.port !== "443" && url.protocol === "https:") {
+    if (!urls2.has(url.toString())) {
+      urls2.add(url.toString());
+      console.warn(
+        `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
+ - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
+`
+      );
+    }
+  }
+}
+__name(checkURL2, "checkURL");
+__name2(checkURL2, "checkURL");
+globalThis.fetch = new Proxy(globalThis.fetch, {
+  apply(target, thisArg, argArray) {
+    const [request, init] = argArray;
+    checkURL2(request, init);
+    return Reflect.apply(target, thisArg, argArray);
+  }
+});
+function jsonResponse(data, status = 200) {
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  };
+  if (data === null && status === 204) {
+    return new Response(null, { status: 204, headers });
+  }
+  return new Response(JSON.stringify(data), { status, headers });
+}
+__name(jsonResponse, "jsonResponse");
+__name2(jsonResponse, "jsonResponse");
+function getRequestConfig(apiKey) {
+  return {
+    headers: {
+      "Authorization": `Bot ${apiKey}`,
+      "Accept": "application/json"
+    }
+  };
+}
+__name(getRequestConfig, "getRequestConfig");
+__name2(getRequestConfig, "getRequestConfig");
+function requestConfigMiddleware(request) {
+  const apiKey = request.env.WOLVESVILLE_API_KEY;
+  if (!apiKey || apiKey === "SUA_CHAVE_API_VEM_AQUI") {
+    return jsonResponse({ error: "A chave da API n\xE3o est\xE1 configurada no servidor." }, 500);
+  }
+  request.requestConfig = getRequestConfig(apiKey);
+}
+__name(requestConfigMiddleware, "requestConfigMiddleware");
+__name2(requestConfigMiddleware, "requestConfigMiddleware");
+function errorHandler(err, request) {
+  console.error("Erro na API da Cloudflare Function:", err);
+  if (err.status === 404) {
+    return jsonResponse({ error: "Recurso n\xE3o encontrado na API Wolvesville." }, 404);
+  }
+  if (err.status === 401 || err.status === 403) {
+    return jsonResponse({ error: "N\xE3o autorizado. Verifique sua chave de API." }, err.status);
+  }
+  return jsonResponse({ error: "Erro interno do servidor." }, 500);
+}
+__name(errorHandler, "errorHandler");
+__name2(errorHandler, "errorHandler");
+var VALID_ITEM_CATEGORIES = [
+  "avatarItems",
+  "bodyPaints",
+  "avatarItemSets",
+  "avatarItemCollections",
+  "bundles",
+  "calendars",
+  "tags",
+  "profileIcons",
+  "profileIconBorders",
+  "emojis",
+  "emojiCollections",
+  "backgrounds",
+  "loadingScreens",
+  "roleIcons",
+  "advancedRoleCardOffers",
+  "baseRoleCardOffers",
+  "roseSkins"
+];
+var WOLVESVILLE_API_BASE_URL = "https://api.wolvesville.com";
+async function handleAnnouncements(request) {
+  const { searchParams } = new URL(request.url);
+  const locale = searchParams.get("locale") || "en";
+  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/announcements`);
+  requestUrl.searchParams.append("locale", locale);
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
+  const responseData = await response.json();
+  return jsonResponse(responseData);
+}
+__name(handleAnnouncements, "handleAnnouncements");
+__name2(handleAnnouncements, "handleAnnouncements");
+async function handleAvatars(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/avatars`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const data = await response.json();
+  return jsonResponse(data);
+}
+__name(handleAvatars, "handleAvatars");
+__name2(handleAvatars, "handleAvatars");
+async function handleSharedAvatarId(request) {
+  const { playerId, slotNumber } = request.params;
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/sharedAvatarId/${playerId}/${slotNumber}`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  if (!response.ok) {
+    console.error(`Upstream API for sharedAvatarId failed with status ${response.status}`);
+    return jsonResponse(
+      { error: `Failed to fetch from upstream API. Status: ${response.status}` },
+      response.status
+    );
+  }
+  const responseData = await response.text();
+  return jsonResponse(responseData);
+}
+__name(handleSharedAvatarId, "handleSharedAvatarId");
+__name2(handleSharedAvatarId, "handleSharedAvatarId");
+async function handleAvatarDetails(request) {
+  const { sharedAvatarId } = request.params;
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/avatars/${sharedAvatarId}`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  if (!response.ok) {
+    console.error(`Upstream API for avatarDetails failed with status ${response.status}`);
+    return jsonResponse(
+      { error: `Failed to fetch from upstream API. Status: ${response.status}` },
+      response.status
+    );
+  }
+  const data = await response.json();
+  return jsonResponse(data);
+}
+__name(handleAvatarDetails, "handleAvatarDetails");
+__name2(handleAvatarDetails, "handleAvatarDetails");
+async function handleBattlePassSeason(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/season`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const seasonData = await response.json();
+  const currencyTotals = {
+    GOLD: 0,
+    SINGLE_ROSE: 0,
+    SERVER_ROSE: 0,
+    BATTLE_PASS_COIN: 0,
+    GEM: 0
+  };
+  seasonData.rewards.forEach((reward) => {
+    if (reward.type === "GOLD") {
+      currencyTotals.GOLD += reward.amount;
+    } else if (reward.type === "BATTLE_PASS_COIN") {
+      currencyTotals.BATTLE_PASS_COIN += reward.amount;
+    } else if (reward.type === "GEM") {
+      currencyTotals.GEM += reward.amount;
+    } else if (reward.type === "ROSE_PACKAGE") {
+      if (reward.rosePackageId === "U0s") {
+        currencyTotals.SERVER_ROSE += reward.amount;
+      } else if (reward.rosePackageId === "mkQ") {
+        currencyTotals.SINGLE_ROSE += reward.amount;
+      }
+    }
+  });
+  const rosesUrl = `${WOLVESVILLE_API_BASE_URL}/items/roseSkins`;
+  const rosesResponse = await fetch(rosesUrl, request.requestConfig);
+  const roses = await rosesResponse.json();
+  const currencyIcons = {
+    GOLD: "https://www.wolvesville.com/static/media/silver_coin.7b12538367a6d2cfa2c0.png",
+    GEM: "https://www.wolvesville.com/static/media/gem.439d7650def0b35d6a66.png",
+    BATTLE_PASS_COIN: `https://cdn2.wolvesville.com/battlePass/coins/bp${seasonData.number}_single@2x.png`,
+    ROSES: {
+      SERVER_ROSE: "https://www.wolvesville.com/static/media/rose_large_sticker_server.985a27229b8e6ccdc63e.png",
+      SINGLE_ROSE: "https://www.wolvesville.com/static/media/rose_inventory_single.eb6af861d48bff85f73a.png"
+    }
+  };
+  if (Array.isArray(roses)) {
+    for (const rose of roses) {
+      if (rose.id === "U0s") {
+        currencyIcons.ROSES.SERVER_ROSE = rose.imageUrl;
+      } else if (rose.id === "mkQ") {
+        currencyIcons.ROSES.SINGLE_ROSE = rose.imageUrl;
+      }
+    }
+  }
+  const responseData = {
+    ...seasonData,
+    currencyTotals,
+    currencyIcons
+  };
+  return jsonResponse(responseData);
+}
+__name(handleBattlePassSeason, "handleBattlePassSeason");
+__name2(handleBattlePassSeason, "handleBattlePassSeason");
+async function handleBattlePassShop(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/battlePass/shop`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const responseData = await response.json();
+  return jsonResponse(responseData);
+}
+__name(handleBattlePassShop, "handleBattlePassShop");
+__name2(handleBattlePassShop, "handleBattlePassShop");
+async function handleBattlePassChallenges(request) {
+  const { searchParams } = new URL(request.url);
+  const locale = searchParams.get("locale") || "en";
+  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/battlePass/challenges`);
+  requestUrl.searchParams.append("locale", locale);
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
+  const responseData = await response.json();
+  return jsonResponse(responseData);
+}
+__name(handleBattlePassChallenges, "handleBattlePassChallenges");
+__name2(handleBattlePassChallenges, "handleBattlePassChallenges");
+async function handleClanSearch(request) {
+  const { searchParams } = new URL(request.url);
+  const name = searchParams.get("name");
+  const language = searchParams.get("language");
+  const open = searchParams.get("open");
+  const searchUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/clans/search`);
+  if (name) searchUrl.searchParams.append("name", name);
+  if (language && language.toLowerCase() !== "all") {
+    searchUrl.searchParams.append("language", language);
+  }
+  const response = await fetch(searchUrl.toString(), request.requestConfig);
+  let clansFound = await response.json();
+  if (Array.isArray(clansFound) && open === "true") {
+    clansFound = clansFound.filter((clan) => clan.joinType === "PUBLIC");
+  }
+  return jsonResponse(clansFound);
+}
+__name(handleClanSearch, "handleClanSearch");
+__name2(handleClanSearch, "handleClanSearch");
+async function handleClanDetails(request) {
+  const { id } = request.params;
+  const infoUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/info`;
+  const membersUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${id}/members/detailed`;
+  const [infoResponse, membersResponse] = await Promise.all([
+    fetch(infoUrl, request.requestConfig),
+    fetch(membersUrl, request.requestConfig)
+  ]);
+  const infoData = await infoResponse.json();
+  const membersData = await membersResponse.json();
+  if (!infoData || !infoData.id) {
+    return jsonResponse({ error: `Clan with ID ${id} not found.` }, 404);
+  }
+  const membersWithDetailsPromises = membersData.map(async (member) => {
+    try {
+      const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${member.playerId}`;
+      const playerDetailsResponse = await fetch(playerDetailsUrl, request.requestConfig);
+      const playerDetails = await playerDetailsResponse.json();
+      return {
+        id: member.id,
+        username: playerDetails.username || member.username,
+        isCoLeader: member.isCoLeader,
+        equippedAvatar: playerDetails.equippedAvatar,
+        level: playerDetails.level
+      };
+    } catch (playerDetailsError) {
+      console.error(`Erro ao buscar detalhes do jogador ${member.username} (ID: ${member.playerId}):`, playerDetailsError.message);
+      return member;
+    }
+  });
+  const detailedMembers = await Promise.all(membersWithDetailsPromises);
+  const combinedData = {
+    ...infoData,
+    members: detailedMembers
+  };
+  return jsonResponse(combinedData);
+}
+__name(handleClanDetails, "handleClanDetails");
+__name2(handleClanDetails, "handleClanDetails");
+function getNameFromUrl(url) {
+  if (!url || typeof url !== "string") return "Item";
+  try {
+    const filename = url.split("/").pop()?.split(".")[0] ?? "";
+    const cleanedName = filename.replace(/bp\d+-/, "").replace(/_store|@\dx/g, "").replace(/[-_]/g, " ");
+    return cleanedName.replace(/\b\w/g, (l) => l.toUpperCase());
+  } catch {
+    return "Item";
+  }
+}
+__name(getNameFromUrl, "getNameFromUrl");
+__name2(getNameFromUrl, "getNameFromUrl");
+function processItem(item) {
+  const newItem = { ...item };
+  if (!newItem.imageUrl) {
+    newItem.imageUrl = newItem.promoImageUrl || newItem.iconUrl || newItem.image && newItem.image.url || newItem.singleImageUrl || newItem.urlPreview || newItem.imageDay && newItem.imageDay.url || newItem.imageSmall && newItem.imageSmall.url;
+  }
+  if (!newItem.name) {
+    newItem.name = newItem.title || getNameFromUrl(newItem.imageUrl);
+  }
+  if (newItem.rarity) {
+    newItem.rarity = String(newItem.rarity).toLowerCase();
+  }
+  return newItem;
+}
+__name(processItem, "processItem");
+__name2(processItem, "processItem");
+function processItems(itemsArray) {
+  return itemsArray.map(processItem);
+}
+__name(processItems, "processItems");
+__name2(processItems, "processItems");
+function parseItemsArray(responseData) {
+  if (Array.isArray(responseData)) {
+    return responseData;
+  } else if (responseData.list) {
+    return Object.values(responseData.list);
+  } else {
+    return Object.values(responseData);
+  }
+}
+__name(parseItemsArray, "parseItemsArray");
+__name2(parseItemsArray, "parseItemsArray");
+async function handleItemsByCategory(request) {
+  const { category } = request.params;
+  if (!VALID_ITEM_CATEGORIES.includes(category)) {
+    return jsonResponse({ error: "Categoria de item inv\xE1lida." }, 400);
+  }
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/${category}`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const responseData = await response.json();
+  if (category === "tags") {
+    return jsonResponse(responseData);
+  }
+  const itemsArray = parseItemsArray(responseData);
+  const processedItems = processItems(itemsArray);
+  return jsonResponse(processedItems);
+}
+__name(handleItemsByCategory, "handleItemsByCategory");
+__name2(handleItemsByCategory, "handleItemsByCategory");
+async function handleItemsByTags(request) {
+  const { searchParams } = new URL(request.url);
+  const season = searchParams.get("season");
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/items/tags`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  let tagsData = await response.json();
+  let parsedTags = parseItemsArray(tagsData);
+  if (season) {
+    const seasonTag = `origin:battle_pass:season_${season}`;
+    parsedTags = parsedTags.filter((item) => item.tags && item.tags.includes(seasonTag));
+  }
+  return jsonResponse(parsedTags);
+}
+__name(handleItemsByTags, "handleItemsByTags");
+__name2(handleItemsByTags, "handleItemsByTags");
+async function handlePlayersSearch(request) {
+  const { searchParams } = new URL(request.url);
+  const username = searchParams.get("username");
+  const page = parseInt(searchParams.get("page")) || 1;
+  const resultsPerPage = 5;
+  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/players/search`);
+  if (username) {
+    requestUrl.searchParams.append("username", username);
+  }
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
+  const responseData = await response.json();
+  let allPlayers;
+  if (Array.isArray(responseData)) {
+    allPlayers = responseData;
+  } else if (responseData && typeof responseData === "object" && responseData.id) {
+    allPlayers = [responseData];
+  } else {
+    allPlayers = [];
+  }
+  for (const player of allPlayers) {
+    if (player.clanId) {
+      try {
+        const clanUrl = `${WOLVESVILLE_API_BASE_URL}/clans/${player.clanId}/info`;
+        const clanResponse = await fetch(clanUrl, request.requestConfig);
+        const clanData = await clanResponse.json();
+        player.clan = { id: player.clanId, name: clanData.name };
+      } catch (clanError) {
+        console.error(`Erro ao buscar detalhes do cl\xE3 ${player.clanId}:`, clanError.message);
+        player.clan = null;
+      }
+    }
+  }
+  if (!allPlayers || allPlayers.length === 0) {
+    return jsonResponse({ players: [], pagination: { currentPage: 1, totalPages: 1 } });
+  }
+  const totalPages = Math.ceil(allPlayers.length / resultsPerPage);
+  const startIndex = (page - 1) * resultsPerPage;
+  const endIndex = startIndex + resultsPerPage;
+  const paginatedPlayers = allPlayers.slice(startIndex, endIndex);
+  const data = {
+    players: paginatedPlayers,
+    pagination: {
+      currentPage: page,
+      totalPages,
+      hasPages: totalPages > 1,
+      prevPage: page > 1 ? page - 1 : void 0,
+      nextPage: page < totalPages ? page + 1 : void 0
+    }
+  };
+  return jsonResponse(data);
+}
+__name(handlePlayersSearch, "handlePlayersSearch");
+__name2(handlePlayersSearch, "handlePlayersSearch");
+async function handlePlayersHighscores(request) {
+  const { searchParams } = new URL(request.url);
+  const type = "oldRank";
+  const limit = parseInt(searchParams.get("limit")) || 10;
+  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/players/highscores`);
+  requestUrl.searchParams.append("type", type);
+  requestUrl.searchParams.append("limit", limit);
+  const response = await fetch(requestUrl.toString(), request.requestConfig);
+  const responseData = await response.json();
+  const allPlayersFromApi = responseData.allTime || [];
+  const highscorePlayers = allPlayersFromApi.slice(0, limit);
+  const playerDetailPromises = highscorePlayers.map(async (player) => {
+    try {
+      const playerDetailsUrl = `${WOLVESVILLE_API_BASE_URL}/players/${player.playerId}`;
+      const response2 = await fetch(playerDetailsUrl, request.requestConfig);
+      if (!response2.ok) {
+        console.error(`Error fetching details for player ${player.username} (ID: ${player.playerId}). Status: ${response2.status}`);
+        return player;
+      }
+      const detailsData = await response2.json();
+      return { ...player, ...detailsData };
+    } catch (detailsError) {
+      console.error(`Network error fetching details for player ${player.username}:`, detailsError.message);
+      return player;
+    }
+  });
+  const detailedPlayers = await Promise.all(playerDetailPromises);
+  return jsonResponse(detailedPlayers);
+}
+__name(handlePlayersHighscores, "handlePlayersHighscores");
+__name2(handlePlayersHighscores, "handlePlayersHighscores");
+async function handleRoles(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const responseData = await response.json();
+  return jsonResponse(responseData);
+}
+__name(handleRoles, "handleRoles");
+__name2(handleRoles, "handleRoles");
+async function handleRoleRotations(request) {
+  const response = await fetch(`${WOLVESVILLE_API_BASE_URL}/roleRotations`, request.requestConfig);
+  const responseData = await response.json();
+  const rotationsFromApi = Array.isArray(responseData) ? responseData : [];
+  const extractRoles = /* @__PURE__ */ __name2((data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data.flatMap(extractRoles);
+    let roleId;
+    let probability;
+    if (typeof data === "string") {
+      roleId = data;
+    } else if (data && typeof data.role === "string") {
+      roleId = data.role;
+      if (typeof data.probability === "number") {
+        probability = data.probability;
+      }
+    } else if (data && Array.isArray(data.roles)) {
+      return data.roles.flatMap(extractRoles);
+    }
+    if (roleId) {
+      const roleInfo = { id: roleId === "red-lady" ? "harlot" : roleId };
+      if (probability !== void 0) {
+        roleInfo.probability = probability <= 1 ? probability * 100 : probability;
+      }
+      if (roleInfo.probability !== void 0 && roleInfo.probability !== 50) {
+        delete roleInfo.probability;
+      }
+      return [roleInfo];
+    }
+    return [];
+  }, "extractRoles");
+  const formattedRotations = rotationsFromApi.map((rotationData) => {
+    const gameMode = rotationData?.gameMode ?? "";
+    const gameModeName = (rotationData?.gameModeName || gameMode.replace(/-/g, " ")).replace(/\b\w/g, (l) => l.toUpperCase());
+    if (gameMode === "sandbox" && Array.isArray(rotationData.roleRotations)) {
+      const processRole = /* @__PURE__ */ __name2((roleData) => {
+        let roleId;
+        let probability;
+        if (typeof roleData === "string") {
+          roleId = roleData;
+        } else if (roleData && typeof roleData.role === "string") {
+          roleId = roleData.role;
+          if (typeof roleData.probability === "number") {
+            probability = roleData.probability;
+          }
+        }
+        if (roleId) {
+          const result = { id: roleId === "red-lady" ? "harlot" : roleId };
+          if (probability !== void 0) {
+            result.probability = probability <= 1 ? probability * 100 : probability;
+          }
+          return result;
+        }
+        return null;
+      }, "processRole");
+      const setups = rotationData.roleRotations.map((setupData) => {
+        const setupProbability = setupData.probability;
+        const rolesSource = setupData.roleRotation?.roles ?? [];
+        const processedRoles = rolesSource.map((roleOrChoice) => {
+          if (Array.isArray(roleOrChoice)) {
+            return roleOrChoice.map(processRole).filter(Boolean);
+          }
+          return [processRole(roleOrChoice)].filter(Boolean);
+        }).filter((r) => r.length > 0);
+        return {
+          probability: setupProbability !== void 0 ? setupProbability <= 1 ? setupProbability * 100 : setupProbability : void 0,
+          roles: processedRoles
+        };
+      });
+      return {
+        gameMode,
+        gameModeName,
+        setups
+      };
+    } else if (gameMode === "sandbox" && !Array.isArray(rotationData.roleRotations)) {
+      return {
+        gameMode,
+        gameModeName
+      };
+    } else {
+      const rolesSource = rotationData?.roleRotations?.[0]?.roleRotation?.roles ?? [];
+      const roles = extractRoles(rolesSource);
+      return {
+        gameMode,
+        gameModeName,
+        roles
+      };
+    }
+  });
+  const filteredRotations = formattedRotations.filter(
+    (rotation) => rotation.gameMode !== "ranked-league-silver" && rotation.gameMode !== "ranked-league-gold"
+  );
+  const desiredOrder = ["quick", "crazy-fun", "advanced", "sandbox"];
+  const sortedRotations = filteredRotations.sort((a, b) => {
+    const indexA = desiredOrder.indexOf(a.gameMode);
+    const indexB = desiredOrder.indexOf(b.gameMode);
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
+  });
+  return jsonResponse(sortedRotations);
+}
+__name(handleRoleRotations, "handleRoleRotations");
+__name2(handleRoleRotations, "handleRoleRotations");
+async function handleShopActiveOffers(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/shop/activeOffers`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const responseData = await response.json();
+  return jsonResponse(responseData);
+}
+__name(handleShopActiveOffers, "handleShopActiveOffers");
+__name2(handleShopActiveOffers, "handleShopActiveOffers");
+async function handleItemCategories(request) {
+  return jsonResponse(VALID_ITEM_CATEGORIES);
+}
+__name(handleItemCategories, "handleItemCategories");
+__name2(handleItemCategories, "handleItemCategories");
+async function handleRoleIds(request) {
+  const requestUrl = `${WOLVESVILLE_API_BASE_URL}/roles`;
+  const response = await fetch(requestUrl, request.requestConfig);
+  const responseData = await response.json();
+  let roleIds = [];
+  if (Array.isArray(responseData)) {
+    roleIds = responseData.map((role) => role.id);
+  }
+  return jsonResponse(roleIds);
+}
+__name(handleRoleIds, "handleRoleIds");
+__name2(handleRoleIds, "handleRoleIds");
+var handleProxy = /* @__PURE__ */ __name2(async (request) => {
+  const { searchParams } = new URL(request.url);
+  const urlToProxy = searchParams.get("url");
+  if (!urlToProxy) {
+    return jsonResponse({ error: "URL parameter is missing" }, 400);
+  }
+  if (!urlToProxy.startsWith("https://cdn.wolvesville.com/")) {
+    return jsonResponse({ error: "URL not allowed for proxying" }, 400);
+  }
+  try {
+    const response = await fetch(urlToProxy, {
+      headers: {
+        "User-Agent": "Wolvesville-Website-Proxy/1.0"
+      }
+    });
+    if (!response.ok) {
+      return jsonResponse({ proxyError: true, status: response.status });
+    }
+    const newResponse = new Response(response.body, response);
+    newResponse.headers.set("Access-Control-Allow-Origin", "*");
+    newResponse.headers.set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+    newResponse.headers.set("Access-Control-Allow-Headers", "Content-Type");
+    return newResponse;
+  } catch (error) {
+    return jsonResponse({ proxyError: true, message: error.message });
+  }
+}, "handleProxy");
+var routes2 = [];
+var addRoute = /* @__PURE__ */ __name2((method, path, handler) => {
+  const pathRegex = new RegExp(`^${path.replace(/:(\w+)/g, "(?<$1>[^/]+)")}$`);
+  routes2.push({ method, pathRegex, handler });
+}, "addRoute");
+var router = {
+  get: /* @__PURE__ */ __name2((path, handler) => addRoute("GET", path, handler), "get"),
+  post: /* @__PURE__ */ __name2((path, handler) => addRoute("POST", path, handler), "post"),
+  all: /* @__PURE__ */ __name2((path, handler) => addRoute("ALL", path, handler), "all")
+};
+router.get("/api/proxy", handleProxy);
+router.get("/api/announcements", handleAnnouncements);
+router.get("/api/avatars/sharedAvatarId/:playerId/:slotNumber", handleSharedAvatarId);
+router.get("/api/avatars/:sharedAvatarId", handleAvatarDetails);
+router.get("/api/avatars", handleAvatars);
+router.get("/api/battlePass/season", handleBattlePassSeason);
+router.get("/api/battlePass/shop", handleBattlePassShop);
+router.get("/api/battlePass/challenges", handleBattlePassChallenges);
+router.get("/api/clans/search", handleClanSearch);
+router.get("/api/clans/:id", handleClanDetails);
+router.get("/api/items/tags", handleItemsByTags);
+router.get("/api/items/:category", handleItemsByCategory);
+router.get("/api/players/search", handlePlayersSearch);
+router.get("/api/players/highscores", handlePlayersHighscores);
+router.get("/api/roles", handleRoles);
+router.get("/api/roleRotations", handleRoleRotations);
+router.get("/api/shop/activeOffers", handleShopActiveOffers);
+router.get("/api/validation/item-categories", handleItemCategories);
+router.get("/api/validation/roles", handleRoleIds);
+async function onRequest(context) {
+  const { request, env } = context;
+  const { pathname } = new URL(request.url);
+  request.env = env;
+  try {
+    const middlewareResponse = requestConfigMiddleware(request);
+    if (middlewareResponse) return middlewareResponse;
+    for (const route of routes2) {
+      if (request.method === route.method || route.method === "ALL") {
+        const match2 = pathname.match(route.pathRegex);
+        if (match2) {
+          request.params = match2.groups || {};
+          return await route.handler(request);
+        }
+      }
+    }
+    return jsonResponse({ error: "Rota n\xE3o encontrada" }, 404);
+  } catch (err) {
+    return errorHandler(err, request);
+  }
+}
+__name(onRequest, "onRequest");
+__name2(onRequest, "onRequest");
+var routes = [
+  {
+    routePath: "/api/:path*",
+    mountPath: "/api",
+    method: "",
+    middlewares: [],
+    modules: [onRequest]
+  }
+];
+function lexer(str) {
+  var tokens = [];
+  var i = 0;
+  while (i < str.length) {
+    var char = str[i];
+    if (char === "*" || char === "+" || char === "?") {
+      tokens.push({ type: "MODIFIER", index: i, value: str[i++] });
+      continue;
+    }
+    if (char === "\\") {
+      tokens.push({ type: "ESCAPED_CHAR", index: i++, value: str[i++] });
+      continue;
+    }
+    if (char === "{") {
+      tokens.push({ type: "OPEN", index: i, value: str[i++] });
+      continue;
+    }
+    if (char === "}") {
+      tokens.push({ type: "CLOSE", index: i, value: str[i++] });
+      continue;
+    }
+    if (char === ":") {
+      var name = "";
+      var j = i + 1;
+      while (j < str.length) {
+        var code = str.charCodeAt(j);
+        if (
+          // `0-9`
+          code >= 48 && code <= 57 || // `A-Z`
+          code >= 65 && code <= 90 || // `a-z`
+          code >= 97 && code <= 122 || // `_`
+          code === 95
+        ) {
+          name += str[j++];
+          continue;
+        }
+        break;
+      }
+      if (!name)
+        throw new TypeError("Missing parameter name at ".concat(i));
+      tokens.push({ type: "NAME", index: i, value: name });
+      i = j;
+      continue;
+    }
+    if (char === "(") {
+      var count = 1;
+      var pattern = "";
+      var j = i + 1;
+      if (str[j] === "?") {
+        throw new TypeError('Pattern cannot start with "?" at '.concat(j));
+      }
+      while (j < str.length) {
+        if (str[j] === "\\") {
+          pattern += str[j++] + str[j++];
+          continue;
+        }
+        if (str[j] === ")") {
+          count--;
+          if (count === 0) {
+            j++;
+            break;
+          }
+        } else if (str[j] === "(") {
+          count++;
+          if (str[j + 1] !== "?") {
+            throw new TypeError("Capturing groups are not allowed at ".concat(j));
+          }
+        }
+        pattern += str[j++];
+      }
+      if (count)
+        throw new TypeError("Unbalanced pattern at ".concat(i));
+      if (!pattern)
+        throw new TypeError("Missing pattern at ".concat(i));
+      tokens.push({ type: "PATTERN", index: i, value: pattern });
+      i = j;
+      continue;
+    }
+    tokens.push({ type: "CHAR", index: i, value: str[i++] });
+  }
+  tokens.push({ type: "END", index: i, value: "" });
+  return tokens;
+}
+__name(lexer, "lexer");
+__name2(lexer, "lexer");
+function parse(str, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var tokens = lexer(str);
+  var _a = options.prefixes, prefixes = _a === void 0 ? "./" : _a, _b = options.delimiter, delimiter = _b === void 0 ? "/#?" : _b;
+  var result = [];
+  var key = 0;
+  var i = 0;
+  var path = "";
+  var tryConsume = /* @__PURE__ */ __name2(function(type) {
+    if (i < tokens.length && tokens[i].type === type)
+      return tokens[i++].value;
+  }, "tryConsume");
+  var mustConsume = /* @__PURE__ */ __name2(function(type) {
+    var value2 = tryConsume(type);
+    if (value2 !== void 0)
+      return value2;
+    var _a2 = tokens[i], nextType = _a2.type, index = _a2.index;
+    throw new TypeError("Unexpected ".concat(nextType, " at ").concat(index, ", expected ").concat(type));
+  }, "mustConsume");
+  var consumeText = /* @__PURE__ */ __name2(function() {
+    var result2 = "";
+    var value2;
+    while (value2 = tryConsume("CHAR") || tryConsume("ESCAPED_CHAR")) {
+      result2 += value2;
+    }
+    return result2;
+  }, "consumeText");
+  var isSafe = /* @__PURE__ */ __name2(function(value2) {
+    for (var _i = 0, delimiter_1 = delimiter; _i < delimiter_1.length; _i++) {
+      var char2 = delimiter_1[_i];
+      if (value2.indexOf(char2) > -1)
+        return true;
+    }
+    return false;
+  }, "isSafe");
+  var safePattern = /* @__PURE__ */ __name2(function(prefix2) {
+    var prev = result[result.length - 1];
+    var prevText = prefix2 || (prev && typeof prev === "string" ? prev : "");
+    if (prev && !prevText) {
+      throw new TypeError('Must have text between two parameters, missing text after "'.concat(prev.name, '"'));
+    }
+    if (!prevText || isSafe(prevText))
+      return "[^".concat(escapeString(delimiter), "]+?");
+    return "(?:(?!".concat(escapeString(prevText), ")[^").concat(escapeString(delimiter), "])+?");
+  }, "safePattern");
+  while (i < tokens.length) {
+    var char = tryConsume("CHAR");
+    var name = tryConsume("NAME");
+    var pattern = tryConsume("PATTERN");
+    if (name || pattern) {
+      var prefix = char || "";
+      if (prefixes.indexOf(prefix) === -1) {
+        path += prefix;
+        prefix = "";
+      }
+      if (path) {
+        result.push(path);
+        path = "";
+      }
+      result.push({
+        name: name || key++,
+        prefix,
+        suffix: "",
+        pattern: pattern || safePattern(prefix),
+        modifier: tryConsume("MODIFIER") || ""
+      });
+      continue;
+    }
+    var value = char || tryConsume("ESCAPED_CHAR");
+    if (value) {
+      path += value;
+      continue;
+    }
+    if (path) {
+      result.push(path);
+      path = "";
+    }
+    var open = tryConsume("OPEN");
+    if (open) {
+      var prefix = consumeText();
+      var name_1 = tryConsume("NAME") || "";
+      var pattern_1 = tryConsume("PATTERN") || "";
+      var suffix = consumeText();
+      mustConsume("CLOSE");
+      result.push({
+        name: name_1 || (pattern_1 ? key++ : ""),
+        pattern: name_1 && !pattern_1 ? safePattern(prefix) : pattern_1,
+        prefix,
+        suffix,
+        modifier: tryConsume("MODIFIER") || ""
+      });
+      continue;
+    }
+    mustConsume("END");
+  }
+  return result;
+}
+__name(parse, "parse");
+__name2(parse, "parse");
+function match(str, options) {
+  var keys = [];
+  var re = pathToRegexp(str, keys, options);
+  return regexpToFunction(re, keys, options);
+}
+__name(match, "match");
+__name2(match, "match");
+function regexpToFunction(re, keys, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var _a = options.decode, decode = _a === void 0 ? function(x) {
+    return x;
+  } : _a;
+  return function(pathname) {
+    var m = re.exec(pathname);
+    if (!m)
+      return false;
+    var path = m[0], index = m.index;
+    var params = /* @__PURE__ */ Object.create(null);
+    var _loop_1 = /* @__PURE__ */ __name2(function(i2) {
+      if (m[i2] === void 0)
+        return "continue";
+      var key = keys[i2 - 1];
+      if (key.modifier === "*" || key.modifier === "+") {
+        params[key.name] = m[i2].split(key.prefix + key.suffix).map(function(value) {
+          return decode(value, key);
+        });
+      } else {
+        params[key.name] = decode(m[i2], key);
+      }
+    }, "_loop_1");
+    for (var i = 1; i < m.length; i++) {
+      _loop_1(i);
+    }
+    return { path, index, params };
+  };
+}
+__name(regexpToFunction, "regexpToFunction");
+__name2(regexpToFunction, "regexpToFunction");
+function escapeString(str) {
+  return str.replace(/([.+*?=^!:${}()[\]|/\\])/g, "\\$1");
+}
+__name(escapeString, "escapeString");
+__name2(escapeString, "escapeString");
+function flags(options) {
+  return options && options.sensitive ? "" : "i";
+}
+__name(flags, "flags");
+__name2(flags, "flags");
+function regexpToRegexp(path, keys) {
+  if (!keys)
+    return path;
+  var groupsRegex = /\((?:\?<(.*?)>)?(?!\?)/g;
+  var index = 0;
+  var execResult = groupsRegex.exec(path.source);
+  while (execResult) {
+    keys.push({
+      // Use parenthesized substring match if available, index otherwise
+      name: execResult[1] || index++,
+      prefix: "",
+      suffix: "",
+      modifier: "",
+      pattern: ""
+    });
+    execResult = groupsRegex.exec(path.source);
+  }
+  return path;
+}
+__name(regexpToRegexp, "regexpToRegexp");
+__name2(regexpToRegexp, "regexpToRegexp");
+function arrayToRegexp(paths, keys, options) {
+  var parts = paths.map(function(path) {
+    return pathToRegexp(path, keys, options).source;
+  });
+  return new RegExp("(?:".concat(parts.join("|"), ")"), flags(options));
+}
+__name(arrayToRegexp, "arrayToRegexp");
+__name2(arrayToRegexp, "arrayToRegexp");
+function stringToRegexp(path, keys, options) {
+  return tokensToRegexp(parse(path, options), keys, options);
+}
+__name(stringToRegexp, "stringToRegexp");
+__name2(stringToRegexp, "stringToRegexp");
+function tokensToRegexp(tokens, keys, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  var _a = options.strict, strict = _a === void 0 ? false : _a, _b = options.start, start = _b === void 0 ? true : _b, _c = options.end, end = _c === void 0 ? true : _c, _d = options.encode, encode = _d === void 0 ? function(x) {
+    return x;
+  } : _d, _e = options.delimiter, delimiter = _e === void 0 ? "/#?" : _e, _f = options.endsWith, endsWith = _f === void 0 ? "" : _f;
+  var endsWithRe = "[".concat(escapeString(endsWith), "]|$");
+  var delimiterRe = "[".concat(escapeString(delimiter), "]");
+  var route = start ? "^" : "";
+  for (var _i = 0, tokens_1 = tokens; _i < tokens_1.length; _i++) {
+    var token = tokens_1[_i];
+    if (typeof token === "string") {
+      route += escapeString(encode(token));
+    } else {
+      var prefix = escapeString(encode(token.prefix));
+      var suffix = escapeString(encode(token.suffix));
+      if (token.pattern) {
+        if (keys)
+          keys.push(token);
+        if (prefix || suffix) {
+          if (token.modifier === "+" || token.modifier === "*") {
+            var mod = token.modifier === "*" ? "?" : "";
+            route += "(?:".concat(prefix, "((?:").concat(token.pattern, ")(?:").concat(suffix).concat(prefix, "(?:").concat(token.pattern, "))*)").concat(suffix, ")").concat(mod);
+          } else {
+            route += "(?:".concat(prefix, "(").concat(token.pattern, ")").concat(suffix, ")").concat(token.modifier);
+          }
+        } else {
+          if (token.modifier === "+" || token.modifier === "*") {
+            throw new TypeError('Can not repeat "'.concat(token.name, '" without a prefix and suffix'));
+          }
+          route += "(".concat(token.pattern, ")").concat(token.modifier);
+        }
+      } else {
+        route += "(?:".concat(prefix).concat(suffix, ")").concat(token.modifier);
+      }
+    }
+  }
+  if (end) {
+    if (!strict)
+      route += "".concat(delimiterRe, "?");
+    route += !options.endsWith ? "$" : "(?=".concat(endsWithRe, ")");
+  } else {
+    var endToken = tokens[tokens.length - 1];
+    var isEndDelimited = typeof endToken === "string" ? delimiterRe.indexOf(endToken[endToken.length - 1]) > -1 : endToken === void 0;
+    if (!strict) {
+      route += "(?:".concat(delimiterRe, "(?=").concat(endsWithRe, "))?");
+    }
+    if (!isEndDelimited) {
+      route += "(?=".concat(delimiterRe, "|").concat(endsWithRe, ")");
+    }
+  }
+  return new RegExp(route, flags(options));
+}
+__name(tokensToRegexp, "tokensToRegexp");
+__name2(tokensToRegexp, "tokensToRegexp");
+function pathToRegexp(path, keys, options) {
+  if (path instanceof RegExp)
+    return regexpToRegexp(path, keys);
+  if (Array.isArray(path))
+    return arrayToRegexp(path, keys, options);
+  return stringToRegexp(path, keys, options);
+}
+__name(pathToRegexp, "pathToRegexp");
+__name2(pathToRegexp, "pathToRegexp");
+var escapeRegex = /[.+?^${}()|[\]\\]/g;
+function* executeRequest(request) {
+  const requestPath = new URL(request.url).pathname;
+  for (const route of [...routes].reverse()) {
+    if (route.method && route.method !== request.method) {
+      continue;
+    }
+    const routeMatcher = match(route.routePath.replace(escapeRegex, "\\$&"), {
+      end: false
+    });
+    const mountMatcher = match(route.mountPath.replace(escapeRegex, "\\$&"), {
+      end: false
+    });
+    const matchResult = routeMatcher(requestPath);
+    const mountMatchResult = mountMatcher(requestPath);
+    if (matchResult && mountMatchResult) {
+      for (const handler of route.middlewares.flat()) {
+        yield {
+          handler,
+          params: matchResult.params,
+          path: mountMatchResult.path
+        };
+      }
+    }
+  }
+  for (const route of routes) {
+    if (route.method && route.method !== request.method) {
+      continue;
+    }
+    const routeMatcher = match(route.routePath.replace(escapeRegex, "\\$&"), {
+      end: true
+    });
+    const mountMatcher = match(route.mountPath.replace(escapeRegex, "\\$&"), {
+      end: false
+    });
+    const matchResult = routeMatcher(requestPath);
+    const mountMatchResult = mountMatcher(requestPath);
+    if (matchResult && mountMatchResult && route.modules.length) {
+      for (const handler of route.modules.flat()) {
+        yield {
+          handler,
+          params: matchResult.params,
+          path: matchResult.path
+        };
+      }
+      break;
+    }
+  }
+}
+__name(executeRequest, "executeRequest");
+__name2(executeRequest, "executeRequest");
+var pages_template_worker_default = {
+  async fetch(originalRequest, env, workerContext) {
+    let request = originalRequest;
+    const handlerIterator = executeRequest(request);
+    let data = {};
+    let isFailOpen = false;
+    const next = /* @__PURE__ */ __name2(async (input, init) => {
+      if (input !== void 0) {
+        let url = input;
+        if (typeof input === "string") {
+          url = new URL(input, request.url).toString();
+        }
+        request = new Request(url, init);
+      }
+      const result = handlerIterator.next();
+      if (result.done === false) {
+        const { handler, params, path } = result.value;
+        const context = {
+          request: new Request(request.clone()),
+          functionPath: path,
+          next,
+          params,
+          get data() {
+            return data;
+          },
+          set data(value) {
+            if (typeof value !== "object" || value === null) {
+              throw new Error("context.data must be an object");
+            }
+            data = value;
+          },
+          env,
+          waitUntil: workerContext.waitUntil.bind(workerContext),
+          passThroughOnException: /* @__PURE__ */ __name2(() => {
+            isFailOpen = true;
+          }, "passThroughOnException")
+        };
+        const response = await handler(context);
+        if (!(response instanceof Response)) {
+          throw new Error("Your Pages function should return a Response");
+        }
+        return cloneResponse(response);
+      } else if ("ASSETS") {
+        const response = await env["ASSETS"].fetch(request);
+        return cloneResponse(response);
+      } else {
+        const response = await fetch(request);
+        return cloneResponse(response);
+      }
+    }, "next");
+    try {
+      return await next();
+    } catch (error) {
+      if (isFailOpen) {
+        const response = await env["ASSETS"].fetch(request);
+        return cloneResponse(response);
+      }
+      throw error;
+    }
+  }
+};
+var cloneResponse = /* @__PURE__ */ __name2((response) => (
+  // https://fetch.spec.whatwg.org/#null-body-status
+  new Response(
+    [101, 204, 205, 304].includes(response.status) ? null : response.body,
+    response
+  )
+), "cloneResponse");
+var drainBody = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env);
+  } finally {
+    try {
+      if (request.body !== null && !request.bodyUsed) {
+        const reader = request.body.getReader();
+        while (!(await reader.read()).done) {
+        }
+      }
+    } catch (e) {
+      console.error("Failed to drain the unused request body.", e);
+    }
+  }
+}, "drainBody");
+var middleware_ensure_req_body_drained_default = drainBody;
+function reduceError(e) {
+  return {
+    name: e?.name,
+    message: e?.message ?? String(e),
+    stack: e?.stack,
+    cause: e?.cause === void 0 ? void 0 : reduceError(e.cause)
+  };
+}
+__name(reduceError, "reduceError");
+__name2(reduceError, "reduceError");
+var jsonError = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env);
+  } catch (e) {
+    const error = reduceError(e);
+    return Response.json(error, {
+      status: 500,
+      headers: { "MF-Experimental-Error-Stack": "true" }
+    });
+  }
+}, "jsonError");
+var middleware_miniflare3_json_error_default = jsonError;
+var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
+  middleware_ensure_req_body_drained_default,
+  middleware_miniflare3_json_error_default
+];
+var middleware_insertion_facade_default = pages_template_worker_default;
+var __facade_middleware__ = [];
+function __facade_register__(...args) {
+  __facade_middleware__.push(...args.flat());
+}
+__name(__facade_register__, "__facade_register__");
+__name2(__facade_register__, "__facade_register__");
+function __facade_invokeChain__(request, env, ctx, dispatch, middlewareChain) {
+  const [head, ...tail] = middlewareChain;
+  const middlewareCtx = {
+    dispatch,
+    next(newRequest, newEnv) {
+      return __facade_invokeChain__(newRequest, newEnv, ctx, dispatch, tail);
+    }
+  };
+  return head(request, env, ctx, middlewareCtx);
+}
+__name(__facade_invokeChain__, "__facade_invokeChain__");
+__name2(__facade_invokeChain__, "__facade_invokeChain__");
+function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
+  return __facade_invokeChain__(request, env, ctx, dispatch, [
+    ...__facade_middleware__,
+    finalMiddleware
+  ]);
+}
+__name(__facade_invoke__, "__facade_invoke__");
+__name2(__facade_invoke__, "__facade_invoke__");
+var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
+  static {
+    __name(this, "___Facade_ScheduledController__");
+  }
+  constructor(scheduledTime, cron, noRetry) {
+    this.scheduledTime = scheduledTime;
+    this.cron = cron;
+    this.#noRetry = noRetry;
+  }
+  static {
+    __name2(this, "__Facade_ScheduledController__");
+  }
+  #noRetry;
+  noRetry() {
+    if (!(this instanceof ___Facade_ScheduledController__)) {
+      throw new TypeError("Illegal invocation");
+    }
+    this.#noRetry();
+  }
+};
+function wrapExportedHandler(worker) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
+    return worker;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
+    __facade_register__(middleware);
+  }
+  const fetchDispatcher = /* @__PURE__ */ __name2(function(request, env, ctx) {
+    if (worker.fetch === void 0) {
+      throw new Error("Handler does not export a fetch() function.");
+    }
+    return worker.fetch(request, env, ctx);
+  }, "fetchDispatcher");
+  return {
+    ...worker,
+    fetch(request, env, ctx) {
+      const dispatcher = /* @__PURE__ */ __name2(function(type, init) {
+        if (type === "scheduled" && worker.scheduled !== void 0) {
+          const controller = new __Facade_ScheduledController__(
+            Date.now(),
+            init.cron ?? "",
+            () => {
+            }
+          );
+          return worker.scheduled(controller, env, ctx);
+        }
+      }, "dispatcher");
+      return __facade_invoke__(request, env, ctx, dispatcher, fetchDispatcher);
+    }
+  };
+}
+__name(wrapExportedHandler, "wrapExportedHandler");
+__name2(wrapExportedHandler, "wrapExportedHandler");
+function wrapWorkerEntrypoint(klass) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
+    return klass;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
+    __facade_register__(middleware);
+  }
+  return class extends klass {
+    #fetchDispatcher = /* @__PURE__ */ __name2((request, env, ctx) => {
+      this.env = env;
+      this.ctx = ctx;
+      if (super.fetch === void 0) {
+        throw new Error("Entrypoint class does not define a fetch() function.");
+      }
+      return super.fetch(request);
+    }, "#fetchDispatcher");
+    #dispatcher = /* @__PURE__ */ __name2((type, init) => {
+      if (type === "scheduled" && super.scheduled !== void 0) {
+        const controller = new __Facade_ScheduledController__(
+          Date.now(),
+          init.cron ?? "",
+          () => {
+          }
+        );
+        return super.scheduled(controller);
+      }
+    }, "#dispatcher");
+    fetch(request) {
+      return __facade_invoke__(
+        request,
+        this.env,
+        this.ctx,
+        this.#dispatcher,
+        this.#fetchDispatcher
+      );
+    }
+  };
+}
+__name(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
+__name2(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
+var WRAPPED_ENTRY;
+if (typeof middleware_insertion_facade_default === "object") {
+  WRAPPED_ENTRY = wrapExportedHandler(middleware_insertion_facade_default);
+} else if (typeof middleware_insertion_facade_default === "function") {
+  WRAPPED_ENTRY = wrapWorkerEntrypoint(middleware_insertion_facade_default);
+}
+var middleware_loader_entry_default = WRAPPED_ENTRY;
+
+// ../../Users/yagoo/AppData/Roaming/npm/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
+var drainBody2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env);
+  } finally {
+    try {
+      if (request.body !== null && !request.bodyUsed) {
+        const reader = request.body.getReader();
+        while (!(await reader.read()).done) {
+        }
+      }
+    } catch (e) {
+      console.error("Failed to drain the unused request body.", e);
+    }
+  }
+}, "drainBody");
+var middleware_ensure_req_body_drained_default2 = drainBody2;
+
+// ../../Users/yagoo/AppData/Roaming/npm/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
+function reduceError2(e) {
+  return {
+    name: e?.name,
+    message: e?.message ?? String(e),
+    stack: e?.stack,
+    cause: e?.cause === void 0 ? void 0 : reduceError2(e.cause)
+  };
+}
+__name(reduceError2, "reduceError");
+var jsonError2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
+  try {
+    return await middlewareCtx.next(request, env);
+  } catch (e) {
+    const error = reduceError2(e);
+    return Response.json(error, {
+      status: 500,
+      headers: { "MF-Experimental-Error-Stack": "true" }
+    });
+  }
+}, "jsonError");
+var middleware_miniflare3_json_error_default2 = jsonError2;
+
+// .wrangler/tmp/bundle-oDIDne/middleware-insertion-facade.js
+var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
+  middleware_ensure_req_body_drained_default2,
+  middleware_miniflare3_json_error_default2
+];
+var middleware_insertion_facade_default2 = middleware_loader_entry_default;
+
+// ../../Users/yagoo/AppData/Roaming/npm/node_modules/wrangler/templates/middleware/common.ts
+var __facade_middleware__2 = [];
+function __facade_register__2(...args) {
+  __facade_middleware__2.push(...args.flat());
+}
+__name(__facade_register__2, "__facade_register__");
+function __facade_invokeChain__2(request, env, ctx, dispatch, middlewareChain) {
+  const [head, ...tail] = middlewareChain;
+  const middlewareCtx = {
+    dispatch,
+    next(newRequest, newEnv) {
+      return __facade_invokeChain__2(newRequest, newEnv, ctx, dispatch, tail);
+    }
+  };
+  return head(request, env, ctx, middlewareCtx);
+}
+__name(__facade_invokeChain__2, "__facade_invokeChain__");
+function __facade_invoke__2(request, env, ctx, dispatch, finalMiddleware) {
+  return __facade_invokeChain__2(request, env, ctx, dispatch, [
+    ...__facade_middleware__2,
+    finalMiddleware
+  ]);
+}
+__name(__facade_invoke__2, "__facade_invoke__");
+
+// .wrangler/tmp/bundle-oDIDne/middleware-loader.entry.ts
+var __Facade_ScheduledController__2 = class ___Facade_ScheduledController__2 {
+  constructor(scheduledTime, cron, noRetry) {
+    this.scheduledTime = scheduledTime;
+    this.cron = cron;
+    this.#noRetry = noRetry;
+  }
+  static {
+    __name(this, "__Facade_ScheduledController__");
+  }
+  #noRetry;
+  noRetry() {
+    if (!(this instanceof ___Facade_ScheduledController__2)) {
+      throw new TypeError("Illegal invocation");
+    }
+    this.#noRetry();
+  }
+};
+function wrapExportedHandler2(worker) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__2 === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__2.length === 0) {
+    return worker;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__2) {
+    __facade_register__2(middleware);
+  }
+  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env, ctx) {
+    if (worker.fetch === void 0) {
+      throw new Error("Handler does not export a fetch() function.");
+    }
+    return worker.fetch(request, env, ctx);
+  }, "fetchDispatcher");
+  return {
+    ...worker,
+    fetch(request, env, ctx) {
+      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
+        if (type === "scheduled" && worker.scheduled !== void 0) {
+          const controller = new __Facade_ScheduledController__2(
+            Date.now(),
+            init.cron ?? "",
+            () => {
+            }
+          );
+          return worker.scheduled(controller, env, ctx);
+        }
+      }, "dispatcher");
+      return __facade_invoke__2(request, env, ctx, dispatcher, fetchDispatcher);
+    }
+  };
+}
+__name(wrapExportedHandler2, "wrapExportedHandler");
+function wrapWorkerEntrypoint2(klass) {
+  if (__INTERNAL_WRANGLER_MIDDLEWARE__2 === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__2.length === 0) {
+    return klass;
+  }
+  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__2) {
+    __facade_register__2(middleware);
+  }
+  return class extends klass {
+    #fetchDispatcher = /* @__PURE__ */ __name((request, env, ctx) => {
+      this.env = env;
+      this.ctx = ctx;
+      if (super.fetch === void 0) {
+        throw new Error("Entrypoint class does not define a fetch() function.");
+      }
+      return super.fetch(request);
+    }, "#fetchDispatcher");
+    #dispatcher = /* @__PURE__ */ __name((type, init) => {
+      if (type === "scheduled" && super.scheduled !== void 0) {
+        const controller = new __Facade_ScheduledController__2(
+          Date.now(),
+          init.cron ?? "",
+          () => {
+          }
+        );
+        return super.scheduled(controller);
+      }
+    }, "#dispatcher");
+    fetch(request) {
+      return __facade_invoke__2(
+        request,
+        this.env,
+        this.ctx,
+        this.#dispatcher,
+        this.#fetchDispatcher
+      );
+    }
+  };
+}
+__name(wrapWorkerEntrypoint2, "wrapWorkerEntrypoint");
+var WRAPPED_ENTRY2;
+if (typeof middleware_insertion_facade_default2 === "object") {
+  WRAPPED_ENTRY2 = wrapExportedHandler2(middleware_insertion_facade_default2);
+} else if (typeof middleware_insertion_facade_default2 === "function") {
+  WRAPPED_ENTRY2 = wrapWorkerEntrypoint2(middleware_insertion_facade_default2);
+}
+var middleware_loader_entry_default2 = WRAPPED_ENTRY2;
+export {
+  __INTERNAL_WRANGLER_MIDDLEWARE__2 as __INTERNAL_WRANGLER_MIDDLEWARE__,
+  middleware_loader_entry_default2 as default
+};
+//# sourceMappingURL=functionsWorker-0.8122293055957435.js.map
