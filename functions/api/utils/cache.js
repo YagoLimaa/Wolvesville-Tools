@@ -1,4 +1,4 @@
-const { jsonResponse } = require('./response');
+import { jsonResponse } from './response';
 
 function withCache(handler, durationInSeconds = 60) {
   // Cloudflare KV has a minimum TTL of 60 seconds.
@@ -52,5 +52,5 @@ function withCache(handler, durationInSeconds = 60) {
   };
 }
 
-module.exports = { withCache };
+export { withCache };
 
