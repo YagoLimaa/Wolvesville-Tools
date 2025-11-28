@@ -12,11 +12,6 @@ import { useRoles, Role } from "./contexts/RolesContext";
 import { Progress } from "@/components/ui/progress";
 import { avatarsApi } from "@/lib/api";
 
-const getSharedAvatarIdFromUrl = (url: string): string | null => {
-  const match = url.match(/\/([a-f0-9-]+)\.png/);
-  return match ? match[1] : null;
-};
-
 const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' = '3x'): string => {
   if (!url) return "";
   if (url.includes('wolvesville.com/static/media') || url.includes('via.placeholder.com') || url.match(/@\dx\./)) {
@@ -428,10 +423,16 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
         <CardHeader className="pb-4">
           <div className="flex items-start gap-4">
             <div className="flex flex-col items-center gap-2">
-              <img
-                src={getHighResUrl(player.equippedAvatar.url)}
-                alt={`Avatar de ${player.username}`}
-                className="w-12 h-12 md:w-16 md:h-16 rounded-full border-2 border-primary shadow-glow-primary object-cover flex-shrink-0"
+              <div
+                role="img"
+                aria-label={`Avatar de ${player.username}`}
+                style={{
+                  backgroundImage: `url(${getHighResUrl(player.equippedAvatar.url)})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
+                className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-primary shadow-glow-primary flex-shrink-0"
               />
               <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
                 {player.level === -1 ? '?' : t('playerCard.level')} {player.level}
@@ -585,10 +586,16 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                       onClick={() => setInspectingAvatar({ url: avatar.url, index })}
                       title={t('playerCard.clickToInspect')}
                     >
-                      <img
-                        src={getHighResUrl(avatar.url)}
-                        alt="Avatar"
-                        className="w-full aspect-[123/128] rounded-lg border border-border object-cover transition-colors group-hover:border-primary"
+                      <div
+                        role="img"
+                        aria-label="Avatar"
+                        style={{
+                          backgroundImage: `url(${getHighResUrl(avatar.url)})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                        }}
+                        className="w-full aspect-[123/128] rounded-lg border border-border transition-colors group-hover:border-primary"
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity rounded-lg">
                         <Info className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />

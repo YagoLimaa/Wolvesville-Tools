@@ -26,7 +26,7 @@ export const NavigationBar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src={wolfLogo} alt="Wolvesville" className="w-10 h-10" />
-            <span className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+            <span className="hidden sm:inline md:hidden lg:inline text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Wolvesville Tools
             </span>
           </Link>
@@ -91,9 +91,7 @@ export const NavigationBar = () => {
                     </div>
                   </div>
                 </NavigationMenuContent>
-              </NavigationMenuItem>
-
-              <NavigationMenuItem>
+              </NavigationMenuItem>              <NavigationMenuItem>
                 <NavigationMenuTrigger className="bg-background/50 hover:bg-accent/80">
                   <Package className="w-4 h-4 mr-2" />
                   {t('navigation.items')}
@@ -136,7 +134,7 @@ export const NavigationBar = () => {
                     {t('navigation.events')}
                   </button> 
                 </PopoverTrigger>
-                <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0">
+                <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0 custom-scrollbar">
                   <AnnouncementsViewer />
                 </PopoverContent>
               </Popover>
@@ -149,7 +147,7 @@ export const NavigationBar = () => {
                     {t('navigation.updates')}
                   </button> 
                 </PopoverTrigger>
-                <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0">
+                <PopoverContent className="w-[450px] max-h-[70vh] overflow-y-auto p-0 custom-scrollbar">
                   <ChangelogViewer />
                 </PopoverContent>
               </Popover>

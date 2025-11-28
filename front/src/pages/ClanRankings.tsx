@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { ClanCard, Clan } from "@/components/ClanCard";
@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import { ClanFilters } from "@/components/ClanFilters";
 import { clansApi } from "@/lib/api";
+import { useClanFilters } from "@/hooks/useClanFilters";
 
 const ClanRankings = () => {
   const { t } = useTranslation();
@@ -14,22 +15,27 @@ const ClanRankings = () => {
   const [rankings, setRankings] = useState<Clan[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [language, setLanguage] = useState("all");
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<"xp" | "members">("xp");
-  const [joinType, setJoinType] = useState("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
+  const {
+    language,
+    setLanguage,
+    localSearchTerm,
+    setLocalSearchTerm,
+    sortBy,
+    setSortBy,
+    joinType,
+    setJoinType,
+    sortOrder,
+    toggleSortOrder,
+    sortedResults,
+  } = useClanFilters(rankings);
 
   const fetchRankings = useCallback(async (lang: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await clansApi.search(lang !== 'all' ? lang.toUpperCase() : undefined);
+      const response = await clansApi.search(undefined, lang !== 'all' ? lang.toUpperCase() : undefined);
       if (response.error) {
         throw new Error(t("clanRankings.fetch_error"));
       }
@@ -46,27 +52,6 @@ const ClanRankings = () => {
   useEffect(() => {
     fetchRankings(language);
   }, [language, fetchRankings]);
-
-  const sortedResults = useMemo(() => {
-    if (!rankings) return [];
-    
-    const filtered = rankings.filter(clan => 
-      clan.name.toLowerCase().includes(localSearchTerm.toLowerCase())
-    ).filter(clan =>
-      joinType === 'all' || clan.joinType === joinType
-    );
-
-    return filtered.sort((a, b) => {
-      const aValue = sortBy === 'xp' ? a.xp : a.memberCount;
-      const bValue = sortBy === 'xp' ? b.xp : b.memberCount;
-
-      if (sortOrder === 'asc') {
-        return aValue - bValue;
-      } else {
-        return bValue - aValue;
-      }
-    });
-  }, [rankings, localSearchTerm, joinType, sortBy, sortOrder]);
 
   return (
     <div className="min-h-screen bg-background">

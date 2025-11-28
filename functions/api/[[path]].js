@@ -2,7 +2,6 @@ import { jsonResponse } from './utils/response';
 import { requestConfigMiddleware } from './middleware/requestConfig';
 import { errorHandler } from './middleware/errorHandler';
 
-// Import all route handlers
 import { handleAnnouncements } from './routes/announcements';
 import { handleAvatars, handleSharedAvatarId, handleAvatarDetails } from './routes/avatars';
 import { handleBattlePassSeason, handleBattlePassShop, handleBattlePassChallenges } from './routes/battlePass';

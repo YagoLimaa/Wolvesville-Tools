@@ -29,6 +29,25 @@ const SearchPlayer = () => {
     
     try {
       const response = await playerApi.search(username, page);
+
+      if (response.status === 404) {
+        setSearchResult({
+          players: [],
+            pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 0,
+            limit: 1,
+            hasPages: false,
+          }
+        });
+        setCurrentQuery(username);
+        setSearchParams({ username, page: page.toString() });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsLoading(false);
+        return;
+      }
+
       if (response.error) {
         throw new Error(response.error);
       }

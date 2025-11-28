@@ -1,15 +1,22 @@
-import { WOLVESVILLE_API_BASE_URL } from '../utils/constants.js';
+import { proxyRequest } from '../utils/apiProxy.js';
 import { jsonResponse } from '../utils/response.js';
 
 export async function handleAnnouncements(request) {
   const { searchParams } = new URL(request.url);
   const locale = searchParams.get('locale') || 'en';
-  
-  const requestUrl = new URL(`${WOLVESVILLE_API_BASE_URL}/announcements`);
-  requestUrl.searchParams.append('locale', locale);
-  
-  const response = await fetch(requestUrl.toString(), request.requestConfig);
+
+  const params = new URLSearchParams();
+  params.set('locale', locale);
+
+  const response = await proxyRequest(request, 'announcements', { customSearchParams: params });
   const responseData = await response.json();
-  
-  return jsonResponse(responseData);
+
+  let announcements = [];
+  if (Array.isArray(responseData)) {
+    announcements = responseData;
+  } else if (responseData && Array.isArray(responseData.announcements)) {
+    announcements = responseData.announcements;
+  }
+
+  return jsonResponse(announcements);
 }

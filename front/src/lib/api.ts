@@ -88,7 +88,7 @@ export const clansApi = {
     apiGet('/clans/search', { name, language, open: open ? 'true' : undefined }),
 
   getDetails: (id: string) =>
-    apiGet(`/clan/${id}`),
+    apiGet(`/clans/${id}`),
 };
 
 export const shopApi = {

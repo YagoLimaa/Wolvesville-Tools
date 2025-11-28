@@ -41,6 +41,8 @@ export interface SearchResult {
   pagination: {
     currentPage: number;
     totalPages: number;
+    totalItems: number;
+    limit: number;
     hasPages: boolean;
     prevPage?: number;
     nextPage?: number;

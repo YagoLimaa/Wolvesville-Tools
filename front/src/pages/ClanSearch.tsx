@@ -9,6 +9,7 @@ import { Info } from "lucide-react";
 import { debounce } from "@/lib/utils";
 import { ClanFilters } from "@/components/ClanFilters";
 import { clansApi } from "@/lib/api";
+import { useClanFilters } from "@/hooks/useClanFilters";
 
 const localesList = [
   "all", "br", "de", "fr", "gb", "th", "vn", "tr", "aq", "ar", "at", "au", 
@@ -28,17 +29,22 @@ const ClanSearch = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"xp" | "members">("xp");
-  const [language, setLanguage] = useState("all");
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-  const [joinType, setJoinType] = useState("all");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
+  const {
+    language,
+    setLanguage,
+    localSearchTerm,
+    setLocalSearchTerm,
+    sortBy,
+    setSortBy,
+    joinType,
+    setJoinType,
+    sortOrder,
+    toggleSortOrder,
+    sortedResults,
+  } = useClanFilters(searchResults);
 
   const locales = useMemo(() => 
     localesList.reduce((acc, loc) => {
@@ -64,12 +70,7 @@ const ClanSearch = () => {
       if (response.error) {
         throw new Error(response.error);
       }
-      let results: Clan[] = [];
-      if (Array.isArray(response.data)) {
-        results = response.data;
-      } else if (response.data && typeof response.data === 'object' && 'clans' in response.data) {
-        results = Array.isArray(response.data.clans) ? response.data.clans : [];
-      }
+      let results: Clan[] = Array.isArray(response.data) ? response.data : (response.data?.clans || []);
       setSearchResults(results);
     } catch (err) {
       setError(t("common.searchError"));
@@ -97,27 +98,6 @@ const ClanSearch = () => {
       debouncedSearch({ clanName: query, lang: language });
     }
   }, [query, language, debouncedSearch]);
-
-  const sortedResults = useMemo(() => {
-    if (!searchResults) return [];
-    
-    const filtered = searchResults.filter(clan => 
-      clan.name.toLowerCase().includes(localSearchTerm.toLowerCase())
-    ).filter(clan => 
-      joinType === 'all' || clan.joinType === joinType
-    );
-
-    return filtered.sort((a, b) => {
-      const aValue = sortBy === 'xp' ? a.xp : a.memberCount;
-      const bValue = sortBy === 'xp' ? b.xp : b.memberCount;
-
-      if (sortOrder === 'asc') {
-        return aValue - bValue;
-      } else {
-        return bValue - aValue;
-      }
-    });
-  }, [searchResults, sortBy, localSearchTerm, joinType, sortOrder]);
 
   return (
     <div className="min-h-screen bg-background">
