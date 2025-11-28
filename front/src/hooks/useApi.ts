@@ -9,7 +9,7 @@ interface UseApiOptions<T> extends Omit<UseQueryOptions<ApiResponse<T>>, 'queryK
 /**
  * Custom hook for making API requests with React Query
  * - Automatic error handling
- * - Built-in caching and refetching
+ * - Built-in refetching
  * - Type-safe responses
  * - Consistent error messages
  */
@@ -37,7 +37,6 @@ export function useApi<T = unknown>(
     },
     enabled,
     retry: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes default
     ...queryOptions,
   });
 }

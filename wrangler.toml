@@ -1,0 +1,7 @@
+name = "website"
+compatibility_date = "2024-05-08"
+
+[[kv_namespaces]]
+binding = "API_CACHE"
+id = "6a336a889ddd43cea76e3bd77b69df11"
+preview_id = "6a336a889ddd43cea76e3bd77b69df11"

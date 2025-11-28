@@ -13,7 +13,6 @@ import ClanSearch from "./pages/ClanSearch";
 import ClanRankings from "./pages/ClanRankings";
 import ClanInfo from "./pages/ClanInfo";
 import NotFound from "./pages/NotFound";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Footer } from "./components/ui/Footer";
 
 const queryClient = new QueryClient();
@@ -51,4 +50,3 @@ const App = () => {
 };
 
 export default App;
-
