@@ -276,7 +276,7 @@
       "bodyPaints": "Pinturas Corporais",
       "avatarItemSets": "Conjuntos de Itens",
       "avatarItemCollections": "Coleções de Itens",
-      "bundles": "Pacotes",
+      "bundles": "Bundles",
       "calendars": "Calendários",
       "profileIcons": "Ícones de Perfil",
       "profileIconBorders": "Bordas de Ícone",
@@ -393,7 +393,7 @@
   },
   "categories": {
     "skin": "Skin",
-    "bundle": "Pacote"
+    "bundle": "Bundle"
   },
   "verification": {
     "title": "Verificar Conta do Wolvesville",
