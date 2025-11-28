@@ -15,17 +15,18 @@ function withCache(handler, durationInSeconds = 60) {
     const key = request.url;
     
     try {
-      // Use { type: 'json' } to automatically parse the JSON response from KV
-      const cachedData = await kv.get(key, { type: 'json' });
+      const cachedText = await kv.get(key, { type: 'text' });
 
-      if (cachedData) {
+      if (cachedText) {
+        console.log(`[Cache] HIT for key: ${key}`);
+        const cachedData = JSON.parse(cachedText);
         const response = jsonResponse(cachedData.data, cachedData.status);
         response.headers.set('X-Response-Time', '0ms');
-
         return response;
       }
     } catch (e) {
-      console.error(`KV get failed: ${e}`);
+      // Log the error but continue to fetch from origin
+      console.error(`KV cache read/parse failed for key ${key}: ${e}`);
     }
 
     const startTime = Date.now();
@@ -35,14 +36,19 @@ function withCache(handler, durationInSeconds = 60) {
 
     if (response.status === 200) {
       const clonedResponse = response.clone();
-      const data = await clonedResponse.json();
-      
-      // Do not block the response while writing to the cache.
-      // request.waitUntil allows the write to happen in the background.
-      request.waitUntil(
-        kv.put(key, JSON.stringify({ data, status: response.status }), { expirationTtl })
-          .catch(e => console.error(`KV put failed: ${e}`))
-      );
+      try {
+        const data = await clonedResponse.json();
+        
+        // Do not block the response while writing to the cache.
+        // request.waitUntil allows the write to happen in the background.
+        request.waitUntil(
+          kv.put(key, JSON.stringify({ data, status: response.status }), { expirationTtl })
+            .then(() => console.log(`[Cache] Stored key: ${key}`))
+            .catch(e => console.error(`KV put failed: ${e}`))
+        );
+      } catch (e) {
+        console.error(`Failed to parse JSON from origin response for key ${key}: ${e}`);
+      }
     }
     
     const responseWithHeader = new Response(response.body, response);
