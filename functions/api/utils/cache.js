@@ -39,13 +39,15 @@ function withCache(handler, durationInSeconds = 60) {
       try {
         const data = await clonedResponse.json();
         
+        const cachePromise = kv.put(key, JSON.stringify({ data, status: response.status }), { expirationTtl })
+          .then(() => console.log(`[Cache] Stored key: ${key}`))
+          .catch(e => console.error(`KV put failed: ${e}`));
+
         // Do not block the response while writing to the cache.
         // request.waitUntil allows the write to happen in the background.
-        request.waitUntil(
-          kv.put(key, JSON.stringify({ data, status: response.status }), { expirationTtl })
-            .then(() => console.log(`[Cache] Stored key: ${key}`))
-            .catch(e => console.error(`KV put failed: ${e}`))
-        );
+        if (typeof request.waitUntil === 'function') {
+          request.waitUntil(cachePromise);
+        }
       } catch (e) {
         console.error(`Failed to parse JSON from origin response for key ${key}: ${e}`);
       }

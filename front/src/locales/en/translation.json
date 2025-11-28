@@ -25,6 +25,7 @@
     "help": {
       "button": "Help",
       "title": "Help",
+      "description": "Get help and find contact information.",
       "feature1": {
         "title": "For questions or help, find me on Discord at `yagod` or in-game as `Yagod`.",
         "description": ""
@@ -115,13 +116,15 @@
       "noItems": "No items in the pass shop to display.",
       "exchangeVoucher": "Exchange Voucher",
       "title": "Pass Shop",
-      "dialogTitle": "Season {{seasonNumber}} Shop"
+      "dialogTitle": "Season {{seasonNumber}} Shop",
+      "dialogDescription": "See the items available in the Battle Pass shop for this season."
     },
     "rewards": {
       "unknownItem": "Unknown Item",
       "noRewards": "No rewards to display.",
       "level": "Level {{level}}",
       "dialogTitle": "Season {{seasonNumber}} Rewards",
+      "dialogDescription": "Browse the rewards for this Battle Pass season.",
       "viewButton": "View Full Battle Pass"
     },
     "challenges": {
@@ -137,7 +140,8 @@
             "endingToday": "Ending today",
             "totalRewards": "Total Rewards",
             "passCost": "Pass Cost"
-          }  },
+          }
+  },
   "clanCard": {
     "members": "{{count}} Members",
     "viewMembers": "View Members",
@@ -147,6 +151,7 @@
     "member": "Member"
   },
   "playerCard": {
+    "username": "Username",
     "level": "Level",
     "gameStats": "Game Stats",
     "wins": "Wins:",
@@ -170,12 +175,14 @@
     "fetchAvatarError": "Failed to fetch avatar details.",
     "genericAvatarError": "An error occurred while inspecting the avatar.",
     "avatarInspectorTitle": "Avatar Inspector",
+    "avatarInspectorDescription": "Inspect the items that make up this avatar.",
     "avatarComposition": "Composition",
     "fullAvatar": "Full Avatar",
     "setDetailsTitle": "Set Details",
     "itemBelongsTo": "This item belongs to the set:",
     "origin": "Origin",
     "achievements": "Achievements",
+    "achievementsDescription": "Here are the player's achievements, sorted by level.",
     "maxLevel": "Max Level",
     "clickToSee": "Click to see"
   },
@@ -205,6 +212,7 @@
     "offer": "Offer",
     "detailsError": "Could not find the details for the items in this bundle.",
     "clickToView": "Click to view details.",
+    "setDetailsDescription": "Here are the items included in this set.",
     "types": {
       "AVATAR_ITEMS_SET": "Limited Outfits",
       "ADVANCED_ROLE_CARD": "Advanced Roles",
@@ -241,6 +249,7 @@
     "unisex": "Unisex",
     "avatarType": "Avatar Type",
     "battlePassSeason": "Battle Pass Season",
+    "battlePassSeasonDescription": "All items available in this Battle Pass season.",
     "season": "Season {{season}}",
     "selectSeasonPlaceholder": "Select a season",
     "errorLoadingTitle": "Error Loading Items",

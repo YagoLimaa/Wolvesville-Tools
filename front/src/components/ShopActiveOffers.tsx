@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -275,6 +275,9 @@ export const ShopActiveOffers = () => {
               <>
                 <DialogHeader>
                   <DialogTitle className="text-center text-2xl font-bold">{(selectedSet.name as string) || ""}</DialogTitle>
+                  <DialogDescription className="text-center text-muted-foreground">
+                    {t('shop.setDetailsDescription', 'Here are the items included in this set.')}
+                  </DialogDescription>
                 </DialogHeader>
                 <div className="relative mb-4 flex justify-center">
                   <img src={selectedSet.promoImageUrl as string} alt={selectedSet.name as string} className="h-auto max-h-40 object-contain rounded-lg border border-border" />

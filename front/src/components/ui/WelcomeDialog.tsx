@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "./dialog";
 import { useTranslation } from "react-i18next";
 import { Button } from "./button";
@@ -51,7 +52,7 @@ export function WelcomeDialog() {
           <DialogTitle className="text-xl sm:text-2xl">{t("welcomeDialog.title")}</DialogTitle>
         </DialogHeader>
         <div className="py-4">
-          <p className="text-muted-foreground mb-6">{t('welcomeDialog.description', "Explore as novidades e recursos que preparamos para você:")}</p>
+          <DialogDescription className="mb-6">{t('welcomeDialog.description', "Explore as novidades e recursos que preparamos para você:")}</DialogDescription>
           <div className="space-y-6">
             <div>
               <GradientButton className="w-full justify-start text-base py-4 sm:text-lg sm:py-6" onClick={() => handleNavigate('/search')}>

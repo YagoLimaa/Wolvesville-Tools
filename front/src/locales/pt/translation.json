@@ -25,6 +25,7 @@
     "help": {
       "button": "Ajuda",
       "title": "Ajuda",
+      "description": "Obtenha ajuda e encontre informações de contato.",
       "feature1": {
         "title": "Para dúvidas ou ajuda, me chame no Discord `yagod` ou no jogo `Yagod`.",
         "description": ""
@@ -118,13 +119,15 @@
       "noItems": "Nenhum item na loja do passe para exibir.",
       "exchangeVoucher": "Voucher de Troca",
       "title": "Loja do Passe",
-      "dialogTitle": "Loja da Temporada {{seasonNumber}}"
+      "dialogTitle": "Loja da Temporada {{seasonNumber}}",
+      "dialogDescription": "Veja os itens disponíveis na loja do Passe de Batalha para esta temporada."
     },
     "rewards": {
       "unknownItem": "Item Desconhecido",
       "noRewards": "Nenhuma recompensa para exibir.",
       "level": "Nível {{level}}",
       "dialogTitle": "Recompensas da Temporada {{seasonNumber}}",
+      "dialogDescription": "Navegue pelas recompensas desta temporada do Passe de Batalha.",
       "viewButton": "Ver Battle Pass Completo"
     },
     "challenges": {
@@ -151,6 +154,7 @@
     "member": "Membro"
   },
   "playerCard": {
+    "username": "Nome de usuário",
     "level": "Nível",
     "gameStats": "Estatísticas de Jogo",
     "wins": "Vitórias:",
@@ -174,12 +178,14 @@
     "fetchAvatarError": "Falha ao buscar detalhes do avatar.",
     "genericAvatarError": "Ocorreu um erro ao inspecionar o avatar.",
     "avatarInspectorTitle": "Analisador de Avatar",
+    "avatarInspectorDescription": "Inspecione os itens que compõem este avatar.",
     "avatarComposition": "Composição",
     "fullAvatar": "Avatar Completo",
     "setDetailsTitle": "Detalhes do Conjunto",
     "itemBelongsTo": "Este item pertence ao conjunto:",
     "origin": "Origem",
     "achievements": "Conquistas",
+    "achievementsDescription": "Aqui estão as conquistas do jogador, ordenadas por nível.",
     "maxLevel": "Nível Máximo",
     "clickToSee": "Clique para ver"
   },
@@ -209,6 +215,7 @@
     "offer": "Oferta",
     "detailsError": "Não foi possível encontrar os detalhes dos itens deste pacote.",
     "clickToView": "Clique para ver os detalhes.",
+    "setDetailsDescription": "Aqui estão os itens incluídos neste conjunto.",
     "types": {
       "AVATAR_ITEMS_SET": "Roupas limitadas",
       "ADVANCED_ROLE_CARD": "Funções avançadas",
@@ -245,6 +252,7 @@
     "unisex": "Unissex",
     "avatarType": "Tipo de Avatar",
     "battlePassSeason": "Temporada do Passe",
+    "battlePassSeasonDescription": "Todos os itens disponíveis nesta temporada do Passe de Batalha.",
     "season": "Temporada {{season}}",
     "selectSeasonPlaceholder": "Selecione uma temporada",
     "errorLoadingTitle": "Erro ao Carregar Itens",

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2 } from 'lucide-react';
 import { ItemImage } from './ItemImage';
 import { itemsApi } from '@/lib/api';
@@ -74,6 +74,9 @@ export const BattlePassSeasonInspector = ({
             <img src={`https://cdn.wolvesville.com/battlePass/icons/bp${season}@3x.png`} alt={`BP ${season}`} className="w-14 h-14" />
             {t('itemsSkins.battlePassSeason')} {season}
           </DialogTitle>
+          <DialogDescription>
+            {t('itemsSkins.battlePassSeasonDescription', 'All items available in this Battle Pass season.')}
+          </DialogDescription>
         </DialogHeader>
         {isLoading ? (
           <div className="flex items-center justify-center h-96">

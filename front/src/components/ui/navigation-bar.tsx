@@ -11,7 +11,7 @@ import { AnnouncementsViewer } from "../AnnouncementsViewer";
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ChangelogViewer } from "../ChangelogViewer";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 export const NavigationBar = () => {
@@ -258,6 +258,9 @@ const HelpDialog = () => {
           <DialogTitle className="flex items-center gap-2">
             <HelpCircle className="w-6 h-6" /> {t('navigation.help.title')}
           </DialogTitle>
+          <DialogDescription>
+            {t('navigation.help.description', 'Get help and find contact information.')}
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4 text-sm text-muted-foreground">
           <div>

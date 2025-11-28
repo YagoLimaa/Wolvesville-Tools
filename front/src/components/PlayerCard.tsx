@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Users, Trophy, Clock, Eye, EyeOff, Loader2, Star, Info } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 import { Link } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRoles, Role } from "./contexts/RolesContext";
 import { Progress } from "@/components/ui/progress";
 import { avatarsApi } from "@/lib/api";
@@ -267,6 +267,9 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{t('playerCard.avatarInspectorTitle')}</DialogTitle>
+          <DialogDescription>
+            {t('playerCard.avatarInspectorDescription', "Inspect the items that make up this avatar.")}
+          </DialogDescription>
         </DialogHeader>
         <div className="min-h-[400px]">
           {isInspecting ? (
@@ -310,9 +313,9 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>{t('playerCard.setDetailsTitle')}</DialogTitle>
+                <DialogDescription>{t('playerCard.itemBelongsTo')}</DialogDescription>
               </DialogHeader>
               <div className="flex flex-col items-center text-center gap-2 mt-4">
-                <p className="text-sm text-muted-foreground">{t('playerCard.itemBelongsTo')}</p>
                 <img src={getPopupImageUrl(parentSet)} alt={parentSet.name} className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg border p-2"/>
                 <p className="font-bold text-lg">{getPopupTitle(parentSet)}</p>
                 {(() => {
@@ -353,6 +356,9 @@ const AchievementsModal = ({ isOpen, onClose, achievements, rolesById }: Achieve
       <DialogContent className="max-h-[85vh] w-[90vw] sm:w-full sm:max-w-2xl overflow-y-auto custom-scrollbar">
         <DialogHeader>
           <DialogTitle>{t('playerCard.achievements')}</DialogTitle>
+          <DialogDescription>
+            {t('playerCard.achievementsDescription', "Here are the player's achievements, sorted by level.")}
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 mt-4">
           {[...achievements].sort((a, b) => b.level - a.level).map((achievement) => {

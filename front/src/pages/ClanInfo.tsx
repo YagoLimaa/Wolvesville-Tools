@@ -196,7 +196,7 @@ const ClanInfoPage = () => {
               </TableHeader>
               <TableBody>
                 {sortedMembers.map((member, index) => (
-                  <TableRow key={member.id}>
+                  <TableRow key={member.username}>
                     <TableCell>
                       <img src={member.equippedAvatar?.url || 'https://via.placeholder.com/40'} alt={member.username} className="w-16 h-16 rounded-full object-cover" />
                     </TableCell>

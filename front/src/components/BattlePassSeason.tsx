@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { BattlePassRewards } from "./BattlePassRewards";
 import { useTranslation } from "react-i18next";
 import { BattlePassShop } from "./BattlePassShop";
@@ -199,6 +199,9 @@ export const BattlePassSeason = () => {
                 <DialogContent className="max-w-4xl h-[80vh] flex flex-col pr-6">
                   <DialogHeader>
                     <DialogTitle>{t('battlePass.rewards.dialogTitle', { seasonNumber: season.number })}</DialogTitle>
+                    <DialogDescription>
+                      {t('battlePass.rewards.dialogDescription', 'Browse the rewards for this Battle Pass season.')}
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="overflow-y-auto -mr-6">
                     <BattlePassRewards season={season} />
@@ -212,6 +215,9 @@ export const BattlePassSeason = () => {
                 <DialogContent className="max-w-4xl h-[80vh] flex flex-col pr-6">
                   <DialogHeader>
                     <DialogTitle>{t('battlePass.shop.dialogTitle', { seasonNumber: season.number })}</DialogTitle>
+                    <DialogDescription>
+                      {t('battlePass.shop.dialogDescription', 'See the items available in the Battle Pass shop for this season.')}
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="overflow-y-auto -mr-6">
                     <BattlePassShop />
