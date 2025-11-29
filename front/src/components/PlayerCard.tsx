@@ -286,11 +286,10 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
                 <h4 className="font-semibold mb-4">{t('playerCard.avatarComposition')}</h4>
                 <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[60vh] overflow-y-auto pr-2">
                   {inspectorData.map(item => (
-                    <Card 
-                      key={item.id}
-                      className={`overflow-hidden ${findParentSet(item) ? 'cursor-pointer hover:border-primary' : ''}`}
-                      onClick={() => findParentSet(item) && setSelectedItemForSet(item)}
-                    >
+                                        <Card
+                                          key={item.id}
+                                          className="overflow-hidden cursor-pointer hover:border-primary"
+                                          onClick={() => setSelectedItemForSet(item)}                    >
                       <CardContent className="p-2 flex flex-col items-center text-center">
                         <img src={getInspectorImageUrl(item)} alt={item.name} className="w-10 h-10 sm:w-16 sm:h-16 object-contain" />
                         <p className="text-xs mt-2 font-semibold leading-tight">{item.name || item.id}</p>
@@ -308,18 +307,22 @@ const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspe
           )}
         </div>
 
-        <Dialog open={!!parentSet} onOpenChange={(open) => !open && setSelectedItemForSet(null)}>
-          {parentSet && (
+        <Dialog open={!!selectedItemForSet} onOpenChange={(open) => !open && setSelectedItemForSet(null)}>
+          {selectedItemForSet && (
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{t('playerCard.setDetailsTitle')}</DialogTitle>
-                <DialogDescription>{t('playerCard.itemBelongsTo')}</DialogDescription>
+                <DialogTitle>
+                  {parentSet ? t('playerCard.setDetailsTitle') : t('playerCard.itemDetailsTitle')}
+                </DialogTitle>
+                <DialogDescription>
+                  {parentSet ? t('playerCard.itemBelongsTo') : t('playerCard.itemDetailsDescription')}
+                </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col items-center text-center gap-2 mt-4">
-                <img src={getPopupImageUrl(parentSet)} alt={parentSet.name} className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg border p-2"/>
-                <p className="font-bold text-lg">{getPopupTitle(parentSet)}</p>
+                <img src={getPopupImageUrl(parentSet || selectedItemForSet)} alt={(parentSet || selectedItemForSet).name} className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg border p-2"/>
+                <p className="font-bold text-lg">{getPopupTitle(parentSet || selectedItemForSet)}</p>
                 {(() => {
-                const typeString = getTypeString(parentSet);
+                const typeString = getTypeString(parentSet || selectedItemForSet);
                 if (!typeString) return null;
                 return (
                     <div className="text-center mt-2">

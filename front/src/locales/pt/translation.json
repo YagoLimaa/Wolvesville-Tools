@@ -183,6 +183,8 @@
     "fullAvatar": "Avatar Completo",
     "setDetailsTitle": "Detalhes do Conjunto",
     "itemBelongsTo": "Este item pertence ao conjunto:",
+    "itemDetailsTitle": "Detalhes do Item",
+    "itemDetailsDescription": "Aqui estão os detalhes deste item.",
     "origin": "Origem",
     "achievements": "Conquistas",
     "achievementsDescription": "Aqui estão as conquistas do jogador, ordenadas por nível.",

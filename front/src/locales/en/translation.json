@@ -180,6 +180,8 @@
     "fullAvatar": "Full Avatar",
     "setDetailsTitle": "Set Details",
     "itemBelongsTo": "This item belongs to the set:",
+    "itemDetailsTitle": "Item Details",
+    "itemDetailsDescription": "Here are the details for this item.",
     "origin": "Origin",
     "achievements": "Achievements",
     "achievementsDescription": "Here are the player's achievements, sorted by level.",
