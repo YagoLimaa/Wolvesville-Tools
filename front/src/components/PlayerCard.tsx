@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { Users, Trophy, Clock, Eye, EyeOff, Loader2, Star, Info } from "lucide-react";
 import { useItems, Item } from "./contexts/ItemsContext";
 import { Link } from "react-router-dom";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useRoles, Role } from "./contexts/RolesContext";
 import { Progress } from "@/components/ui/progress";
 import { avatarsApi } from "@/lib/api";
