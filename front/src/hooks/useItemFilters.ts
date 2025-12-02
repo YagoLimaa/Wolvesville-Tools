@@ -1,16 +1,21 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useItems } from '@/components/contexts/ItemsContext';
 import { collectionCategories, rarityOrder } from '@/lib/itemUtils';
 
 export const useItemFilters = () => {
   const { allItems, tagsByItemId } = useItems();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [rarityFilter, setRarityFilter] = useState("all");
-  const [genderFilter, setGenderFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [bpSeasonFilter, setBpSeasonFilter] = useState("");
+  // Read all filter values from the URL search parameters
+  const searchTerm = searchParams.get('search') || '';
+  const categoryFilter = searchParams.get('category') || 'all';
+  const rarityFilter = searchParams.get('rarity') || 'all';
+  const genderFilter = searchParams.get('gender') || 'all';
+  const typeFilter = searchParams.get('type') || 'all';
+  const bpSeasonFilter = searchParams.get('bp') || '';
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  
   const [brokenImageIds, setBrokenImageIds] = useState<Set<string>>(new Set());
 
   const handleImageError = useCallback((itemId: string) => {
@@ -20,6 +25,47 @@ export const useItemFilters = () => {
       return newSet;
     });
   }, []);
+  
+  const updateFilters = useCallback((newFilters: Record<string, string | number>) => {
+    const currentParams = Object.fromEntries(searchParams);
+    
+    // Always reset page to 1 when any filter (except 'page' itself) changes
+    if (Object.keys(newFilters).some(k => k !== 'page')) {
+      delete currentParams.page;
+    }
+
+    const updatedParams = { ...currentParams, ...newFilters };
+
+    // Clean up empty filters
+    for (const key in updatedParams) {
+      if (updatedParams[key] === '' || updatedParams[key] === 'all' || updatedParams[key] === null || updatedParams[key] === undefined) {
+        delete updatedParams[key];
+      }
+    }
+
+    setSearchParams(updatedParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const createSetter = (name: string) => (value: string | number) => {
+    const newFilters = { [name]: value };
+    // Handle dependent filter resets
+    if (name === 'category' && value !== 'all') {
+      newFilters.gender = 'all';
+      newFilters.type = 'all';
+      if (value !== 'avatarItems') {
+        newFilters.bp = '';
+      }
+    }
+    updateFilters(newFilters);
+  };
+  
+  const setCategoryFilter = createSetter('category');
+  const setSearchTerm = createSetter('search');
+  const setRarityFilter = createSetter('rarity');
+  const setGenderFilter = createSetter('gender');
+  const setTypeFilter = createSetter('type');
+  const setBpSeasonFilter = createSetter('bp');
+  const setCurrentPage = createSetter('page');
 
   const sortedItems = useMemo(() => {
     if (!allItems) return [];
@@ -76,16 +122,6 @@ export const useItemFilters = () => {
       return matchesSearch && matchesCategory && matchesRarity && matchesGender && matchesType && matchesBpSeason;
     });
   }, [sortedItems, searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter, bpSeasonFilter, tagsByItemId]);
-  
-  useEffect(() => {
-    if (categoryFilter !== "all") {
-        setGenderFilter("all");
-        setTypeFilter("all");
-    }
-    if (categoryFilter !== 'all' && categoryFilter !== 'avatarItems') {
-      setBpSeasonFilter("");
-    }
-  }, [categoryFilter]);
 
   const avatarItemTypes = useMemo(() => {
     if (!allItems) return [];
@@ -100,6 +136,7 @@ export const useItemFilters = () => {
     genderFilter, setGenderFilter,
     typeFilter, setTypeFilter,
     bpSeasonFilter, setBpSeasonFilter,
+    currentPage, setCurrentPage,
     handleImageError,
     filteredItems,
     avatarItemTypes,

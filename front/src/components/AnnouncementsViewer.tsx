@@ -2,10 +2,11 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, User, Calendar } from "lucide-react";
+import { AlertTriangle, User, Calendar, Info } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { announcementsApi } from '@/lib/api';
+import { EmptyState } from "./ui/empty-state";
 
 interface Attachment {
   url: string;
@@ -40,14 +41,14 @@ const fetchAnnouncements = async (): Promise<{ announcements: Announcement[] }> 
     }
   }
   
-  return { announcements: [] }; // Return empty array if data is not in expected format
+  return { announcements: [] };
 };
 
 export const AnnouncementsViewer = () => {
   const { data, isLoading, isError, error } = useQuery<{ announcements: Announcement[] }, Error>({
     queryKey: ["announcements"],
     queryFn: fetchAnnouncements,
-    staleTime: 1000 * 60 * 15, // Cache de 15 minutos
+    staleTime: 1000 * 60 * 15,
   });
 
   if (isLoading) {
@@ -66,6 +67,18 @@ export const AnnouncementsViewer = () => {
         <AlertTitle>Erro</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
+    );
+  }
+
+  if (data?.announcements.length === 0) {
+    return (
+      <div className="p-4">
+        <EmptyState
+          icon={<Info className="h-8 w-8" />}
+          title="Nenhum anúncio"
+          description="Não há nenhum anúncio para ser exibido no momento."
+        />
+      </div>
     );
   }
 

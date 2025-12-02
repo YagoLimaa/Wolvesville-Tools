@@ -1,7 +1,7 @@
-import { proxyRequest } from './apiProxy.js';
+import { callApi } from './ApiService.js';
 
 async function fetchRoses(request) {
-  const rosesResponse = await proxyRequest(request, 'items/roseSkins');
+  const rosesResponse = await callApi('items/roseSkins', { request });
   return rosesResponse.json();
 }
 

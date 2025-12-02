@@ -316,6 +316,11 @@
       "description": "Não foram encontrados jogadores com o nome \"{{query}}\"."
     }
   },
+  "playerInfo": {
+    "playerNotFound": "Jogador não encontrado",
+    "fetchError": "Falha ao buscar dados do jogador. Tente novamente mais tarde.",
+    "loading": "Carregando perfil de {{username}}..."
+  },
   "itemsContext": {
     "fetchCategoryFailed": "Falha ao buscar a categoria: {{category}}",
     "fetchCategoryError": "Erro ao buscar a categoria de itens {{category}}: ",

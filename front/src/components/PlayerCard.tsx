@@ -26,321 +26,7 @@ const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' = '3x'):
   return url;
 };
 
-interface AvatarInspectorModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  avatar: { url: string; index: number } | null;
-  playerId: string;
-}
 
-const AvatarInspectorModal = ({ isOpen, onClose, avatar, playerId }: AvatarInspectorModalProps) => {
-  const { t, i18n } = useTranslation();
-  const { itemsById, allItems, tagsByItemId } = useItems();
-  const [inspectorData, setInspectorData] = useState<Item[]>([]);
-  const [isInspecting, setIsInspecting] = useState(false);
-  const [inspectorError, setInspectorError] = useState<string | null>(null);
-  const [selectedItemForSet, setSelectedItemForSet] = useState<Item | null>(null);
-
-  const getInspectorImageUrl = (item: Item) => {
-    if (item.name && item.name.includes('Golden Wheel')) {
-      return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
-    } else if (item.name && item.name.includes('Wheel Of Fortune')) {
-      return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
-    } else if (item.name && item.name.includes('Daily Reward')) {
-      return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
-    }
-    return getHighResUrl(item.imageUrl);
-  };
-
-  const getBattlePassSeason = (collection: Item): string | null => {
-    let representativeItemId: string | undefined = undefined;
-    const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
-
-    if (selectedItemForSet && selectedItemForSet.id !== collection.id && reverseSearchableCategories.includes(selectedItemForSet.category)) {
-        representativeItemId = selectedItemForSet.id;
-    }
-    else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
-        representativeItemId = collection.avatarItemIds[0];
-    }
-    else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
-        const firstSetOrId = collection.avatarItemSets[0];
-        if (typeof firstSetOrId === 'string') {
-            const set = itemsById.get(firstSetOrId);
-            if (set && set.avatarItemIds && set.avatarItemIds.length > 0) {
-                representativeItemId = set.avatarItemIds[0];
-            }
-        } else if (firstSetOrId.avatarItemIds && firstSetOrId.avatarItemIds.length > 0) {
-            representativeItemId = firstSetOrId.avatarItemIds[0];
-        }
-    }
-
-    if (representativeItemId) {
-        const tags = tagsByItemId.get(representativeItemId);
-        if (tags) {
-            const originTag = tags.find(t => t.startsWith('origin:battle_pass:season_'));
-            if (originTag) {
-                return originTag.split('_').pop() || null;
-            }
-        }
-    }
-    return null;
-  }
-
-  const getPopupImageUrl = (item: Item) => {
-    if (item.name && item.name.includes('Golden Wheel')) {
-      return 'https://www.wolvesville.com/static/media/wheel_of_fortune2.5bc3c3e74f636f0dba3f.png';
-    } else if (item.name && item.name.includes('Wheel Of Fortune')) {
-      return 'https://www.wolvesville.com/static/media/wheel_of_fortune.6cc428f5de217c526190.png';
-    } else if (item.name && item.name.includes('Daily Reward')) {
-      return 'https://www.wolvesville.com/static/media/daily_reward.web.ebe06948b4678ea75d6a.png';
-    }
-
-    const season = getBattlePassSeason(item);
-    if (season) {
-        return getHighResUrl(`https://cdn.wolvesville.com/battlePass/icons/bp${season}.png`);
-    }
-
-    if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
-      const match = item.imageUrl.match(/\/bp(\d+)/);
-      if (match) {
-        const bpNumber = match[1];
-        return getHighResUrl(`https://cdn.wolvesville.com/battlePass/icons/bp${bpNumber}.png`);
-      }
-    }
-    return getHighResUrl(item.imageUrl);
-  };
-
-  const getPopupTitle = (item: Item) => {
-    if ((item.event === 'BATTLE_PASS' || (item.imageUrl && item.imageUrl.includes('/bp')))) {
-      const match = item.imageUrl.match(/\/bp(\d+)/);
-      if (match) {
-        const bpNumber = match[1];
-        return `BP${bpNumber} - ${item.name}`;
-      }
-    }
-    if (item.name && item.name.includes('Golden Wheel')) {
-      return 'Rose Wheel';
-    }
-    return item.name;
-  };
-
-  const formatEventName = (event: string) => {
-    return event.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  }
-
-  const getTypeString = (collection: Item) => {
-    let representativeItemId: string | undefined = undefined;
-    const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
-
-    if (selectedItemForSet && selectedItemForSet.id !== collection.id && reverseSearchableCategories.includes(selectedItemForSet.category)) {
-        representativeItemId = selectedItemForSet.id;
-    }
-    else if (collection.avatarItemIds && collection.avatarItemIds.length > 0) {
-        representativeItemId = collection.avatarItemIds[0];
-    }
-    else if (collection.category === 'bundles' && collection.avatarItemSets && collection.avatarItemSets.length > 0) {
-        const firstSetOrId = collection.avatarItemSets[0];
-        if (typeof firstSetOrId === 'string') {
-            const set = itemsById.get(firstSetOrId);
-            if (set && set.avatarItemIds && set.avatarItemIds.length > 0) {
-                representativeItemId = set.avatarItemIds[0];
-            }
-        } else if (firstSetOrId.avatarItemIds && firstSetOrId.avatarItemIds.length > 0) {
-            representativeItemId = firstSetOrId.avatarItemIds[0];
-        }
-    }
-
-    if (representativeItemId) {
-        const tags = tagsByItemId.get(representativeItemId);
-        if (tags) {
-            const originTag = tags.find(t => t.startsWith('origin:'));
-            if (originTag) {
-                const translationKey = originTag.replace('origin:', 'origins.').replace(/:/g, '.');
-
-                if (i18n.exists(translationKey)) {
-                  return t(translationKey);
-                }
-  
-                const parts = originTag.replace('origin:', '').split(':');
-                if (parts.length > 1) {
-                  const genericKey = `origins.${parts[0]}`;
-                  if (i18n.exists(genericKey)) {
-                    const name = parts.slice(1).join(' ').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                    return t(genericKey, { name });
-                  }
-                }
-
-                return originTag
-                    .replace('origin:', '')
-                    .replace(/_/g, ' ')
-                    .replace(/:/g, ' : ')
-                    .split(' ')
-                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                    .join(' ');
-            }
-        }
-    }
-
-    const event = (collection as Item & { event?: string }).event;
-    if (event === 'BATTLE_PASS') return t('origins.battle_pass', "BP (Battle Pass)");
-    if (event) return t(`origins.event.${event}`, formatEventName(event));
-    if (collection.category === 'bundles') return t('origins.bundle', "Bundle");
-    if (['avatarItemSets', 'avatarItemCollections'].includes(collection.category)) {
-        return t('origins.item_set', "Item Set");
-    }
-
-    return null;
-  }
-
-  useEffect(() => {
-    if (isOpen && avatar) {
-      const fetchAvatarItems = async () => {
-        setIsInspecting(true);
-        setInspectorError(null);
-        setInspectorData([]);
-
-        try {
-          const sharedIdResponse = await avatarsApi.getSharedId(playerId, avatar.index);
-          if (sharedIdResponse.error || typeof sharedIdResponse.data !== 'string') {
-            throw new Error("Failed to fetch shared avatar ID");
-          }
-          const sharedAvatarId = sharedIdResponse.data;
-
-          if (!sharedAvatarId) {
-            throw new Error("Invalid shared avatar ID received");
-          }
-
-          const response = await avatarsApi.getDetails(sharedAvatarId);
-          if (response.error || !response.data) {
-            throw new Error(t('playerCard.fetchAvatarError'));
-          }
-          const data = response.data;
-          
-          if (data.items && typeof data.items === 'object') {
-            const itemIds = Object.values(data.items).filter(id => typeof id === 'string') as string[];
-            const items = itemIds.map(id => itemsById.get(id)).filter((item): item is Item => !!item);
-            setInspectorData(items);
-          } else {
-            setInspectorData([]);
-          }
-
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setInspectorError(err.message);
-            } else {
-                setInspectorError(t('playerCard.genericAvatarError'));
-            }
-        } finally {
-          setIsInspecting(false);
-        }
-      };
-
-      fetchAvatarItems();
-    }
-  }, [isOpen, avatar, playerId, itemsById, t]);
-
-  const findParentSet = (item: Item): Item | null => {
-    if (!allItems) return null;
-    if (item.parentSetId) {
-      const parent = itemsById.get(item.parentSetId);
-      if (parent) return parent;
-    }
-    const collectionCategories = ['avatarItemSets', 'avatarItemCollections', 'bundles', 'calendars'];
-    const reverseSearchableCategories = ['avatarItems', 'emojis', 'roseSkins', 'roleIcons', 'loadingScreens', 'bodyPaints', 'backgrounds', 'profileIconBorders'];
-
-    if (reverseSearchableCategories.includes(item.category)) {
-      const parent = allItems.find(
-        set => (collectionCategories.includes(set.category)) && 
-               (set.avatarItemIds?.includes(item.id) || 
-                set.rewards?.some(r => r.avatarItemId === item.id || r.emojiId === item.id) || 
-                set.items?.some(i => (i as { avatarItemId?: string }).avatarItemId === item.id))
-      );
-      if (parent) return parent;
-    }
-    return null;
-  };
-
-  const parentSet = selectedItemForSet ? findParentSet(selectedItemForSet) : null;
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>{t('playerCard.avatarInspectorTitle')}</DialogTitle>
-          <DialogDescription>
-            {t('playerCard.avatarInspectorDescription', "Inspect the items that make up this avatar.")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="min-h-[400px]">
-          {isInspecting ? (
-            <div className="flex items-center justify-center h-full">
-              <Loader2 className="w-10 h-10 animate-spin text-primary" />
-            </div>
-          ) : inspectorError ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-destructive">{inspectorError}</p>
-            </div>
-          ) : (
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="order-2 md:order-1 md:w-2/3">
-                <h4 className="font-semibold mb-4">{t('playerCard.avatarComposition')}</h4>
-                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[60vh] overflow-y-auto pr-2">
-                  {inspectorData.map(item => (
-                                        <Card
-                                          key={item.id}
-                                          className="overflow-hidden cursor-pointer hover:border-primary"
-                                          onClick={() => setSelectedItemForSet(item)}                    >
-                      <CardContent className="p-2 flex flex-col items-center text-center">
-                        <img src={getInspectorImageUrl(item)} alt={item.name} className="w-10 h-10 sm:w-16 sm:h-16 object-contain" />
-                        <p className="text-xs mt-2 font-semibold leading-tight">{item.name || item.id}</p>
-                        {item.rarity && <Badge variant="secondary" className="mt-1 text-xs">{t(`itemsSkins.${item.rarity}`)}</Badge>}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-              <div className="order-1 md:order-2 md:w-1/3">
-                <h4 className="font-semibold mb-4 text-center">{t('playerCard.fullAvatar')}</h4>
-                {avatar && <img src={getHighResUrl(avatar.url)} alt="Full Avatar" className="rounded-lg mx-auto md:w-full" />}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <Dialog open={!!selectedItemForSet} onOpenChange={(open) => !open && setSelectedItemForSet(null)}>
-          {selectedItemForSet && (
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {parentSet ? t('playerCard.setDetailsTitle') : t('playerCard.itemDetailsTitle')}
-                </DialogTitle>
-                <DialogDescription>
-                  {parentSet ? t('playerCard.itemBelongsTo') : t('playerCard.itemDetailsDescription')}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col items-center text-center gap-2 mt-4">
-                <img src={getPopupImageUrl(parentSet || selectedItemForSet)} alt={(parentSet || selectedItemForSet).name} className="w-48 h-48 sm:w-64 sm:h-64 object-contain rounded-lg border p-2"/>
-                <p className="font-bold text-lg">{getPopupTitle(parentSet || selectedItemForSet)}</p>
-                {(() => {
-                const typeString = getTypeString(parentSet || selectedItemForSet);
-                if (!typeString) return null;
-                return (
-                    <div className="text-center mt-2">
-                        <span className="bg-primary text-primary-foreground font-bold py-1 px-3 rounded-full text-base">
-                            {t('playerCard.origin')}: {typeString}
-                        </span>
-                    </div>
-                );
-              })()}
-              </div>
-            </DialogContent>
-          )}
-        </Dialog>
-
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 interface AchievementsModalProps {
   isOpen: boolean;
@@ -405,13 +91,13 @@ const AchievementsModal = ({ isOpen, onClose, achievements, rolesById }: Achieve
 
 interface PlayerCardProps {
   player: Player;
+  onAvatarClick: (avatar: { url: string; index: number }) => void;
 }
 
-export const PlayerCard = ({ player }: PlayerCardProps) => {
+export const PlayerCard = ({ player, onAvatarClick }: PlayerCardProps) => {
   const { t } = useTranslation();
   const [showAvatars, setShowAvatars] = useState(false);
   const [isAchievementsModalOpen, setIsAchievementsModalOpen] = useState(false);
-  const [inspectingAvatar, setInspectingAvatar] = useState<{ url: string; index: number } | null>(null);
   const { itemsById } = useItems();
   const { rolesById } = useRoles();
 
@@ -592,7 +278,7 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
                     <div
                       key={index}
                       className="relative group cursor-pointer"
-                      onClick={() => setInspectingAvatar({ url: avatar.url, index })}
+                      onClick={() => onAvatarClick({ url: avatar.url, index })}
                       title={t('playerCard.clickToInspect')}
                     >
                       <div
@@ -620,13 +306,6 @@ export const PlayerCard = ({ player }: PlayerCardProps) => {
           )}
         </CardContent>
       </Card>
-
-      <AvatarInspectorModal 
-        isOpen={!!inspectingAvatar}
-        onClose={() => setInspectingAvatar(null)}
-        avatar={inspectingAvatar}
-        playerId={player.id}
-      />
 
       <AchievementsModal
         isOpen={isAchievementsModalOpen}

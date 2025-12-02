@@ -314,6 +314,11 @@
       "description": "No players were found with the name \"{{query}}\""
     }
   },
+  "playerInfo": {
+    "playerNotFound": "Player not found",
+    "fetchError": "Failed to fetch player data. Please try again later.",
+    "loading": "Loading profile for {{username}}..."
+  },
   "itemsContext": {
     "fetchCategoryFailed": "Failed to fetch category: {{category}}",
     "fetchCategoryError": "Error fetching item category {{category}}: ",

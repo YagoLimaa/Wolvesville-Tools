@@ -1,15 +1,20 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { NavigationBar } from "@/components/ui/navigation-bar";
-import { SearchForm } from "@/components/SearchForm";
 import { ClanCard, Clan } from "@/components/ClanCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Info } from "lucide-react";
 import { debounce } from "@/lib/utils";
 import { ClanFilters } from "@/components/ClanFilters";
 import { clansApi } from "@/lib/api";
-import { useClanFilters } from "@/hooks/useClanFilters";
+import { useClanFilters, SortBy, SortOrder, JoinType } from "@/hooks/useClanFilters";
+import { Input } from "@/components/ui/input";
+
+// Define a type for the object structure when the response is not an array
+interface ClanSearchResponse {
+  clans: Clan[];
+}
 
 const localesList = [
   "all", "br", "de", "fr", "gb", "th", "vn", "tr", "aq", "ar", "at", "au", 
@@ -28,23 +33,23 @@ const ClanSearch = () => {
   const [searchResults, setSearchResults] = useState<Clan[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const {
-    language,
-    setLanguage,
+  // State derived from URL
+  const query = searchParams.get("name") || "";
+  const language = searchParams.get("lang") || "all";
+  const localSearchTerm = searchParams.get("filter") || "";
+  const sortBy = (searchParams.get("sortBy") as SortBy) || "xp";
+  const joinType = (searchParams.get("join") as JoinType) || "all";
+  const sortOrder = (searchParams.get("order") as SortOrder) || "desc";
+
+  const { sortedResults } = useClanFilters({
+    clans: searchResults,
     localSearchTerm,
-    setLocalSearchTerm,
-    sortBy,
-    setSortBy,
     joinType,
-    setJoinType,
+    sortBy,
     sortOrder,
-    toggleSortOrder,
-    sortedResults,
-  } = useClanFilters(searchResults);
+  });
 
   const locales = useMemo(() => 
     localesList.reduce((acc, loc) => {
@@ -53,24 +58,25 @@ const ClanSearch = () => {
     }, {} as { [key: string]: string }),
   [t]);
 
-  const handleSearch = useCallback(async (options: { clanName: string; lang: string; }) => {
-    const { clanName, lang } = options;
-    if (!clanName) return;
+  const handleApiSearch = useCallback(async (clanName: string, lang: string) => {
+    if (!clanName) {
+      setSearchResults(null);
+      return;
+    }
     setIsLoading(true);
     setError(null);
 
-    const params = new URLSearchParams();
-    params.set('name', clanName);
-    if (lang !== 'all') params.set('language', lang.toUpperCase());
-    
-    navigate(`/clan/search?${params.toString()}`);
-
     try {
       const response = await clansApi.search(clanName, lang !== 'all' ? lang : undefined);
-      if (response.error) {
-        throw new Error(response.error);
+      if (response.error) throw new Error(response.error);
+      
+      let results: Clan[] = [];
+      if (Array.isArray(response.data)) {
+        results = response.data;
+      } else if (typeof response.data === 'object' && response.data !== null && 'clans' in response.data) {
+        results = (response.data as ClanSearchResponse).clans;
       }
-      let results: Clan[] = Array.isArray(response.data) ? response.data : (response.data?.clans || []);
+
       setSearchResults(results);
     } catch (err) {
       setError(t("common.searchError"));
@@ -78,26 +84,31 @@ const ClanSearch = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, t]);
+  }, [t]);
 
-  const debouncedSearch = useMemo(() => {
-    return debounce((options: Parameters<typeof handleSearch>[0]) => {
-      handleSearch(options);
-    }, 500);
-  }, [handleSearch]);
+  const debouncedApiSearch = useMemo(() => debounce(handleApiSearch, 500), [handleApiSearch]);
 
   useEffect(() => {
-    const clanNameFromUrl = searchParams.get("name");
-    if (clanNameFromUrl) {
-      setQuery(clanNameFromUrl);
+    debouncedApiSearch(query, language);
+  }, [query, language, debouncedApiSearch]);
+  
+  const updateSearchParams = (newParams: Record<string, string>) => {
+    const currentParams = Object.fromEntries(searchParams);
+    const updated = { ...currentParams, ...newParams };
+    for (const key in updated) {
+      if (!updated[key] || updated[key] === 'all') {
+        delete updated[key];
+      }
     }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (query) {
-      debouncedSearch({ clanName: query, lang: language });
-    }
-  }, [query, language, debouncedSearch]);
+    setSearchParams(updated, { replace: true });
+  };
+  
+  const setQuery = (value: string) => updateSearchParams({ name: value });
+  const setLanguage = (value: string) => updateSearchParams({ lang: value });
+  const setLocalSearchTerm = (value: string) => updateSearchParams({ filter: value });
+  const setSortBy = (value: SortBy) => updateSearchParams({ sortBy: value });
+  const setJoinType = (value: JoinType) => updateSearchParams({ join: value });
+  const toggleSortOrder = () => updateSearchParams({ order: sortOrder === 'asc' ? 'desc' : 'asc' });
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,35 +119,37 @@ const ClanSearch = () => {
           <Card className="max-w-2xl mx-auto bg-card/50 backdrop-blur border-accent/20">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold text-center mb-4">{t('clanSearch.search_clan_title')}</h2>
-              <SearchForm 
-                onSearch={setQuery} 
-                isLoading={isLoading} 
-                placeholder={t('clanSearch.search_clan_placeholder')}
-                label={t('clanSearch.clan_name_label')}
-                buttonText={t('clanSearch.search_clan_button')}
-              />
+              <div className="relative">
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={t('clanSearch.search_clan_placeholder')}
+                  aria-label={t('clanSearch.clan_name_label')}
+                  className="text-center"
+                />
+              </div>
             </CardContent>
           </Card>
+
+          <ClanFilters
+            localSearchTerm={localSearchTerm}
+            setLocalSearchTerm={setLocalSearchTerm}
+            language={language}
+            setLanguage={setLanguage}
+            locales={locales}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            joinType={joinType}
+            setJoinType={setJoinType}
+            sortOrder={sortOrder}
+            toggleSortOrder={toggleSortOrder}
+          />
 
           {isLoading && <p className="text-center text-muted-foreground text-lg">{t('clanSearch.searching_clans')}</p>}
           {error && <p className="text-center text-destructive text-lg">{error}</p>}
 
           {searchResults !== null && (
             <div>
-              <ClanFilters
-                localSearchTerm={localSearchTerm}
-                setLocalSearchTerm={setLocalSearchTerm}
-                language={language}
-                setLanguage={setLanguage}
-                locales={locales}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                joinType={joinType}
-                setJoinType={setJoinType}
-                sortOrder={sortOrder}
-                toggleSortOrder={toggleSortOrder}
-              />
-
               {searchResults.length > 0 ? (
                 sortedResults.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

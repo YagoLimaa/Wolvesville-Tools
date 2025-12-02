@@ -2,11 +2,12 @@ import * as React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, User, Calendar } from "lucide-react";
+import { AlertTriangle, User, Calendar, Info } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 import { announcementsApi } from '@/lib/api';
+import { EmptyState } from "./ui/empty-state";
 
 interface Changelog {
   content: string;
@@ -48,6 +49,18 @@ export const ChangelogViewer = () => {
         <AlertTitle>Erro</AlertTitle>
         <AlertDescription>{error.message}</AlertDescription>
       </Alert>
+    );
+  }
+
+  if (data?.changelogs.length === 0) {
+    return (
+      <div className="p-4">
+        <EmptyState
+          icon={<Info className="h-8 w-8" />}
+          title="Nenhuma atualização"
+          description="Não há nenhuma atualização para ser exibida no momento."
+        />
+      </div>
     );
   }
 

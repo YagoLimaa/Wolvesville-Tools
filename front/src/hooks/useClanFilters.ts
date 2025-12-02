@@ -1,20 +1,25 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Clan } from '@/components/ClanCard';
 
 export type SortBy = 'xp' | 'members';
 export type SortOrder = 'asc' | 'desc';
 export type JoinType = 'all' | 'PUBLIC' | 'INVITE_ONLY' | 'CLOSED';
 
-export const useClanFilters = (clans: Clan[] | null) => {
-  const [language, setLanguage] = useState("all");
-  const [localSearchTerm, setLocalSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState<SortBy>("xp");
-  const [joinType, setJoinType] = useState<JoinType>("all");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+interface UseClanFiltersArgs {
+  clans: Clan[] | null;
+  localSearchTerm: string;
+  joinType: JoinType;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+}
 
-  const toggleSortOrder = () => {
-    setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-  };
+export const useClanFilters = ({
+  clans,
+  localSearchTerm,
+  joinType,
+  sortBy,
+  sortOrder,
+}: UseClanFiltersArgs) => {
 
   const sortedResults = useMemo(() => {
     if (!clans) return [];
@@ -33,18 +38,6 @@ export const useClanFilters = (clans: Clan[] | null) => {
   }, [clans, localSearchTerm, joinType, sortBy, sortOrder]);
 
   return {
-    // Filter State
-    language,
-    setLanguage,
-    localSearchTerm,
-    setLocalSearchTerm,
-    sortBy,
-    setSortBy,
-    joinType,
-    setJoinType,
-    sortOrder,
-    toggleSortOrder,
-    // Derived Data
     sortedResults,
   };
 };

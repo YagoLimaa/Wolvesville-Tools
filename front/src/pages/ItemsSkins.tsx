@@ -32,6 +32,7 @@ const ItemsSkins = () => {
     genderFilter, setGenderFilter,
     typeFilter, setTypeFilter,
     bpSeasonFilter, setBpSeasonFilter,
+    currentPage, setCurrentPage,
     handleImageError,
     filteredItems,
     avatarItemTypes,
@@ -43,12 +44,6 @@ const ItemsSkins = () => {
     inspectingBpSeason, setInspectingBpSeason,
     handleItemClick,
   } = useItemSelection();
-
-  const [currentPage, setCurrentPage] = React.useState(1);
-
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, categoryFilter, rarityFilter, genderFilter, typeFilter, bpSeasonFilter]);
 
   const paginatedItems = React.useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

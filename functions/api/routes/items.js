@@ -1,7 +1,7 @@
 import { VALID_ITEM_CATEGORIES } from '../utils/constants.js';
 import { processItems, parseItemsArray } from '../utils/itemProcessor.js';
 import { jsonResponse } from '../utils/response.js';
-import { proxyRequest } from '../utils/apiProxy.js';
+import { callApi } from '../utils/ApiService.js';
 
 export async function handleItemsByCategory(request) {
   const { category } = request.params;
@@ -10,7 +10,7 @@ export async function handleItemsByCategory(request) {
     return jsonResponse({ error: 'Categoria de item inválida.' }, 400);
   }
 
-  const response = await proxyRequest(request, `items/${category}`);
+  const response = await callApi(`items/${category}`, { request });
 
   if (!response.ok) {
     try {
@@ -42,7 +42,7 @@ export async function handleItemsByTags(request) {
   const { searchParams } = new URL(request.url);
   const season = searchParams.get('season');
 
-  const response = await proxyRequest(request, 'items/tags');
+  const response = await callApi('items/tags', { request });
   let tagsData = await response.json();
 
   if (!response.ok) {

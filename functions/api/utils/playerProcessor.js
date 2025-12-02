@@ -1,8 +1,8 @@
-import { proxyRequest } from './apiProxy.js';
+import { callApi } from './ApiService.js';
 
 async function fetchClanInfo(request, clanId) {
   try {
-    const response = await proxyRequest(request, `clans/${clanId}/info`);
+    const response = await callApi(`clans/${clanId}/info`, { request });
     if (!response.ok) return null;
     return await response.json();
   } catch (error) {
@@ -43,7 +43,7 @@ export function paginatePlayers(players, page = 1, resultsPerPage = 5) {
 
 async function fetchPlayerDetails(request, playerId) {
     try {
-        const response = await proxyRequest(request, `players/${playerId}`);
+        const response = await callApi(`players/${playerId}`, { request });
         if (!response.ok) return null;
         return await response.json();
     } catch (error) {

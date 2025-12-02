@@ -1,4 +1,4 @@
-import { proxyRequest } from '../utils/apiProxy.js';
+import { callApi } from '../utils/ApiService.js';
 import { jsonResponse } from '../utils/response.js';
 
 export async function handleAnnouncements(request) {
@@ -8,7 +8,7 @@ export async function handleAnnouncements(request) {
   const params = new URLSearchParams();
   params.set('locale', locale);
 
-  const response = await proxyRequest(request, 'announcements', { customSearchParams: params });
+  const response = await callApi('announcements', { request, customSearchParams: params });
   const responseData = await response.json();
 
   let announcements = [];

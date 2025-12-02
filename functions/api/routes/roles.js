@@ -1,15 +1,15 @@
 import { jsonResponse } from '../utils/response.js';
-import { proxyRequest } from '../utils/apiProxy.js';
+import { callApi } from '../utils/ApiService.js';
 import { processRoleRotations } from '../utils/roleProcessor.js';
 
 export async function handleRoles(request) {
-  const response = await proxyRequest(request, 'roles');
+  const response = await callApi('roles', { request });
   const responseData = await response.json();
   return jsonResponse(responseData);
 }
 
 export async function handleRoleRotations(request) {
-  const response = await proxyRequest(request, 'roleRotations');
+  const response = await callApi('roleRotations', { request });
   const responseData = await response.json();
 
   if (!response.ok) {

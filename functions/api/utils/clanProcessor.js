@@ -1,12 +1,12 @@
-import { proxyRequest } from './apiProxy.js';
+import { callApi } from './ApiService.js';
 
 async function fetchClanMembers(request, clanId) {
-  const response = await proxyRequest(request, `clans/${clanId}/members/detailed`);
+  const response = await callApi(`clans/${clanId}/members/detailed`, { request });
   return response.json();
 }
 
 async function fetchPlayerDetails(request, playerId) {
-  const response = await proxyRequest(request, `players/${playerId}`);
+  const response = await callApi(`players/${playerId}`, { request });
   if (!response.ok) {
     return null;
   }

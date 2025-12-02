@@ -1,4 +1,4 @@
-import { proxyRequest } from '../utils/apiProxy.js';
+import { callApi } from '../utils/ApiService.js';
 import { jsonResponse } from '../utils/response.js';
 import { processClanDetails } from '../utils/clanProcessor.js';
 
@@ -17,7 +17,7 @@ export async function handleClanSearch(request) {
     params.append('language', language);
   }
 
-  const response = await proxyRequest(request, 'clans/search', { customSearchParams: params });
+  const response = await callApi('clans/search', { request, customSearchParams: params });
   let clansFound = await response.json();
 
   if (!response.ok) {
@@ -34,7 +34,7 @@ export async function handleClanSearch(request) {
 
 export async function handleClanDetails(request) {
   const { id } = request.params;
-  const infoResponse = await proxyRequest(request, `clans/${id}/info`);
+  const infoResponse = await callApi(`clans/${id}/info`, { request });
   const infoData = await infoResponse.json();
 
   if (!infoResponse.ok) {
