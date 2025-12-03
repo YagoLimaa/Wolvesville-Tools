@@ -32,7 +32,7 @@ export const HelpDialog = () => {
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-2 text-base">{t('navigation.help.feature2.title')}</h4>
-              <p className="leading-relaxed break-words">{t('navigation.help.feature2.description')}</p>
+              <p className="leading-relaxed break-words">{t('navigation.help.feature2.description')}<a className="font-semibold text-purple-300 mb-2 text-base hover:underline" href="https://forms.gle/oTQ5dMDbcsXmKDXr6">{t('navigation.help.feature2.link')}</a></p>
             </div>
           </div>
         </DialogContent>

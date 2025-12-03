@@ -10,8 +10,6 @@
     "search_clan_description": "Find information about clans",
     "clan_rankings": "Clan Rankings",
     "clan_rankings_description": "Browse clan rankings and see the top clans.",
-    "trades": "Trades",
-    "trades_description": "Announce and find trades",
     "items": "Items",
     "skins_and_avatars": "Skins & Avatars",
     "skins_and_avatars_description": "Explore all available items, skins, and avatars in the game.",
@@ -31,8 +29,9 @@
         "description": ""
       },
       "feature2": {
-        "title": "",
-        "description": ""
+        "title": "For give us a easy feedback or ideias:",
+        "description": "",
+        "link": "https://forms.gle/oTQ5dMDbcsXmKDXr6"
       }
     }
   },
@@ -46,14 +45,6 @@
     "feature2": {
       "title": "🎒 Item Explorer",
       "description": "In the 'Skins & Avatars' section, you can browse, search, and filter all items available in the game, view their details, and see how to obtain them."
-    },
-    "feature3": {
-      "title": "🎉 Community Events",
-      "description": "Stay up to date with the latest community events and participate to win exclusive rewards."
-    },
-    "feature4": {
-      "title": "💡 Feedback and Suggestions",
-      "description": "Have an idea to improve the site? Share your feedback and suggestions with us."
     }
   },
   "pagination": {
@@ -77,36 +68,9 @@
     "of": "of",
     "back": "Back",
     "title": "Title",
-    "description_optional": "Description (Optional)",
-    "offering": "You are offering",
-    "requesting": "You are requesting",
-    "logout": "Logout",
-    "edit": "Edit"
+    "description_optional": "Description (Optional)"
   },
-  "trades": {
-    "showcase_title": "Trade Showcase",
-    "showcase_description": "Browse all public trade listings.",
-    "my_listings_button": "My Listings",
-    "login_button": "Login to Trade",
-    "loading": "Loading trade listings...",
-    "error": "Could not load trade listings. Please try again later.",
-    "listed_by": "Listed by {{username}}",
-    "no_listings_title": "No Listings Yet",
-    "no_listings_description": "There are no public trade listings available at the moment.",
-    "interest_button": "I'm Interested",
-    "interest_sent_button": "Interest Sent",
-    "toast_offer_success_title": "Interest Registered!",
-    "toast_offer_success_desc": "The author has been notified. Add them in-game to trade!",
-    "toast_offer_error_title": "Failed to Register Interest",
-    "toast_offer_error_desc": "An unknown error occurred. Please try again.",
-    "toast_offer_conflict_desc": "You have already shown interest in this listing.",
-    "filter_by_category": "Filter by category",
-    "all_categories": "All Categories",
-    "selling": "Selling",
-    "buying": "Buying",
-    "no_filtered_listings_title": "No Listings Found",
-    "no_filtered_listings_description": "No trade listings were found matching the current filter."
-  },
+
   "battlePass": {
     "fetchError": "Could not fetch Battle Pass data.",
     "coinAlt": "Pass Coin",
@@ -337,67 +301,9 @@
     "closed": "Closed"
   },
   "footer": {
-    "unofficial_notice": "Unofficial wolvesville website",
-    "api_disclaimer": "made by Yagod"
-  },
-  "myTrades": {
-    "rules_title": "Rules and Tips for Safe Trading",
-    "rule1": "All trades are your sole responsibility. The website is not liable for any losses or unsuccessful transactions.",
-    "rule2": "Be wary of offers that are too good to be true. Always check the other player's profile.",
-    "rule3": "Arrange all trade details within the game. Do not use external platforms to negotiate.",
-    "rule4": "Record or take screenshots of all trading steps as proof for your security.",
-    "rule5": "Trading in-game items for real money or vice-versa is strictly prohibited. Violations will result in a ban.",
-    "my_trades_title": "My Trades",
-    "my_trades_description": "Manage your trade listings.",
-    "logged_in_as": "Logged in as: {{username}}",
-    "back_to_trades": "Back to Showcase",
-    "create_trade_title": "Create a New Trade Listing",
-    "title_placeholder": "e.g., Trading skin for rose",
-    "description_placeholder": "Provide more details about your trade here...",
-    "offering_placeholder": "List the items you are offering...",
-    "requesting_placeholder": "List the items you are requesting in return...",
-    "create_button": "Create Listing",
-    "creating_button": "Creating...",
-    "my_created_trades_title": "Your Trade Listings",
-    "no_trades_yet": "You have not created any trade listings yet.",
-    "created_at": "Created on {{date}}",
-    "loading_trades": "Loading your trades...",
-    "error_loading_trades": "Error loading trades.",
-    "toast_auth_error_title": "Authentication Error",
-    "toast_auth_error_desc": "You must be logged in to create a listing.",
-    "toast_create_success_title": "Listing Created!",
-    "toast_create_success_desc": "Your trade listing has been successfully created.",
-    "toast_create_error_title": "Creation Failed",
-    "toast_create_error_desc": "Could not create the listing. Please try again.",
-    "delete_trade_title": "Are you sure?",
-    "delete_trade_description": "This action cannot be undone. This will permanently delete your trade listing.",
-    "delete_success_title": "Listing Deleted!",
-    "delete_success_description": "Your trade listing has been successfully removed.",
-    "delete_error_title": "Error Deleting",
-    "delete_error_description": "Could not delete the listing. Please try again.",
-    "edit_trade_title": "Edit Trade Listing",
-    "save_button": "Save Changes",
-    "saving_button": "Saving...",
-    "toast_update_success_title": "Listing Updated!",
-    "toast_update_success_desc": "Your trade listing has been successfully updated.",
-    "toast_update_error_title": "Update Failed",
-    "toast_update_error_desc": "Could not update the listing. Please try again.",
-    "interested_players_title": "Interested Players",
-    "no_offers": "No offers yet.",
-    "new_offers_tooltip": "You have new offers!",
-    "offer_accepted": "Accepted",
-    "offer_rejected": "Rejected",
-    "offer_pending": "Pending",
-    "toast_offer_update_error": "Failed to update offer status.",
-    "add_item_button": "Add Item",
-    "category_label": "Category",
-    "category_placeholder": "Select a category",
-    "category_selling": "I'm Selling",
-    "category_buying": "I'm Buying"
-  },
-  "notifications": {
-    "title": "Notifications",
-    "no_notifications": "You have no new notifications."
+    "unofficial_notice": "Unofficial wolvesville website,",
+    "tos_notice": "under the terms of use of the <tosLink>Wolvesville API</tosLink>",
+    "api_disclaimer": "made by <yagodLink>Yagod</yagodLink>"
   },
   "currencies": {
     "gold": "Gold",
@@ -407,31 +313,6 @@
   "categories": {
     "skin": "Skin",
     "bundle": "Bundle"
-  },
-  "verification": {
-    "title": "Verify Wolvesville Account",
-    "description_step1": "To access the trading area, you need to verify your account. Enter your username to begin.",
-    "description_step2": "Copy the code below and paste it into your in-game bio. Then, click Verify.",
-    "rules_title": "Verification Rules",
-    "rule1": "The code must be exactly as shown in your bio.",
-    "rule2": "You have 5 minutes to verify after generating the code.",
-    "rule3": "You have 3 attempts. After that, your account will be blocked for 1 hour.",
-    "username_placeholder": "Your in-game username",
-    "generate_code_button": "Generate Code",
-    "generating_code_button": "Generating...",
-    "expires_in": "Expires in: {{time}}",
-    "copy_code_button": "Copy Code",
-    "verify_button": "Verify",
-    "verifying_button": "Verifying...",
-    "toast": {
-      "username_required_title": "Error",
-      "username_required_desc": "Please enter your username.",
-      "code_generated_title": "Code Generated!",
-      "code_generated_desc": "Copy the code and paste it into your in-game bio.",
-      "generate_error_title": "Error Generating Code",
-      "generate_error_desc": "Could not generate the code. Check the username and try again.",
-      "verification_error_title": "Verification Error"
-    }
   },
   "clanSearch": {
     "search_clan_title": "Search Clan",

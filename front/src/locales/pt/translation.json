@@ -10,8 +10,6 @@
     "search_clan_description": "Encontre informações sobre clãs",
     "clan_rankings": "Rankings de Clãs",
     "clan_rankings_description": "Navegue pelos rankings de clãs e veja os melhores.",
-    "trades": "Trocas",
-    "trades_description": "Anuncie e encontre trocas",
     "items": "Itens",
     "skins_and_avatars": "Skins & Avatares",
     "skins_and_avatars_description": "Explore todos os itens, skins e avatares disponíveis no jogo.",
@@ -31,8 +29,9 @@
         "description": ""
       },
       "feature2": {
-        "title": "",
-        "description": ""
+        "title": "Para me dar um feedback ou ideias:",
+        "description": "",
+        "link": "https://forms.gle/oTQ5dMDbcsXmKDXr6"
       }
     }
   },
@@ -46,14 +45,6 @@
     "feature2": {
       "title": "🎒 Explorador de Itens",
       "description": "Na seção 'Skins & Avatares', você pode navegar, pesquisar e filtrar todos os itens disponíveis no jogo, ver seus detalhes e como obtê-los."
-    },
-    "feature3": {
-      "title": "🎉 Eventos da Comunidade",
-      "description": "Fique por dentro dos últimos eventos da comunidade e participe para ganhar recompensas exclusivas."
-    },
-    "feature4": {
-      "title": "💡 Feedback e Sugestões",
-      "description": "Tem uma ideia para melhorar o site? Compartilhe seu feedback e sugestões conosco."
     }
   },
   "pagination": {
@@ -80,35 +71,7 @@
     "of": "de",
     "back": "Voltar",
     "title": "Título",
-    "description_optional": "Descrição (Opcional)",
-    "offering": "Você está oferecendo",
-    "requesting": "Você está pedindo",
-    "logout": "Sair",
-    "edit": "Editar"
-  },
-  "trades": {
-    "showcase_title": "Vitrine de Trocas",
-    "showcase_description": "Navegue por todos os anúncios de troca públicos.",
-    "my_listings_button": "Meus Anúncios",
-    "login_button": "Faça Login para Trocar",
-    "loading": "Carregando anúncios de troca...",
-    "error": "Não foi possível carregar os anúncios. Por favor, tente novamente mais tarde.",
-    "listed_by": "Anunciado por {{username}}",
-    "no_listings_title": "Nenhum Anúncio Ainda",
-    "no_listings_description": "Não há nenhum anúncio de troca público disponível no momento.",
-    "interest_button": "Tenho Interesse",
-    "interest_sent_button": "Interesse Enviado",
-    "toast_offer_success_title": "Interesse Registrado!",
-    "toast_offer_success_desc": "O autor foi notificado. Adicione-o no jogo para negociarem!",
-    "toast_offer_error_title": "Falha ao Registrar Interesse",
-    "toast_offer_error_desc": "Ocorreu um erro desconhecido. Tente novamente.",
-    "toast_offer_conflict_desc": "Você já demonstrou interesse neste anúncio.",
-    "filter_by_category": "Filtrar por categoria",
-    "all_categories": "Todas as Categorias",
-    "selling": "Vendendo",
-    "buying": "Comprando",
-    "no_filtered_listings_title": "Nenhum Anúncio Encontrado",
-    "no_filtered_listings_description": "Nenhum anúncio de troca foi encontrado com o filtro atual."
+    "description_optional": "Descrição (Opcional)"
   },
   "battlePass": {
     "fetchError": "Não foi possível buscar os dados do Battle Pass.",
@@ -339,67 +302,9 @@
     "closed": "Fechado"
   },
   "footer": {
-    "unofficial_notice": "Site não oficial do wolvesville",
-    "api_disclaimer": "feito por Yagod"
-  },
-  "myTrades": {
-    "rules_title": "Regras e Dicas para Trocas Seguras",
-    "rule1": "Toda troca é de sua inteira responsabilidade. O site não se responsabiliza por perdas ou transações mal-sucedidas.",
-    "rule2": "Desconfie de ofertas boas demais para serem verdade. Sempre verifique o perfil do outro jogador.",
-    "rule3": "Combine todos os detalhes da troca dentro do jogo. Não utilize plataformas externas para negociar.",
-    "rule4": "Grave ou tire capturas de tela de todas as etapas da troca como comprovante de segurança.",
-    "rule5": "É estritamente proibido negociar itens do jogo por dinheiro real ou vice-versa. Violações resultarão em banimento.",
-    "my_trades_title": "Minhas Trocas",
-    "my_trades_description": "Gerencie seus anúncios de troca.",
-    "logged_in_as": "Logado como: {{username}}",
-    "back_to_trades": "Voltar para a Vitrine",
-    "create_trade_title": "Criar Novo Anúncio de Troca",
-    "title_placeholder": "Ex: Troco skin por rosa",
-    "description_placeholder": "Forneça mais detalhes sobre sua troca aqui...",
-    "offering_placeholder": "Liste os itens que você está oferecendo...",
-    "requesting_placeholder": "Liste os itens que você está pedindo em troca...",
-    "create_button": "Criar Anúncio",
-    "creating_button": "Criando...",
-    "my_created_trades_title": "Seus Anúncios de Troca",
-    "no_trades_yet": "Você ainda não criou nenhum anúncio de troca.",
-    "created_at": "Criado em {{date}}",
-    "loading_trades": "Carregando suas trocas...",
-    "error_loading_trades": "Erro ao carregar as trocas.",
-    "toast_auth_error_title": "Erro de Autenticação",
-    "toast_auth_error_desc": "Você precisa estar logado para criar um anúncio.",
-    "toast_create_success_title": "Anúncio Criado!",
-    "toast_create_success_desc": "Seu anúncio de troca foi criado com sucesso.",
-    "toast_create_error_title": "Falha na Criação",
-    "toast_create_error_desc": "Não foi possível criar o anúncio. Tente novamente.",
-    "delete_trade_title": "Você tem certeza?",
-    "delete_trade_description": "Esta ação não pode ser desfeita. Isso apagará permanentemente seu anúncio de troca.",
-    "delete_success_title": "Anúncio apagado!",
-    "delete_success_description": "Seu anúncio de troca foi removido com sucesso.",
-    "delete_error_title": "Erro ao apagar",
-    "delete_error_description": "Não foi possível apagar o anúncio. Tente novamente.",
-    "edit_trade_title": "Editar Anúncio de Troca",
-    "save_button": "Salvar Alterações",
-    "saving_button": "Salvando...",
-    "toast_update_success_title": "Anúncio Atualizado!",
-    "toast_update_success_desc": "Seu anúncio de troca foi atualizado com sucesso.",
-    "toast_update_error_title": "Falha na Atualização",
-    "toast_update_error_desc": "Não foi possível atualizar o anúncio. Tente novamente.",
-    "interested_players_title": "Jogadores Interessados",
-    "no_offers": "Nenhuma oferta ainda.",
-    "new_offers_tooltip": "Você tem novas ofertas!",
-    "offer_accepted": "Aceito",
-    "offer_rejected": "Rejeitado",
-    "offer_pending": "Pendente",
-    "toast_offer_update_error": "Falha ao atualizar o status da oferta.",
-    "add_item_button": "Adicionar Item",
-    "category_label": "Categoria",
-    "category_placeholder": "Selecione uma categoria",
-    "category_selling": "Estou Vendendo",
-    "category_buying": "Estou Comprando"
-  },
-  "notifications": {
-    "title": "Notificações",
-    "no_notifications": "Você não tem nenhuma notificação nova."
+    "unofficial_notice": "Site não oficial do wolvesville,",
+    "tos_notice": "sob os termos de uso da <tosLink>API do Wolvesville</tosLink>",
+    "api_disclaimer": "feito por <yagodLink>Yagod</yagodLink>"
   },
   "currencies": {
     "gold": "Ouro",
@@ -409,31 +314,6 @@
   "categories": {
     "skin": "Skin",
     "bundle": "Bundle"
-  },
-  "verification": {
-    "title": "Verificar Conta do Wolvesville",
-    "description_step1": "Para acessar a área de trocas, você precisa verificar sua conta. Insira seu nome de usuário para começar.",
-    "description_step2": "Copie o código abaixo e cole na sua bio do jogo. Depois, clique em Verificar.",
-    "rules_title": "Regras da Verificação",
-    "rule1": "O código deve estar exatamente como mostrado na sua bio.",
-    "rule2": "Você tem 5 minutos para verificar após gerar o código.",
-    "rule3": "Você tem 3 tentativas. Após isso, sua conta será bloqueada por 1 hora.",
-    "username_placeholder": "Seu nome de usuário no jogo",
-    "generate_code_button": "Gerar Código",
-    "generating_code_button": "Gerando...",
-    "expires_in": "Expira em: {{time}}",
-    "copy_code_button": "Copiar Código",
-    "verify_button": "Verificar",
-    "verifying_button": "Verificando...",
-    "toast": {
-      "username_required_title": "Erro",
-      "username_required_desc": "Por favor, insira seu nome de usuário.",
-      "code_generated_title": "Código Gerado!",
-      "code_generated_desc": "Copie o código e cole na sua bio do jogo.",
-      "generate_error_title": "Erro ao gerar código",
-      "generate_error_desc": "Não foi possível gerar o código. Verifique o nome de usuário e tente novamente.",
-      "verification_error_title": "Erro na Verificação"
-    }
   },
   "clanSearch": {
     "search_clan_title": "Buscar Clã",
