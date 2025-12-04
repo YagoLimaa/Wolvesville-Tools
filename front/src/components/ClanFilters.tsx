@@ -1,5 +1,6 @@
 
 import { useTranslation } from "react-i18next";
+import { type SortBy, type JoinType, type SortOrder } from "@/hooks/useClanFilters";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,11 +13,11 @@ interface ClanFiltersProps {
   language: string;
   setLanguage: (value: string) => void;
   locales: { [key: string]: string };
-  sortBy: "xp" | "members";
-  setSortBy: (value: "xp" | "members") => void;
-  joinType: string;
-  setJoinType: (value: string) => void;
-  sortOrder: "asc" | "desc";
+  sortBy: SortBy;
+  setSortBy: (value: SortBy) => void;
+  joinType: JoinType;
+  setJoinType: (value: JoinType) => void;
+  sortOrder: SortOrder;
   toggleSortOrder: () => void;
 }
 
@@ -60,7 +61,7 @@ export const ClanFilters = ({
         </div>
         <div className="flex items-center gap-2">
           <Label htmlFor="sort-by-filter">{t('clanSearch.sort_by_placeholder')}</Label>
-          <Select value={sortBy} onValueChange={setSortBy}>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortBy)}>
             <SelectTrigger id="sort-by-filter" className="w-full sm:w-[180px]">
               <SelectValue placeholder={t('clanSearch.sort_by_placeholder')} />
             </SelectTrigger>
@@ -72,7 +73,7 @@ export const ClanFilters = ({
         </div>
         <div className="flex items-center gap-2">
           <Label htmlFor="join-type-filter">{t('clanSearch.join_type_placeholder')}</Label>
-          <Select value={joinType} onValueChange={setJoinType}>
+          <Select value={joinType} onValueChange={(v) => setJoinType(v as JoinType)}>
             <SelectTrigger id="join-type-filter" className="w-full sm:w-[180px]">
               <SelectValue placeholder={t('clanSearch.join_type_placeholder')} />
             </SelectTrigger>

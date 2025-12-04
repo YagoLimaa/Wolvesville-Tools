@@ -257,7 +257,12 @@
       "backgrounds": "Backgrounds",
       "loadingScreens": "Loading Screens",
       "roleIcons": "Role Icons",
-      "roseSkins": "Rose Skins"
+      "roseSkins": "Rose Skins",
+      "clanQuestsGold": "Clan Quests (Gold)",
+      "clanQuestsGems": "Clan Quests (Gems)",
+      "dailyRewards": "Daily Rewards",
+      "miscellaneous": "Miscellaneous",
+      "staffItens": "Staff Items"
     }
   },
   "searchPlayer": {

@@ -41,6 +41,16 @@ export async function handleItemsByCategory(request) {
 export async function handleItemsByTags(request) {
   const { searchParams } = new URL(request.url);
   const season = searchParams.get('season');
+  const category = searchParams.get('category');
+
+  // mapeando as categorias para as tags corretas de /items/tags
+  const categoryMap = {
+    dailyRewards: 'daily_rewards',
+    miscellaneous: 'miscellaneous',
+    clanQuestsGold: 'clan_quests_gold',
+    clanQuestGems: 'clan_quests_gems',
+    staffItens: "staff_items",
+  };
 
   const response = await callApi('items/tags', { request });
   let tagsData = await response.json();
@@ -56,5 +66,9 @@ export async function handleItemsByTags(request) {
     parsedTags = parsedTags.filter(item => item.tags && item.tags.includes(seasonTag));
   }
 
+  if (category && categoryMap[category]) {
+    const origintag = `origin:${categoryMap[category]}`;
+    parsedTags = parsedTags.filter(item => item.tags && item.tags.includes(origintag));
+  }
   return jsonResponse(parsedTags);
 }

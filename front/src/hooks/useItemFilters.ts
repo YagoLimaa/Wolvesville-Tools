@@ -27,28 +27,26 @@ export const useItemFilters = () => {
   }, []);
   
   const updateFilters = useCallback((newFilters: Record<string, string | number>) => {
-    const currentParams = Object.fromEntries(searchParams);
-    
-    // Always reset page to 1 when any filter (except 'page' itself) changes
-    if (Object.keys(newFilters).some(k => k !== 'page')) {
-      delete currentParams.page;
-    }
-
-    const updatedParams = { ...currentParams, ...newFilters };
-
-    // Clean up empty filters
-    for (const key in updatedParams) {
-      if (updatedParams[key] === '' || updatedParams[key] === 'all' || updatedParams[key] === null || updatedParams[key] === undefined) {
-        delete updatedParams[key];
+    setSearchParams(prev => {
+      const currentParams = Object.fromEntries(prev);
+      if (Object.keys(newFilters).some(k => k !== 'page')) {
+        delete currentParams.page;
       }
-    }
+      const updatedParams = { ...currentParams, ...newFilters };
+      const finalParams: Record<string, string> = {};
+      for (const key in updatedParams) {
+        const value = updatedParams[key];
+        if (value !== '' && value !== 'all' && value !== null && value !== undefined) {
+          finalParams[key] = String(value);
+        }
+      }
 
-    setSearchParams(updatedParams, { replace: true });
-  }, [searchParams, setSearchParams]);
+      return finalParams;
+    }, { replace: true });
+  }, [setSearchParams]);
 
   const createSetter = (name: string) => (value: string | number) => {
     const newFilters = { [name]: value };
-    // Handle dependent filter resets
     if (name === 'category' && value !== 'all') {
       newFilters.gender = 'all';
       newFilters.type = 'all';
@@ -69,8 +67,7 @@ export const useItemFilters = () => {
 
   const sortedItems = useMemo(() => {
     if (!allItems) return [];
-    
-    let itemsToSort = [...allItems];
+    const itemsToSort = [...allItems];
 
     if (['calendars', 'bundles', 'roseSkins', 'avatarItemSets'].includes(categoryFilter)) {
       itemsToSort.reverse();
@@ -86,9 +83,29 @@ export const useItemFilters = () => {
   }, [allItems, brokenImageIds, categoryFilter]);
 
   const filteredItems = useMemo(() => {
+    const originCategoryMap = {
+      dailyRewards: 'origin:daily_rewards',
+      miscellaneous: 'origin:miscellaneous',
+      clanQuestsGold: 'origin:clan_quest:gold',
+      clanQuestsGems: 'origin:clan_quest:gems',
+      staffItens: "origin:staff_items",
+    };
+    const originCategoryKeys = Object.keys(originCategoryMap);
+
     return sortedItems.filter(item => {
       const matchesSearch = (item.name || item.id).toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
+
+      const matchesCategory = (() => {
+        if (categoryFilter === "all") return true;
+
+        if (originCategoryKeys.includes(categoryFilter)) {
+          const itemTags = tagsByItemId.get(item.id);
+          const targetTag = originCategoryMap[categoryFilter as keyof typeof originCategoryMap];
+          return itemTags?.includes(targetTag) ?? false;
+        }
+
+        return item.category === categoryFilter;
+      })();
       const matchesRarity = rarityFilter === "all" || !item.rarity || item.rarity === rarityFilter;
 
       let matchesGender = true;
@@ -99,7 +116,6 @@ export const useItemFilters = () => {
       }
       
       const matchesType = item.category !== 'avatarItems' || typeFilter === "all" || item.type === typeFilter;
-
       const matchesBpSeason = (() => {
         if (!bpSeasonFilter) return true;
         const seasonTag = `origin:battle_pass:season_${bpSeasonFilter}`;

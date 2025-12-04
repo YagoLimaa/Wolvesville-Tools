@@ -15,20 +15,20 @@ const ClanRankings = () => {
   const [rankings, setRankings] = useState<Clan[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [language, setLanguage] = useState('all');
+  const [localSearchTerm, setLocalSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<"xp" | "members">('xp');
+  const [joinType, setJoinType] = useState<"all" | "PUBLIC" | "INVITE_ONLY" | "CLOSED">('all');
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">('desc');
+  const toggleSortOrder = () => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
 
-  const {
-    language,
-    setLanguage,
+  const { sortedResults } = useClanFilters({
+    clans: rankings,
     localSearchTerm,
-    setLocalSearchTerm,
-    sortBy,
-    setSortBy,
     joinType,
-    setJoinType,
+    sortBy,
     sortOrder,
-    toggleSortOrder,
-    sortedResults,
-  } = useClanFilters(rankings);
+  });
 
   const fetchRankings = useCallback(async (lang: string) => {
     setIsLoading(true);
@@ -39,7 +39,12 @@ const ClanRankings = () => {
       if (response.error) {
         throw new Error(t("clanRankings.fetch_error"));
       }
-      const results = (Array.isArray(response.data) ? response.data : response.data?.clans || []) as Clan[];
+      let results: Clan[] = [];
+      if (Array.isArray(response.data)) {
+        results = response.data as Clan[];
+      } else if (response.data && typeof response.data === 'object' && 'clans' in response.data && Array.isArray((response.data as { clans: Clan[] }).clans)) {
+        results = (response.data as { clans: Clan[] }).clans;
+      }
       setRankings(results);
     } catch (err) {
       setError(t("clanRankings.search_error"));

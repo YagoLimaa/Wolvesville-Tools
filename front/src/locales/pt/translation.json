@@ -258,7 +258,12 @@
       "backgrounds": "Planos de Fundo",
       "loadingScreens": "Telas de Carregamento",
       "roleIcons": "Ícones de Função",
-      "roseSkins": "Skins de Rosa"
+      "roseSkins": "Skins de Rosa",
+      "clanQuestsGold": "Missões de Clã (Ouro)",
+      "clanQuestsGems": "Missões de Clã (Gemas)",
+      "dailyRewards": "Recompensas Diárias",
+      "miscellaneous": "Variados",
+      "staffItens": "Itens da Staff"
     }
   },
   "searchPlayer": {

@@ -42,7 +42,7 @@ export const ItemFilterSidebar: React.FC<ItemFilterSidebarProps> = ({
   const categoryKeys = React.useMemo(() => [
     "avatarItemCollections", "avatarItems", "avatarItemSets", "backgrounds", "bodyPaints",
     "bundles", "calendars", "emojiCollections", "emojis", "loadingScreens",
-    "profileIconBorders", "profileIcons", "roleIcons", "roseSkins",
+    "profileIconBorders", "profileIcons", "roleIcons", "roseSkins", "dailyRewards", "clanQuestsGold", "clanQuestsGems", "miscellaneous", "staffItens",
   ], []);
 
   return (
