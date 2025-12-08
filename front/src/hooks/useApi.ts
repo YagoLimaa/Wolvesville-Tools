@@ -6,13 +6,6 @@ interface UseApiOptions<T> extends Omit<UseQueryOptions<ApiResponse<T>>, 'queryK
   enabled?: boolean;
 }
 
-/**
- * Custom hook for making API requests with React Query
- * - Automatic error handling
- * - Built-in refetching
- * - Type-safe responses
- * - Consistent error messages
- */
 export function useApi<T = unknown>(
   queryKey: (string | number | undefined)[],
   apiFn: () => Promise<ApiResponse<T>>,
@@ -41,9 +34,6 @@ export function useApi<T = unknown>(
   });
 }
 
-/**
- * Extract data from successful API response
- */
 export function useApiData<T = unknown>(
   queryKey: (string | number | undefined)[],
   apiFn: () => Promise<ApiResponse<T>>,
