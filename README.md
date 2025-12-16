@@ -27,13 +27,15 @@ This guide will help you get a local copy of the project up and running for deve
 
 - [Node.js](https://nodejs.org/) (LTS version recommended)
 - [npm](https://www.npmjs.com/) (usually comes with Node.js)
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (for backend)
+- [Concurrently](https://www.npmjs.com/package/concurrently) (will be installed with `npm install`)
+
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repositorio.git
-cd seu-repositorio
+git clone https://github.com/YagoLimaa/Wolvesville-Tools.git
+cd Wolvesville-Tools
 ```
 
 ### 2. Install Dependencies
@@ -66,30 +68,22 @@ The backend requires an API key from Wolvesville to function. For local developm
     WOLVESVILLE_API_KEY="YOUR_API_KEY_HERE"
     ```
 
-> **Note**: The `.dev.vars` file is intended for local development only. It should be added to your `.gitignore` file to prevent it from being committed to the repository.
+> **Note**: The `.dev.vars` file is intended for local development only. It is already included in the root `.gitignore` file.
 
 ### 4. Running the Project Locally
 
-You need to run the frontend and backend servers in separate terminals.
+Thanks to the `concurrently` script, you can start both the frontend and backend with a single command from the project's **root** directory.
 
--   **Terminal 1: Start the Backend Server**
+```bash
+npm run dev
+```
 
-    Run the following command from the **root** of the project to start the Cloudflare Workers server:
+This command will:
+1.  Start the frontend development server (Vite).
+2.  Wait for the frontend to be available.
+3.  Start the backend server (Wrangler) and proxy requests to the frontend.
 
-    ```bash
-    wrangler dev
-    ```
-
--   **Terminal 2: Start the Frontend Server**
-
-    Navigate to the `front` directory and start the Vite development server:
-
-    ```bash
-    cd front
-    npm run dev
-    ```
-
-    The frontend will be available at `http://localhost:5173` (or another port if 5173 is busy) and will connect to the local backend server running via `wrangler`.
+The application will be available at the address shown in your terminal, typically `http://localhost:8788`.
 
 ## Deployment
 
