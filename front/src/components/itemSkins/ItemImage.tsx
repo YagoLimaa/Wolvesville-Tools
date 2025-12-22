@@ -13,7 +13,7 @@ export const ItemImage = ({ item, onImageError, isHovered, categoryFilter }: { i
     setImageSrc(getHighResUrl(item.imageUrl) || '');
     setHasError(false);
     setAnimationFailed(false);
-  }, [item.id, item.imageUrl]);
+  }, [item.id, item.imageUrl, categoryFilter]);
 
   const shouldAnimate = item.urlAnimation && (item.category !== 'emojis' || categoryFilter !== 'emojis' || isHovered);
 
@@ -60,6 +60,6 @@ export const ItemImage = ({ item, onImageError, isHovered, categoryFilter }: { i
   const isFallback = imageSrc?.includes("ad3466d4-8798-4b9b-a5e7-2ae7d2343c58");
 
   return (
-    <img src={imageSrc} alt={item.name || item.id} className={`w-full h-full ${['bundles', 'avatarItemCollections', 'avatarItemSets'].includes(item.category) ? 'object-cover' : 'object-contain'} ${['bundles', 'avatarItemCollections', 'avatarItemSets'].includes(item.category) ? '' : 'p-2'} ${isFallback ? 'bg-black/20 rounded-md' : ''}`} onError={handleError} />
+    <img src={imageSrc} alt={item.name || item.id} className={`w-full h-full object-contain ${isFallback ? 'bg-black/20 rounded-md p-2' : ''}`} onError={handleError} />
   );
 };

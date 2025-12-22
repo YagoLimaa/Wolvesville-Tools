@@ -2,6 +2,7 @@ import { jsonResponse } from './utils/response';
 import { requestConfigMiddleware } from './middleware/requestConfig';
 import { errorHandler } from './middleware/errorHandler';
 import { withCache } from './utils/cache';
+import { handleCacheStats, handleCacheInvalidate, handleCacheClear } from './utils/cacheManager';
 
 import { handleAnnouncements } from './routes/announcements';
 import { handleAvatars, handleSharedAvatarId, handleAvatarDetails } from './routes/avatars';
@@ -63,6 +64,11 @@ router.get('/api/shop/activeOffers', withCache(handleShopActiveOffers, CACHE_DUR
 // fazer as validações
 router.get('/api/validation/item-categories', handleItemCategories);
 router.get('/api/validation/roles', handleRoleIds);
+
+// Cache management endpoints
+router.get('/api/cache/stats', handleCacheStats);
+router.post('/api/cache/invalidate', handleCacheInvalidate);
+router.post('/api/cache/clear', handleCacheClear);
 
 export async function onRequest(context) {
   const { request, env } = context;

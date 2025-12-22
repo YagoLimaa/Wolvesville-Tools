@@ -44,7 +44,7 @@ export const ItemGrid = ({
           onClick={() => handleItemClick(item)}
           onMouseEnter={() => setHoveredItemId(item.id)}
           onMouseLeave={() => setHoveredItemId(null)}
-          className={`group relative aspect-square flex flex-col items-center justify-center p-2 rounded-lg bg-background/50 border-2 transition-all hover:scale-105 hover:shadow-glow-primary text-left w-full
+          className={`group relative aspect-square flex flex-col items-center justify-center ${item.category === 'bundles' ? '' : 'p-2'} rounded-lg bg-background/50 border-2 transition-all hover:scale-105 hover:shadow-glow-primary text-left w-full
             ${item.rarity ? rarityColors[item.rarity] : 'border-border'}
             ${collectionCategories.includes(item.category) || item.parentSetId || reverseSearchableCategories.includes(item.category) ? 'cursor-pointer' : 'cursor-default'}
           `}

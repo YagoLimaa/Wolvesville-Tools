@@ -15,6 +15,41 @@ export interface ContainedItemIdentifier {
   type: string;
 }
 
+export interface BundleEmoji {
+  id: string;
+  name?: string;
+  rarity?: string;
+  [key: string]: unknown;
+}
+
+export interface BundleLoadingScreen {
+  id: string;
+  rarity?: string;
+  [key: string]: unknown;
+}
+
+export interface BundleBackground {
+  id: string;
+  [key: string]: unknown;
+}
+
+export interface BundleRoleIcon {
+  id: string;
+  rarity?: string;
+  [key: string]: unknown;
+}
+
+export interface BundleBodyPaint {
+  id: string;
+  [key: string]: unknown;
+}
+
+export interface BundleRoseSkin {
+  id: string;
+  rarity?: string;
+  [key: string]: unknown;
+}
+
 export const rarityOrder = { common: 1, rare: 2, epic: 3, legendary: 4 };
 
 export const rarityColors = {
@@ -43,7 +78,9 @@ export const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' =
 
 export const getCollectionPieces = (collection: Item | null, allItems: Item[] | null, itemsById: Map<string, Item>): Item[] => {
   if (!collection || !allItems) return [];
+  
   let pieceIdentifiers: ContainedItemIdentifier[] = [];
+  
   if (collection.avatarItemIds) {
     pieceIdentifiers = collection.avatarItemIds.map(id => ({ id, type: 'avatarItems' }));
   } else if (collection.emojiIds) {
@@ -53,12 +90,64 @@ export const getCollectionPieces = (collection: Item | null, allItems: Item[] | 
       id: reward.avatarItemId || reward.loadingScreenId || reward.emojiId || '',
       type: reward.type.toLowerCase().replace(/_/g, '') + 's'
     })).filter(p => p.id !== '');
-  } else if (collection.category === 'bundles' && collection.items) {
-      pieceIdentifiers = (collection.items as ContainedItem[]).map((item) => ({
-        id: item.avatarItemId || item.loadingScreenId || item.emojiId || '',
-        type: item.type.toLowerCase().replace(/_/g, '') + 's'
-      })).filter(p => p.id !== '');
+  } else if (collection.items) {
+    pieceIdentifiers = (collection.items as ContainedItem[]).map((item) => ({
+      id: item.avatarItemId || item.loadingScreenId || item.emojiId || '',
+      type: item.type.toLowerCase().replace(/_/g, '') + 's'
+    })).filter(p => p.id !== '');
+  } else if (collection.category === 'bundles') {
+    if (Array.isArray(collection.avatarItemSets)) {
+      for (const set of collection.avatarItemSets) {
+        if (typeof set === 'object' && set.avatarItemIds) {
+          const ids = (set.avatarItemIds as string[]).map(id => ({ id, type: 'avatarItems' }));
+          pieceIdentifiers.push(...ids);
+        }
+      }
+    }
+    
+    if (Array.isArray(collection.emojis)) {
+      const emojiIds = (collection.emojis as BundleEmoji[])
+        .map(emoji => ({ id: emoji.id, type: 'emojis' }))
+        .filter(p => p.id);
+      pieceIdentifiers.push(...emojiIds);
+    }
+
+    if (Array.isArray(collection.loadingScreens)) {
+      const screenIds = (collection.loadingScreens as BundleLoadingScreen[])
+        .map(screen => ({ id: screen.id, type: 'loadingScreens' }))
+        .filter(p => p.id);
+      pieceIdentifiers.push(...screenIds);
+    }
+
+    if (Array.isArray(collection.backgrounds)) {
+      const bgIds = (collection.backgrounds as BundleBackground[])
+        .map(bg => ({ id: bg.id, type: 'backgrounds' }))
+        .filter(p => p.id);
+      pieceIdentifiers.push(...bgIds);
+    }
+
+    if (Array.isArray(collection.roleIcons)) {
+      const roleIds = (collection.roleIcons as BundleRoleIcon[])
+        .map(role => ({ id: role.id, type: 'roleIcons' }))
+        .filter(p => p.id);
+      pieceIdentifiers.push(...roleIds);
+    }
+
+    if (Array.isArray(collection.bodyPaints)) {
+      const paintIds = (collection.bodyPaints as BundleBodyPaint[])
+        .map(paint => ({ id: paint.id, type: 'bodyPaints' }))
+        .filter(p => p.id);
+      pieceIdentifiers.push(...paintIds);
+    }
+
+    if (Array.isArray(collection.roseSkins)) {
+      const roseIds = (collection.roseSkins as BundleRoseSkin[])
+        .map(rose => ({ id: rose.id, type: 'roseSkins' }))
+        .filter(p => p.id);
+      pieceIdentifiers.push(...roseIds);
+    }
   }
+  
   const uniquePieces = new Map<string, Item>();
   pieceIdentifiers.forEach(p => {
     const item = itemsById.get(String(p.id));
