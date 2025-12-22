@@ -272,6 +272,9 @@ export const PlayerCard = ({ player, onAvatarClick }: PlayerCardProps) => {
 
           {showAvatars && (
             <>
+            <p className="text-center text-sm text-muted-foreground mt-3">
+                {t('playerCard.clickToInspectDescription')}
+              </p>
               <div className="grid grid-cols-3 gap-2 rounded-lg bg-secondary p-2 md:grid-cols-5 md:gap-4 md:p-4">
                 {player.avatars && Array.isArray(player.avatars) && player.avatars.map((avatar, index) => (
                   avatar && avatar.url && (
@@ -281,6 +284,7 @@ export const PlayerCard = ({ player, onAvatarClick }: PlayerCardProps) => {
                       onClick={() => onAvatarClick({ url: avatar.url, index })}
                       title={t('playerCard.clickToInspect')}
                     >
+                      
                       <div
                         role="img"
                         aria-label="Avatar"
@@ -299,9 +303,6 @@ export const PlayerCard = ({ player, onAvatarClick }: PlayerCardProps) => {
                   )
                 ))}
               </div>
-              <p className="text-center text-sm text-muted-foreground mt-3">
-                {t('playerCard.clickToInspectDescription')}
-              </p>
             </>
           )}
         </CardContent>
