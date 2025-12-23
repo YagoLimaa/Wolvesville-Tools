@@ -11,7 +11,15 @@ export default defineConfig(({ command }) => {
       react(),
       sitemap({
         hostname: 'https://wolvesville-tools.pages.dev',
-        robots: [{ userAgent: '*', allow: '/' }]
+        robots: [{ userAgent: '*', allow: '/' }],
+        priority: 1.0,
+        dynamicRoutes: [
+          '/clans',
+          '/clan-rankings',
+          '/players',
+          '/items/shop',
+          '/items/skins'
+        ]
       })
     ],
     resolve: {
