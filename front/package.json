@@ -88,6 +88,7 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
+    "vite-plugin-sitemap": "^0.6.2",
     "wait-on": "^9.0.3"
   }
 }
