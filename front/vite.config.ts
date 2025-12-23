@@ -10,13 +10,13 @@ export default defineConfig({
     react(),
     sitemap({
       hostname: 'https://wolvesville-tools.pages.dev',
-      dynamicRoutes: [
-        '/',
-        '/clans',
-        '/clan-rankings',
-        '/players',
-        '/items/shop',
-        '/items/skins'
+      urls: [
+        { path: '/', changefreq: 'daily', priority: 1.0 },
+        { path: '/clans', changefreq: 'daily', priority: 0.8 },
+        { path: '/clan-rankings', changefreq: 'daily', priority: 0.8 },
+        { path: '/players', changefreq: 'daily', priority: 0.8 },
+        { path: '/items/shop', changefreq: 'daily', priority: 0.8 },
+        { path: '/items/skins', changefreq: 'daily', priority: 0.8 }
       ],
       robots: [
         {
