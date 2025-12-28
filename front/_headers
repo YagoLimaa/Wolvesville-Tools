@@ -27,3 +27,6 @@
   Content-Type: image/x-icon
 /*.woff2
   Content-Type: font/woff2
+
+/sitemap.xml
+  Content-Type: application/xml

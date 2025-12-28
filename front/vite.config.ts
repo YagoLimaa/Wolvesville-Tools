@@ -22,6 +22,7 @@ export default defineConfig({
         {
           userAgent: '*',
           allow: '/',
+          sitemap: 'https://wolvesville-tools.pages.dev/sitemap.xml',
         },
       ],
     })
