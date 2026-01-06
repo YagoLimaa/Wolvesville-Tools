@@ -130,7 +130,7 @@ export const PlayerCard = ({ player, onAvatarClick }: PlayerCardProps) => {
                 className="w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-primary shadow-glow-primary flex-shrink-0"
               />
               <div className="bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-bold">
-                {player.level === -1 ? '?' : t('playerCard.level')} {player.level}
+                {player.level === -1 ? '?' : `${t('playerCard.level')} ${player.level}`}
               </div>
             </div>
             <div className="flex-1 min-w-0">

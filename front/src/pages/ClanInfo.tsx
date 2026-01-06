@@ -205,7 +205,7 @@ const ClanInfoPage = () => {
                         {member.username}
                       </Link>
                     </TableCell>
-                    <TableCell>{member.level}</TableCell>
+                    <TableCell>{member.level === -1 ? '?' : member.level}</TableCell>
                     <TableCell>
                       {member.isLeader ? t('clanCard.leader') : member.isCoLeader ? t('clanCard.coLeader') : t('clanCard.member')}
                     </TableCell>
