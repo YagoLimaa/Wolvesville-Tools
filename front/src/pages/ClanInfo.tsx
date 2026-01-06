@@ -21,6 +21,7 @@ interface ClanMember {
   id: string;
   username: string;
   level: number;
+  isLeader?: boolean;
   isCoLeader?: boolean;
   equippedAvatar?: {
     url: string;
@@ -124,17 +125,16 @@ const ClanInfoPage = () => {
       return null;
     }
     const sortedMembers = [...clan.members].sort((a, b) => {
-      const getRoleValue = (m: ClanMember, index: number) => {
-        if (index === 0) return 0; 
+      const getRoleValue = (m: ClanMember) => {
+        if (m.isLeader) return 0;
         if (m.isCoLeader) return 1;
         return 2;
       };
-      const roleA = getRoleValue(a, clan.members.indexOf(a));
-      const roleB = getRoleValue(b, clan.members.indexOf(b));
+      const roleA = getRoleValue(a);
+      const roleB = getRoleValue(b);
       if (roleA !== roleB) return roleA - roleB;
-      return b.level - a.level; 
+      return b.level - a.level;
     });
-  
   
     return (
       <Card className="bg-card/50 backdrop-blur-sm border-border/50">
@@ -195,7 +195,7 @@ const ClanInfoPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedMembers.map((member, index) => (
+                {sortedMembers.map((member) => (
                   <TableRow key={member.username}>
                     <TableCell>
                       <img src={member.equippedAvatar?.url || 'https://via.placeholder.com/40'} alt={member.username} className="w-16 h-16 rounded-full object-cover" />
@@ -207,7 +207,7 @@ const ClanInfoPage = () => {
                     </TableCell>
                     <TableCell>{member.level}</TableCell>
                     <TableCell>
-                      {index === 0 ? t('clanCard.leader') : member.isCoLeader ? t('clanCard.coLeader') : t('clanCard.member')}
+                      {member.isLeader ? t('clanCard.leader') : member.isCoLeader ? t('clanCard.coLeader') : t('clanCard.member')}
                     </TableCell>
                   </TableRow>
                 ))}

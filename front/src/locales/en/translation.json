@@ -107,7 +107,7 @@
           }
   },
   "clanCard": {
-    "members": "{{count}} Members",
+    "members": "Members",
     "viewMembers": "View Members",
     "clanMembers": "Clan Members",
     "leader": "Leader",
