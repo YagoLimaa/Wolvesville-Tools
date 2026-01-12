@@ -19,8 +19,14 @@ export async function handleSharedAvatarId(request) {
     );
   }
 
-  const responseData = await response.text();
-  return jsonResponse(responseData);
+  const responseData = await response.json();
+  if (responseData && typeof responseData === 'object' && responseData.sharedAvatarId) {
+    return jsonResponse(responseData.sharedAvatarId);
+  }
+  return jsonResponse(
+    { error: "Invalid response from upstream API: sharedAvatarId not found or malformed" },
+    500
+  );
 }
 
 export async function handleAvatarDetails(request) {
