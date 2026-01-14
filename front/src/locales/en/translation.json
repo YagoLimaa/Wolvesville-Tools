@@ -531,5 +531,18 @@
     "Gambler": "Gambler",
     "Forger": "Forger",
     "Bandit": "Bandit"
+    ,
+    "Marksman": "Marksman",
+    "Regular werewolf": "Regular werewolf",
+    "Kitten wolf": "Kitten wolf",
+    "Wolf pacifist": "Wolf pacifist",
+    "Cannibal": "Cannibal",
+    "Zombie": "Zombie",
+    "Trapper": "Trapper",
+    "Toxic wolf": "Toxic wolf",
+    "Bomber": "Bomber",
+    "Lurker": "Lurker",
+    "Ghost wolf": "Ghost wolf",
+    "Evil detective": "Evil detective"
   }
 }

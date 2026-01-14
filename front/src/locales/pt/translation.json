@@ -527,5 +527,18 @@
     "Gambler": "Jogador",
     "Forger": "Falsificador",
     "Bandit": "Bandido"
+    ,
+    "Marksman": "Atirador",
+    "Regular werewolf": "Lobisomem Regular",
+    "Kitten wolf": "Lobo Gatinho",
+    "Wolf pacifist": "Lobo Pacifista",
+    "Cannibal": "Canibal",
+    "Zombie": "Zumbi",
+    "Trapper": "Armador",
+    "Toxic wolf": "Lobo Tóxico",
+    "Bomber": "Bombeiro",
+    "Lurker": "Escondido",
+    "Ghost wolf": "Lobo Fantasma",
+    "Evil detective": "Detetive Maligno"
   }
 }
