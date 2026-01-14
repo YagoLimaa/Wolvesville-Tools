@@ -38,7 +38,6 @@ interface AchievementsModalProps {
 const AchievementsModal = ({ isOpen, onClose, achievements, rolesById }: AchievementsModalProps) => {
   const { t } = useTranslation();
 
-  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
