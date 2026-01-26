@@ -16,6 +16,7 @@ import {
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { Button } from "@/components/ui/button";
 import { clansApi } from "@/lib/api";
+import { useSEO } from "@/hooks/useSEO";
 
 interface ClanMember {
   id: string;
@@ -74,6 +75,31 @@ const ClanInfoPage = () => {
     queryKey: ["clanInfo", id],
     queryFn: () => fetchClanInfo(id!),
     enabled: !!id,
+  });
+
+  useSEO({
+    title: clan 
+      ? `${clan.name} - Wolvesville Clan`
+      : "Clan Info - Wolvesville Tools",
+    description: clan
+      ? `${clan.name} (${clan.tag}) - ${clan.memberCount} members, Level ${clan.minLevel}+. ${clan.description.substring(0, 120)}...`
+      : "View detailed Wolvesville clan information",
+    image: clan?.icon || 'https://wolvesville-tools.pages.dev/link.png',
+    url: `https://wolvesville-tools.pages.dev/clan/${id}`,
+    keywords: clan
+      ? ["wolvesville", "clan", clan.name, clan.tag, "rankings"]
+      : ["wolvesville", "clans", "info"],
+    schemaMarkup: clan ? {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": clan.name,
+      "identifier": clan.id,
+      "image": clan.icon,
+      "description": clan.description,
+      "url": `https://wolvesville-tools.pages.dev/clan/${id}`,
+      "numberOfEmployees": clan.memberCount,
+      "foundingDate": clan.creationTime
+    } : undefined
   });
 
   const formatDate = (dateString: string) => {

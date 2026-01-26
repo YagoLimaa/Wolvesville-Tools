@@ -13,9 +13,31 @@ import {
 import { NavigationBar } from "@/components/ui/navigation-bar";
 import { Shirt, Swords, Users, Store } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useSEO } from "@/hooks/useSEO";
 
 const Index = () => {
   const { t } = useTranslation();
+
+  useSEO({
+    title: "Wolvesville Tools - Your Complete Game Hub",
+    description: "Your complete hub for Wolvesville with everything you need: player search, stats, clan rankings, battle pass, shop, and much more!",
+    keywords: ["wolvesville", "tools", "players", "clans", "battle pass", "shop", "stats", "rankings"],
+    url: "https://wolvesville-tools.pages.dev/",
+    type: "website",
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Wolvesville Tools",
+      "description": "Your complete hub for Wolvesville with player search, stats, clan rankings, battle pass, and more",
+      "url": "https://wolvesville-tools.pages.dev/",
+      "applicationCategory": "GameApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+  });
 
   return (
     <div className="min-h-screen bg-background">

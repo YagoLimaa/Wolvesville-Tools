@@ -7,6 +7,7 @@ import { Info } from "lucide-react";
 import { ClanFilters } from "@/components/ClanFilters";
 import { clansApi } from "@/lib/api";
 import { useClanFilters } from "@/hooks/useClanFilters";
+import { useSEO } from "@/hooks/useSEO";
 
 const ClanRankings = () => {
   const { t } = useTranslation();
@@ -21,6 +22,20 @@ const ClanRankings = () => {
   const [joinType, setJoinType] = useState<"all" | "PUBLIC" | "INVITE_ONLY" | "CLOSED">('all');
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">('desc');
   const toggleSortOrder = () => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+
+  useSEO({
+    title: "Clan Rankings - Wolvesville Tools",
+    description: "View the top-ranked Wolvesville clans by XP and members. Filter by language and join type.",
+    keywords: ["wolvesville", "clans", "rankings", "top", "leaderboard", "xp"],
+    url: "https://wolvesville-tools.pages.dev/clan/rankings",
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "RankingTable",
+      "name": "Wolvesville Clan Rankings",
+      "description": "Top-ranked clans in Wolvesville by XP and members",
+      "url": "https://wolvesville-tools.pages.dev/clan/rankings"
+    }
+  });
 
   const { sortedResults } = useClanFilters({
     clans: rankings,

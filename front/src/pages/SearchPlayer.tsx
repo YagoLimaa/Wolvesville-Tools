@@ -15,6 +15,7 @@ import { playerApi, avatarsApi } from "@/lib/api";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useRoles, Role } from "../components/contexts/RolesContext";
+import { useSEO } from "@/hooks/useSEO";
 
 const getHighResUrl = (url: string | undefined, resolution: '2x' | '3x' = '3x'): string => {
   if (!url) return "";
@@ -359,6 +360,35 @@ const SearchPlayer = () => {
 
   const username = searchParams.get('username');
   const page = searchParams.get('page');
+  useSEO({
+    title: username 
+      ? `${username} - Wolvesville Player Stats`
+      : "Search Players - Wolvesville Tools",
+    description: username 
+      ? `View detailed stats and avatar information for ${username} in Wolvesville`
+      : "Search and view detailed player statistics, rankings, and avatar information in Wolvesville",
+    keywords: username
+      ? ["wolvesville", "player", "stats", "profile", username]
+      : ["wolvesville", "players", "search", "stats", "rankings"],
+    url: `https://wolvesville-tools.pages.dev/search${username ? `?username=${encodeURIComponent(username)}` : ''}`,
+    schemaMarkup: searchResult && searchResult.players.length > 0 ? {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": `${currentQuery} - Wolvesville Player Search Results`,
+      "description": `Search results for Wolvesville player: ${currentQuery}`,
+      "url": `https://wolvesville-tools.pages.dev/search?username=${encodeURIComponent(currentQuery)}`,
+      "mainEntity": searchResult.players.slice(0, 5).map(player => ({
+        "@type": "Person",
+        "name": player.username,
+        "url": `https://wolvesville-tools.pages.dev/search?username=${encodeURIComponent(player.username)}`
+      }))
+    } : {
+      "@context": "https://schema.org",
+      "@type": "SearchResultsPage",
+      "name": "Wolvesville Player Search",
+      "description": "Search for players in Wolvesville and view their detailed statistics"
+    }
+  });
 
   const handleSearch = useCallback(async (username: string, page: number = 1) => {
     setIsLoading(true);

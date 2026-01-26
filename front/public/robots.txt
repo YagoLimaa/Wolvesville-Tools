@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /search
+Allow: /items/skins
+Allow: /items/shop
+Allow: /clan/search
+Allow: /clan/rankings
+Allow: /clan/*
+Allow: /*.css
+Allow: /*.js
+Allow: /assets/*
+Allow: /link.png
+
+Disallow: /api/
+Disallow: /_headers
+Disallow: /_redirects
+
+Sitemap: https://wolvesville-tools.pages.dev/sitemap.xml

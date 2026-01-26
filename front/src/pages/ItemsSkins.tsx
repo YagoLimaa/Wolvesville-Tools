@@ -17,6 +17,7 @@ import { ItemFilterSidebar } from '@/components/itemSkins/ItemFilterSidebar';
 import { ItemGrid } from '@/components/itemSkins/ItemGrid';
 import { CollectionInspector } from '@/components/itemSkins/CollectionInspector';
 import { BattlePassSeasonInspector } from '@/components/itemSkins/BattlePassSeasonInspector';
+import { useSEO } from '@/hooks/useSEO';
 
 const ITEMS_PER_PAGE = 50;
 
@@ -44,6 +45,33 @@ const ItemsSkins = () => {
     inspectingBpSeason, setInspectingBpSeason,
     handleItemClick,
   } = useItemSelection();
+
+  useSEO({
+    title: searchTerm 
+      ? `${searchTerm} - Wolvesville Item Skins`
+      : "Item Skins - Wolvesville Tools",
+    description: searchTerm
+      ? `Find and browse ${searchTerm} in Wolvesville item collection. View all avatar skins, cosmetics, and cosmetics.`
+      : "Browse and search all Wolvesville item skins, avatars, emojis, and cosmetics with detailed filters",
+    keywords: ["wolvesville", "items", "skins", "avatars", "cosmetics", "collection", searchTerm || "browse"],
+    url: `https://wolvesville-tools.pages.dev/items/skins${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}`,
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "Wolvesville Item Skins Collection",
+      "description": "Browse all Wolvesville item skins and cosmetics",
+      "url": "https://wolvesville-tools.pages.dev/items/skins",
+      "mainEntity": {
+        "@type": "Collection",
+        "itemCount": filteredItems.length,
+        "hasPart": filteredItems.slice(0, 10).map(item => ({
+          "@type": "Thing",
+          "name": item.name,
+          "identifier": item.id
+        }))
+      }
+    }
+  });
 
   const paginatedItems = React.useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

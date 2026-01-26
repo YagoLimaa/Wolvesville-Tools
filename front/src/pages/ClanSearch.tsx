@@ -10,6 +10,7 @@ import { ClanFilters } from "@/components/ClanFilters";
 import { clansApi } from "@/lib/api";
 import { useClanFilters, SortBy, SortOrder, JoinType } from "@/hooks/useClanFilters";
 import { Input } from "@/components/ui/input";
+import { useSEO } from "@/hooks/useSEO";
 
 // Define a type for the object structure when the response is not an array
 interface ClanSearchResponse {
@@ -42,6 +43,24 @@ const ClanSearch = () => {
   const sortBy = (searchParams.get("sortBy") as SortBy) || "xp";
   const joinType = (searchParams.get("join") as JoinType) || "all";
   const sortOrder = (searchParams.get("order") as SortOrder) || "desc";
+
+  useSEO({
+    title: query
+      ? `Search Clans - ${query} - Wolvesville Tools`
+      : "Search Clans - Wolvesville Tools",
+    description: query
+      ? `Find Wolvesville clans matching ${query}. Filter by language, join type, and sort by XP, level, or members.`
+      : "Search and filter Wolvesville clans by language, XP, level, and join type",
+    keywords: ["wolvesville", "clans", "search", "filter", query || "clans"],
+    url: `https://wolvesville-tools.pages.dev/clan/search${query ? `?name=${encodeURIComponent(query)}` : ''}`,
+    schemaMarkup: {
+      "@context": "https://schema.org",
+      "@type": "SearchResultsPage",
+      "name": "Wolvesville Clan Search",
+      "description": "Search and filter Wolvesville clans",
+      "url": "https://wolvesville-tools.pages.dev/clan/search"
+    }
+  });
 
   const { sortedResults } = useClanFilters({
     clans: searchResults,
